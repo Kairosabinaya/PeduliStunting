@@ -236,7 +236,8 @@ export interface Database {
           avatar_url?: string | null;
           updated_at?: string;
         };
-      };
+      Relationships: [];
+        };
       subscriptions: {
         Row: {
           id: string;
@@ -266,7 +267,8 @@ export interface Database {
           midtrans_sub_id?: string | null;
           updated_at?: string;
         };
-      };
+      Relationships: [];
+        };
       payments: {
         Row: {
           id: string;
@@ -290,7 +292,8 @@ export interface Database {
           payment_method?: string | null;
           midtrans_id?: string | null;
         };
-      };
+      Relationships: [];
+        };
       provinces: {
         Row: {
           id: number;
@@ -318,7 +321,8 @@ export interface Database {
           geojson?: Record<string, unknown> | null;
           updated_at?: string;
         };
-      };
+      Relationships: [];
+        };
       stunting_data: {
         Row: {
           id: string;
@@ -341,7 +345,8 @@ export interface Database {
           prevalence_rate?: number;
           category?: StuntingCategory;
         };
-      };
+      Relationships: [];
+        };
       predictor_data: {
         Row: {
           id: string;
@@ -416,7 +421,8 @@ export interface Database {
           x19_ipm?: number | null;
           x20_pengeluaran?: number | null;
         };
-      };
+      Relationships: [];
+        };
       predictor_meta: {
         Row: {
           id: number;
@@ -461,7 +467,8 @@ export interface Database {
           category?: string | null;
           display_order?: number;
         };
-      };
+      Relationships: [];
+        };
       model_coefficients: {
         Row: {
           id: string;
@@ -491,7 +498,8 @@ export interface Database {
           significant_vars?: string[];
           model_version?: string | null;
         };
-      };
+      Relationships: [];
+        };
       facts: {
         Row: {
           id: string;
@@ -517,7 +525,8 @@ export interface Database {
           category?: string | null;
           is_active?: boolean;
         };
-      };
+      Relationships: [];
+        };
       articles: {
         Row: {
           id: string;
@@ -556,7 +565,8 @@ export interface Database {
           published_at?: string | null;
           updated_at?: string;
         };
-      };
+      Relationships: [];
+        };
       simulation_history: {
         Row: {
           id: string;
@@ -584,7 +594,8 @@ export interface Database {
           output_results?: Record<string, unknown>;
           report_pdf_url?: string | null;
         };
-      };
+      Relationships: [];
+        };
       upload_jobs: {
         Row: {
           id: string;
@@ -615,7 +626,8 @@ export interface Database {
           error_message?: string | null;
           completed_at?: string | null;
         };
-      };
+      Relationships: [];
+        };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
