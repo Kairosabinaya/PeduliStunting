@@ -40,3 +40,60 @@ body {
   background-color: var(--color-background);
   color: var(--color-foreground);
 }
+
+/* Article content typography */
+.article-content {
+  line-height: 1.75;
+}
+.article-content h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: var(--color-foreground);
+}
+.article-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+.article-content p {
+  margin-bottom: 1.25rem;
+}
+.article-content ul,
+.article-content ol {
+  margin-bottom: 1.25rem;
+  padding-left: 1.5rem;
+}
+.article-content ul {
+  list-style-type: disc;
+}
+.article-content ol {
+  list-style-type: decimal;
+}
+.article-content li {
+  margin-bottom: 0.5rem;
+}
+.article-content a {
+  color: var(--color-primary-600);
+  text-decoration: underline;
+}
+.article-content a:hover {
+  color: var(--color-primary-700);
+}
+.article-content blockquote {
+  border-left: 4px solid var(--color-primary-200);
+  padding-left: 1rem;
+  font-style: italic;
+  opacity: 0.8;
+  margin-bottom: 1.25rem;
+}
+.article-content img {
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+  max-width: 100%;
+}
+.article-content strong {
+  font-weight: 600;
+}

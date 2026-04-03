@@ -18,9 +18,14 @@ const NAV_LINKS = [
   { href: "/harga", label: "Harga" },
 ] as const;
 
-export function Header() {
+interface HeaderProps {
+  variant?: "default" | "transparent";
+}
+
+export function Header({ variant = "default" }: HeaderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const supabase = createClient();
 
@@ -36,13 +41,25 @@ export function Header() {
     return () => subscription.unsubscribe();
   }, [supabase.auth]);
 
+  useEffect(() => {
+    if (variant !== "transparent") return;
+    const onScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [variant]);
+
   async function handleLogout() {
     await supabase.auth.signOut();
     window.location.href = "/";
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-primary-100">
+    <header className={cn(
+      "sticky top-0 z-50 transition-colors duration-300",
+      variant === "transparent" && !scrolled
+        ? "bg-transparent border-b border-transparent"
+        : "bg-white/80 backdrop-blur-md border-b border-primary-100"
+    )}>
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}

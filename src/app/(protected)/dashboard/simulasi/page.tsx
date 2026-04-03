@@ -9,6 +9,7 @@ import { useProvinces } from "@/hooks/use-provinces";
 import { useSimulation } from "@/hooks/use-simulation";
 import { VariableCard, PredictionGauge } from "@/components/simulation";
 import { DATA_YEARS, MAX_FREE_SIMULATIONS_PER_DAY } from "@/lib/constants";
+import { generateReport } from "./report-action";
 
 export default function SimulasiPage() {
   const [selectedProvinceId, setSelectedProvinceId] = useState<number | null>(null);
@@ -34,12 +35,15 @@ export default function SimulasiPage() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [lastSavedId, setLastSavedId] = useState<string | null>(null);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   async function handleSave() {
     setSaveMessage(null);
     const result = await saveSimulation();
     if (result?.success) {
       setSaveMessage({ type: "success", text: "Simulasi berhasil disimpan!" });
+      setLastSavedId(result.id ?? null);
     } else if (result?.error) {
       setSaveMessage({ type: "error", text: result.error });
     }
@@ -173,6 +177,29 @@ export default function SimulasiPage() {
                   {isSaving ? "Menyimpan..." : "Simpan"}
                 </button>
               </div>
+
+              {/* Generate Report button (premium only) */}
+              {lastSavedId && (
+                <button
+                  onClick={async () => {
+                    setIsGeneratingReport(true);
+                    setSaveMessage(null);
+                    const result = await generateReport(lastSavedId);
+                    if ("url" in result) {
+                      setSaveMessage({ type: "success", text: "Report berhasil dibuat!" });
+                      window.open(result.url, "_blank");
+                    } else {
+                      setSaveMessage({ type: "error", text: result.error });
+                    }
+                    setIsGeneratingReport(false);
+                  }}
+                  disabled={isGeneratingReport}
+                  type="button"
+                  className="w-full rounded-lg border border-primary-600 text-primary-600 px-4 py-2 text-sm font-medium hover:bg-primary-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isGeneratingReport ? "Membuat Report..." : "Generate Report PDF"}
+                </button>
+              )}
 
               {/* Daily count */}
               <p className="text-xs text-center text-foreground/50">
