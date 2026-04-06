@@ -1,0 +1,41 @@
+-- Seed 34 Indonesian provinces with center coordinates from Dataset_Provinsi.xlsx
+-- IDs follow BPS (Badan Pusat Statistik) province codes.
+
+INSERT INTO provinces (id, name, slug, latitude, longitude) VALUES
+  (11, 'Aceh', 'aceh', 4.6951350, 96.7493993),
+  (12, 'Sumatera Utara', 'sumatera-utara', 2.1153547, 99.5450974),
+  (13, 'Sumatera Barat', 'sumatera-barat', -0.7399397, 100.8000051),
+  (14, 'Riau', 'riau', 0.2933469, 101.7068294),
+  (15, 'Jambi', 'jambi', -1.4851831, 102.4380581),
+  (16, 'Sumatera Selatan', 'sumatera-selatan', -3.3194374, 103.9143990),
+  (17, 'Bengkulu', 'bengkulu', -3.5778471, 102.3463875),
+  (18, 'Lampung', 'lampung', -4.5585849, 105.4068079),
+  (19, 'Kepulauan Bangka Belitung', 'kepulauan-bangka-belitung', -2.7410513, 106.4405872),
+  (21, 'Kepulauan Riau', 'kepulauan-riau', 3.9456514, 108.1428669),
+  (31, 'DKI Jakarta', 'dki-jakarta', -6.2115440, 106.8451720),
+  (32, 'Jawa Barat', 'jawa-barat', -7.0909110, 107.6688870),
+  (33, 'Jawa Tengah', 'jawa-tengah', -7.1509750, 110.1402594),
+  (34, 'DI Yogyakarta', 'di-yogyakarta', -7.8753849, 110.4262088),
+  (35, 'Jawa Timur', 'jawa-timur', -7.5360639, 112.2384017),
+  (36, 'Banten', 'banten', -6.4058172, 106.0640179),
+  (51, 'Bali', 'bali', -8.4095178, 115.1889160),
+  (52, 'Nusa Tenggara Barat', 'nusa-tenggara-barat', -8.6529334, 117.3616476),
+  (53, 'Nusa Tenggara Timur', 'nusa-tenggara-timur', -8.6573819, 121.0793705),
+  (61, 'Kalimantan Barat', 'kalimantan-barat', -0.2787808, 111.4752851),
+  (62, 'Kalimantan Tengah', 'kalimantan-tengah', -1.6814878, 113.3823545),
+  (63, 'Kalimantan Selatan', 'kalimantan-selatan', -3.0926415, 115.2837585),
+  (64, 'Kalimantan Timur', 'kalimantan-timur', 1.6406296, 116.4193890),
+  (65, 'Kalimantan Utara', 'kalimantan-utara', 3.0731000, 116.0414000),
+  (71, 'Sulawesi Utara', 'sulawesi-utara', 0.6246932, 123.9750018),
+  (72, 'Sulawesi Tengah', 'sulawesi-tengah', -1.4300254, 121.4456179),
+  (73, 'Sulawesi Selatan', 'sulawesi-selatan', -3.6687994, 119.9740534),
+  (74, 'Sulawesi Tenggara', 'sulawesi-tenggara', -4.1449100, 122.1746050),
+  (75, 'Gorontalo', 'gorontalo', 0.6999372, 122.4467238),
+  (76, 'Sulawesi Barat', 'sulawesi-barat', -2.8441371, 119.2320784),
+  (81, 'Maluku', 'maluku', -3.2384616, 130.1452734),
+  (82, 'Maluku Utara', 'maluku-utara', 1.5709993, 127.8087693),
+  (91, 'Papua Barat', 'papua-barat', -1.3361154, 133.1747162),
+  (94, 'Papua', 'papua', -4.2699280, 138.0803529)
+ON CONFLICT (id) DO UPDATE SET
+  latitude = EXCLUDED.latitude,
+  longitude = EXCLUDED.longitude;

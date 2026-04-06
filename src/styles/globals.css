@@ -97,3 +97,31 @@ body {
 .article-content strong {
   font-weight: 600;
 }
+
+/* Leaflet tooltip — clean style matching app design */
+.leaflet-tooltip {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  border: 1px solid #f3f4f6;
+  background-color: white;
+  color: var(--color-foreground);
+}
+
+.leaflet-tooltip-top::before {
+  border-top-color: white;
+}
+
+.leaflet-tooltip-bottom::before {
+  border-bottom-color: white;
+}
+
+.leaflet-tooltip-left::before {
+  border-left-color: white;
+}
+
+.leaflet-tooltip-right::before {
+  border-right-color: white;
+}
