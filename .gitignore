@@ -61,26 +61,17 @@ supabase/.temp/
 .claude-thoughts/
 project guidelines
 project guidelines
-docs/superpowers/
 .aider*
 .cursor/
 .windsurf/
 .continue/
 .github/copilot-*
 
-# --- Source data (RAW research artefacts - keep local only) ---
-# These are large research artefacts (PDF, GPKG, raw exports) that must not enter git.
-# The Markdown text in /docs (STATE, GLOSSARY, ADR, build-plan) IS tracked.
-docs/source/
-!docs/source/.gitkeep
-
-# But still allow committing a small fingerprint/manifest if we add one later
-!docs/source/README.md
-!docs/source/MANIFEST.md
-
-# Model exports (large derivatives of dataset)
-docs/source/model-exports/
-docs/source/who-standards/
+# --- /docs is local-only ---
+# All documentation, ADRs, STATE/GLOSSARY, raw research artefacts (PDF, GPKG,
+# model exports, WHO standards) live under /docs and stay out of git. Only
+# README.md at the repository root is published.
+docs/
 
 # --- Data dumps & misc local files ---
 *.gpkg
