@@ -1,0 +1,103 @@
+# --- Node / pnpm / Next.js ---
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+.npm/
+.next/
+out/
+build/
+dist/
+coverage/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# --- Env files (NEVER commit) ---
+.env
+.env.*
+!.env.example
+
+# --- Logs ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+logs/
+
+# --- Test artifacts ---
+/coverage/
+/playwright-report/
+/test-results/
+/playwright/.cache/
+.vitest-cache/
+
+# --- IDE / OS ---
+.vscode/*
+!.vscode/settings.json.example
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+
+# --- Vercel / Sentry / Supabase ---
+.vercel/
+.sentryclirc
+sentry.properties
+.supabase/
+supabase/.branches/
+supabase/.temp/
+
+# --- Claude / AI agents internal artefacts ---
+# Do NOT commit Claude-generated session artefacts, plans, scratch, or hooks state
+.claude/
+.claude-cache/
+.claude-session/
+.claude-plans/
+.claude-thoughts/
+project guidelines
+project guidelines
+docs/superpowers/
+.aider*
+.cursor/
+.windsurf/
+.continue/
+.github/copilot-*
+
+# --- Source data (RAW research artefacts - keep local only) ---
+# These are large research artefacts (PDF, GPKG, raw exports) that must not enter git.
+# The Markdown text in /docs (STATE, GLOSSARY, ADR, build-plan) IS tracked.
+docs/source/
+!docs/source/.gitkeep
+
+# But still allow committing a small fingerprint/manifest if we add one later
+!docs/source/README.md
+!docs/source/MANIFEST.md
+
+# Model exports (large derivatives of dataset)
+docs/source/model-exports/
+docs/source/who-standards/
+
+# --- Data dumps & misc local files ---
+*.gpkg
+*.geojson.local
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.csv.local
+*.xlsx.local
+tmp/
+scratch/
+.scratch/
+
+# --- Misc ---
+*.pid
+*.seed
+*.pid.lock
+.cache/

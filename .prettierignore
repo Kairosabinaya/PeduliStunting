@@ -1,0 +1,14 @@
+node_modules
+.next
+.turbo
+out
+build
+dist
+coverage
+playwright-report
+test-results
+pnpm-lock.yaml
+public
+docs/source
+*.md
+!docs/**/*.md
