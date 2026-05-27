@@ -29,18 +29,22 @@ import {
   MAP_YEAR_PARAM,
   type MapSource,
 } from "@/config/map";
-import {
-  isSupportedYear,
-  type SupportedYear,
-} from "@/config/years";
+import { isSupportedYear, type SupportedYear } from "@/config/years";
 
 export interface MapStateValue {
   readonly tahun: SupportedYear;
   readonly sumber: MapSource;
   readonly wilayah: string | null;
+  /**
+   * `true` while the user is actively dragging or zooming the camera. The
+   * `MapShell` fades out floating overlays while this flag is on so the
+   * user has an unobstructed view during interaction.
+   */
+  readonly isInteracting: boolean;
   setTahun(year: SupportedYear): void;
   setSumber(source: MapSource): void;
   setWilayah(kodeBps: string | null): void;
+  setIsInteracting(value: boolean): void;
 }
 
 const MapStateContext = createContext<MapStateValue | null>(null);
@@ -61,6 +65,7 @@ export function MapStateProvider({
   const [tahun, setTahunState] = useState<SupportedYear>(initialTahun);
   const [sumber, setSumberState] = useState<MapSource>(initialSumber);
   const [wilayah, setWilayahState] = useState<string | null>(initialWilayah);
+  const [isInteracting, setIsInteractingState] = useState(false);
 
   // Mirror state to the URL via history.replaceState so the user can share
   // links and Back/Forward work, but without invoking the Next.js router
@@ -106,9 +111,31 @@ export function MapStateProvider({
     setWilayahState(kodeBps);
   }, []);
 
+  const setIsInteracting = useCallback((value: boolean) => {
+    setIsInteractingState(value);
+  }, []);
+
   const value = useMemo<MapStateValue>(
-    () => ({ tahun, sumber, wilayah, setTahun, setSumber, setWilayah }),
-    [setSumber, setTahun, setWilayah, sumber, tahun, wilayah],
+    () => ({
+      tahun,
+      sumber,
+      wilayah,
+      isInteracting,
+      setTahun,
+      setSumber,
+      setWilayah,
+      setIsInteracting,
+    }),
+    [
+      isInteracting,
+      setIsInteracting,
+      setSumber,
+      setTahun,
+      setWilayah,
+      sumber,
+      tahun,
+      wilayah,
+    ],
   );
 
   return (

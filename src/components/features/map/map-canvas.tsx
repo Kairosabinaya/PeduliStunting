@@ -15,13 +15,7 @@
 
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AttributionControl,
   Layer,
@@ -33,10 +27,7 @@ import {
 } from "react-map-gl/maplibre";
 import type { FeatureCollection, Geometry } from "geojson";
 import type maplibregl from "maplibre-gl";
-import type {
-  ExpressionSpecification,
-  LngLatBoundsLike,
-} from "maplibre-gl";
+import type { ExpressionSpecification, LngLatBoundsLike } from "maplibre-gl";
 
 import type { MapFeatureProperties } from "./map-data";
 
@@ -46,29 +37,26 @@ import { cn } from "@/lib/cn";
 
 import { useMapState } from "./map-state-context";
 
-/**
- * Bounding box (lon/lat) used to recenter the camera when the user pans the
- * map off Indonesia. Slightly padded so islands at the edges (Sabang, Merauke)
- * still feel comfortably inside the viewport when snapped back.
- */
-const INDONESIA_RESET_BOUNDS = [
-  [92, -13],
-  [142, 8],
-] as const satisfies LngLatBoundsLike;
+const MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
 
 /**
- * Default camera state on first load. Centered on the Java Sea so all major
- * islands (Sumatra, Java, Kalimantan, Sulawesi) are simultaneously visible
- * at zoom ~4.2 on a typical 1440px-wide viewport.
+ * Padding (in CSS pixels) used when running `map.fitBounds(...)` against
+ * the data-driven Indonesia bbox. Combined with the ~5% lat/lon padding
+ * already baked into the bbox itself, this gives the viewport a clean
+ * negative-space margin so glass panels overlap ocean, not landmass.
  */
-const INITIAL_VIEW_STATE = {
-  longitude: 117,
-  latitude: -2.5,
-  zoom: 4.2,
-};
+const FIT_BOUNDS_PADDING_PX = 24;
 
-const MAP_STYLE_URL =
-  "https://tiles.openfreemap.org/styles/positron";
+/**
+ * Pixel radius around the cursor used as a fallback hit-test when the
+ * exact cursor pixel misses every polygon. Without this, Kepulauan Seribu,
+ * Sabang, Maluku atolls, and other small islands are practically
+ * unhoverable at country-level zoom — each one occupies fewer than two
+ * pixels. 10px gives a 20×20 square hit area, generous enough to feel
+ * forgiving but small enough not to "steal" hovers when the cursor sits
+ * squarely inside a large neighbouring region.
+ */
+const HIT_TOLERANCE_PX = 10;
 
 const REGION_SOURCE_ID = "regions";
 const REGION_FILL_LAYER_ID = "regions-fill";
@@ -100,7 +88,56 @@ export interface MapCanvasProps {
   readonly dataKey: string;
   readonly source: MapSource;
   readonly selectedKodeBps: string | null;
+  /**
+   * Tight Indonesia bbox `[[west, south], [east, north]]` used both for the
+   * initial camera framing and as the snap-back target when the user pans
+   * the camera off Indonesia.
+   */
+  readonly bounds: readonly [
+    readonly [number, number],
+    readonly [number, number],
+  ];
   readonly className?: string;
+}
+
+/**
+ * Compute a `[[west, south], [east, north]]` bbox from any GeoJSON Polygon /
+ * MultiPolygon geometry by walking every leaf coordinate pair. Returns null
+ * when the geometry has no usable coordinates (e.g. an empty MultiPolygon
+ * from a bad import) so callers can skip the fitBounds gracefully.
+ */
+function computeFeatureBbox(
+  geometry: Geometry,
+): readonly [readonly [number, number], readonly [number, number]] | null {
+  let minLng = Number.POSITIVE_INFINITY;
+  let minLat = Number.POSITIVE_INFINITY;
+  let maxLng = Number.NEGATIVE_INFINITY;
+  let maxLat = Number.NEGATIVE_INFINITY;
+  function visit(point: readonly number[]): void {
+    const lng = point[0];
+    const lat = point[1];
+    if (typeof lng !== "number" || typeof lat !== "number") return;
+    if (lng < minLng) minLng = lng;
+    if (lng > maxLng) maxLng = lng;
+    if (lat < minLat) minLat = lat;
+    if (lat > maxLat) maxLat = lat;
+  }
+  function walk(input: unknown): void {
+    if (!Array.isArray(input) || input.length === 0) return;
+    if (typeof input[0] === "number") {
+      visit(input as readonly number[]);
+      return;
+    }
+    for (const item of input) walk(item);
+  }
+  if ("coordinates" in geometry) {
+    walk((geometry as { coordinates: unknown }).coordinates);
+  }
+  if (!Number.isFinite(minLng) || !Number.isFinite(maxLng)) return null;
+  return [
+    [minLng, minLat],
+    [maxLng, maxLat],
+  ];
 }
 
 // Reading CSS variables from JS requires getComputedStyle. We resolve once
@@ -138,9 +175,18 @@ export function MapCanvas({
   dataKey,
   source,
   selectedKodeBps,
+  bounds,
   className,
 }: MapCanvasProps) {
-  const { setWilayah } = useMapState();
+  const { setWilayah, setIsInteracting } = useMapState();
+  // Bounds are wrapped in a ref so the long-lived event listeners (onIdle,
+  // onLoad fitBounds) always read the current value without re-binding on
+  // every render — but the bounds change so rarely (only when regions
+  // dataset changes) that even direct closure capture would be fine.
+  const boundsRef = useRef(bounds);
+  useEffect(() => {
+    boundsRef.current = bounds;
+  }, [bounds]);
   // Memoise the FeatureCollection reference by `dataKey`. The Server
   // Component re-creates the JSON on every render (selection changes too),
   // but MapLibre's `Source` re-tessellates on every fresh reference. We
@@ -260,13 +306,55 @@ export function MapCanvas({
   );
 
   // Click → instant client state update. No router, no RSC.
+  // Empty click (ocean / outside any region polygon) clears the selection so
+  // the merged panel falls back to the national summary view. Region click
+  // additionally eases the camera so the kab/kota fills a comfortable
+  // portion of the viewport (Google Maps "tap-to-zoom" behaviour).
   const handleClick = useCallback(
     (event: MapLayerMouseEvent) => {
-      const feature = event.features?.[0];
-      if (!feature) return;
+      // Tiny features (Kepulauan Seribu, Sabang, atolls) are nearly
+      // impossible to hit with a point query at low zoom. If the exact
+      // cursor pixel missed every polygon, expand the hit-test to a small
+      // box around the cursor and pick the first match before falling back
+      // to the "ocean click → deselect" behaviour.
+      let feature = event.features?.[0];
+      if (!feature) {
+        const p = event.point;
+        const padded = event.target.queryRenderedFeatures(
+          [
+            [p.x - HIT_TOLERANCE_PX, p.y - HIT_TOLERANCE_PX],
+            [p.x + HIT_TOLERANCE_PX, p.y + HIT_TOLERANCE_PX],
+          ],
+          { layers: [REGION_FILL_LAYER_ID] },
+        );
+        feature = padded[0];
+      }
+      if (!feature) {
+        // Click landed on ocean / outside any region polygon. Deselect AND
+        // ease the camera back to the dataset-derived Indonesia bbox so the
+        // user "zooms out" with a single click rather than having to drag.
+        setWilayah(null);
+        event.target.fitBounds(boundsRef.current as LngLatBoundsLike, {
+          padding: FIT_BOUNDS_PADDING_PX,
+          duration: 800,
+        });
+        return;
+      }
       const kodeBps = feature.properties?.kodeBps;
       if (typeof kodeBps !== "string") return;
       setWilayah(kodeBps);
+      if (feature.geometry) {
+        const bbox = computeFeatureBbox(feature.geometry as Geometry);
+        if (bbox) {
+          event.target.fitBounds(bbox as LngLatBoundsLike, {
+            padding: 80,
+            duration: 800,
+            // Cap zoom so a tiny kota (Sabang, Tual) doesn't slam the user
+            // into street level; we want to show context too.
+            maxZoom: 8,
+          });
+        }
+      }
     },
     [setWilayah],
   );
@@ -344,9 +432,20 @@ export function MapCanvas({
           safeSet(id, "line-color", palette.boundary);
         }
       } else if (layer.type === "symbol") {
-        safeSet(id, "text-color", palette.text);
-        safeSet(id, "text-halo-color", palette.textHalo);
-        safeSet(id, "text-halo-width", 1.2);
+        // Labels sitting OVER our choropleth fills (places, cities, country
+        // names) get a hard white-on-dark-halo treatment so they remain
+        // readable on the bold Google-palette greens/yellows/reds. Water
+        // labels keep the theme-aware contrast so they don't clash with
+        // the light-blue / deep-navy sea fills.
+        if (isWater) {
+          safeSet(id, "text-color", palette.text);
+          safeSet(id, "text-halo-color", palette.textHalo);
+          safeSet(id, "text-halo-width", 1.2);
+        } else {
+          safeSet(id, "text-color", "#ffffff");
+          safeSet(id, "text-halo-color", "#1a1a1a");
+          safeSet(id, "text-halo-width", 1.8);
+        }
       }
     }
   }, []);
@@ -396,9 +495,23 @@ export function MapCanvas({
     };
 
     const onMouseMove = (event: maplibregl.MapMouseEvent) => {
-      const features = map.queryRenderedFeatures(event.point, {
+      // Point query first — fast and gives the "correct" feature when the
+      // cursor is squarely inside a polygon. If it misses, widen the
+      // search to a small box so users can still hover/select tiny islands
+      // (Kepulauan Seribu, Sabang, atolls) without sniper-precision aim.
+      let features = map.queryRenderedFeatures(event.point, {
         layers: [REGION_FILL_LAYER_ID],
       });
+      if (features.length === 0) {
+        const p = event.point;
+        features = map.queryRenderedFeatures(
+          [
+            [p.x - HIT_TOLERANCE_PX, p.y - HIT_TOLERANCE_PX],
+            [p.x + HIT_TOLERANCE_PX, p.y + HIT_TOLERANCE_PX],
+          ],
+          { layers: [REGION_FILL_LAYER_ID] },
+        );
+      }
       const feature = features[0];
       map.getCanvas().style.cursor = feature ? "pointer" : "";
 
@@ -461,29 +574,50 @@ export function MapCanvas({
 
     const onIdle = () => {
       // Snap-back: when the camera settles with no part of Indonesia
-      // visible, ease back to the default view. `idle` is more reliable
-      // than `moveend` (it fires only when the camera has truly stopped
-      // and tiles have finished loading, so we don't fight ongoing user
-      // gestures).
+      // visible, fit back to the tight Indonesia bbox. `idle` is more
+      // reliable than `moveend` (it fires only when the camera has truly
+      // stopped and tiles finished loading, so we don't fight ongoing
+      // user gestures).
       const view = map.getBounds();
       const w = view.getWest();
       const e = view.getEast();
       const s = view.getSouth();
       const n = view.getNorth();
-      const [[idoW, idoS], [idoE, idoN]] = INDONESIA_RESET_BOUNDS;
+      const [[idoW, idoS], [idoE, idoN]] = boundsRef.current;
       const intersects = !(e < idoW || w > idoE || n < idoS || s > idoN);
       if (intersects) return;
-      map.easeTo({
-        center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
-        zoom: INITIAL_VIEW_STATE.zoom,
+      map.fitBounds(boundsRef.current as LngLatBoundsLike, {
+        padding: FIT_BOUNDS_PADDING_PX,
         duration: 800,
       });
+    };
+
+    // movestart/moveend drive the overlay fade flag exposed via the map
+    // state context. We use `movestart` (not `dragstart`) so wheel-zoom and
+    // touch-pinch also trigger the fade — any USER camera motion counts.
+    //
+    // MapLibre fires the same events for programmatic camera changes
+    // (`fitBounds`, `easeTo`) — those would otherwise hide the overlays
+    // every time the user clicks a region (because click → auto-zoom fires
+    // `movestart/moveend` internally). We gate the fade on
+    // `event.originalEvent` which MapLibre populates ONLY when the move
+    // was triggered by a browser input event (mouse, wheel, touch). For
+    // programmatic camera moves it is `undefined`, so the listener no-ops.
+    const onMoveStart = (event: { originalEvent?: unknown }) => {
+      if (!event.originalEvent) return;
+      setIsInteracting(true);
+    };
+    const onMoveEnd = (event: { originalEvent?: unknown }) => {
+      if (!event.originalEvent) return;
+      setIsInteracting(false);
     };
 
     map.on("mousemove", onMouseMove);
     map.on("mouseleave", onMouseLeave);
     map.getCanvas().addEventListener("mouseleave", onMouseLeave);
     map.on("idle", onIdle);
+    map.on("movestart", onMoveStart);
+    map.on("moveend", onMoveEnd);
 
     return () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
@@ -491,8 +625,10 @@ export function MapCanvas({
       map.off("mouseleave", onMouseLeave);
       map.getCanvas().removeEventListener("mouseleave", onMouseLeave);
       map.off("idle", onIdle);
+      map.off("movestart", onMoveStart);
+      map.off("moveend", onMoveEnd);
     };
-  }, [mapReady]);
+  }, [mapReady, setIsInteracting]);
 
   /**
    * Re-apply basemap paint properties (sea + land bg) whenever the user
@@ -512,15 +648,113 @@ export function MapCanvas({
     return () => observer.disconnect();
   }, [applyBasemapPaints, mapReady]);
 
+  /**
+   * One-shot geolocation request after the map is ready. If the user grants
+   * access AND their position falls inside a known kab/kota, we both select
+   * that region (opens the detail panel) and ease the camera to it. If they
+   * deny, time out, or are outside Indonesia, we silently fall back to the
+   * already-applied Indonesia bbox framing.
+   *
+   * The flow runs once per mount via `attemptedRef` — re-rendering the map
+   * canvas (e.g. on year toggle) must not trigger a second permission
+   * prompt, which would be jarring.
+   */
+  const geolocationAttemptedRef = useRef(false);
+  useEffect(() => {
+    if (!mapReady) return;
+    if (geolocationAttemptedRef.current) return;
+    geolocationAttemptedRef.current = true;
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+
+    /**
+     * Resolve a kab/kota for a lng/lat. Returns false when the regions
+     * layer isn't registered yet (style is loaded but react-map-gl hasn't
+     * finished mounting `<Source>` + `<Layer>` children); caller should
+     * retry via the map's `idle` event.
+     */
+    const trySnapToUserLocation = (
+      longitude: number,
+      latitude: number,
+    ): boolean => {
+      const map = mapRef.current?.getMap();
+      if (!map) return false;
+      // Layer may not exist yet on cached-permission flows where the
+      // geolocation callback fires synchronously, before `<Source>` and
+      // `<Layer>` finish mounting. Bail and retry — the `idle` event runs
+      // once both style + sources are fully loaded.
+      if (!map.getLayer(REGION_FILL_LAYER_ID)) return false;
+      const point = map.project([longitude, latitude]);
+      const matches = map.queryRenderedFeatures(point, {
+        layers: [REGION_FILL_LAYER_ID],
+      });
+      const feature = matches[0];
+      const kodeBps = feature?.properties?.kodeBps;
+      if (typeof kodeBps !== "string") return true;
+      setWilayah(kodeBps);
+      if (feature?.geometry) {
+        const bbox = computeFeatureBbox(feature.geometry as Geometry);
+        if (bbox) {
+          map.fitBounds(bbox as LngLatBoundsLike, {
+            padding: 80,
+            duration: 1200,
+            maxZoom: 8,
+          });
+        }
+      }
+      return true;
+    };
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { longitude, latitude } = position.coords;
+        if (trySnapToUserLocation(longitude, latitude)) return;
+        // Regions layer wasn't ready when the geolocation callback fired —
+        // queue a single retry once the map finishes loading its sources.
+        const map = mapRef.current?.getMap();
+        if (!map) return;
+        const onIdleOnce = () => {
+          if (trySnapToUserLocation(longitude, latitude)) {
+            map.off("idle", onIdleOnce);
+          }
+        };
+        map.on("idle", onIdleOnce);
+      },
+      () => {
+        // User denied permission, position unavailable, or timed out —
+        // keep the default Indonesia framing without surfacing an error.
+      },
+      // 8s timeout strikes a balance: long enough for GPS warm-up on
+      // mobile, short enough that the user doesn't wait forever.
+      { enableHighAccuracy: false, timeout: 8000, maximumAge: 5 * 60 * 1000 },
+    );
+  }, [mapReady, setWilayah]);
+
   return (
     <div className={cn("h-full w-full", className)}>
       <Map
         ref={mapRef}
-        initialViewState={INITIAL_VIEW_STATE}
+        initialViewState={{
+          // Fallback initial state used only for the brief moment before
+          // `onLoad` runs `fitBounds(boundsRef.current)`. Picks a safe
+          // center inside the Indonesia bbox so the user never sees
+          // off-screen content during the swap.
+          longitude: (bounds[0][0] + bounds[1][0]) / 2,
+          latitude: (bounds[0][1] + bounds[1][1]) / 2,
+          zoom: 4,
+        }}
         mapStyle={MAP_STYLE_URL}
         interactiveLayerIds={[REGION_FILL_LAYER_ID]}
         onClick={handleClick}
-        onLoad={() => setMapReady(true)}
+        onLoad={(event) => {
+          // Snap the camera to the dataset-derived tight Indonesia bbox.
+          // duration: 0 so the user lands on the framed view without an
+          // animated zoom-in flash.
+          event.target.fitBounds(boundsRef.current as LngLatBoundsLike, {
+            padding: FIT_BOUNDS_PADDING_PX,
+            duration: 0,
+          });
+          setMapReady(true);
+        }}
         attributionControl={false}
         cooperativeGestures={false}
         scrollZoom={true}
@@ -538,16 +772,8 @@ export function MapCanvas({
           data={stableFeatureCollection}
           promoteId="kodeBps"
         >
-          <Layer
-            id={REGION_FILL_LAYER_ID}
-            type="fill"
-            paint={fillPaint}
-          />
-          <Layer
-            id={REGION_BORDER_LAYER_ID}
-            type="line"
-            paint={borderPaint}
-          />
+          <Layer id={REGION_FILL_LAYER_ID} type="fill" paint={fillPaint} />
+          <Layer id={REGION_BORDER_LAYER_ID} type="line" paint={borderPaint} />
           <Layer
             id={REGION_HOVER_LAYER_ID}
             type="line"
@@ -624,8 +850,7 @@ function buildFillPaintFromPalette(
     readonly tinggi: string;
   },
 ): ExpressionSpecification {
-  const field =
-    source === "predicted" ? "predictedCategory" : "actualCategory";
+  const field = source === "predicted" ? "predictedCategory" : "actualCategory";
   return [
     "match",
     ["get", field],

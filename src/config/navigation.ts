@@ -30,9 +30,4 @@ export const PRIMARY_NAV: readonly PrimaryNavItem[] = [
     label: "Tracker",
     description: "Pantau pertumbuhan dan rencana sehat anak",
   },
-  {
-    href: "/account",
-    label: "Akun",
-    description: "Profil, preferensi, dan keluar",
-  },
 ] as const;

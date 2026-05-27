@@ -42,7 +42,8 @@ export function MiniHistoryChart({
   className,
 }: MiniHistoryChartProps) {
   const observedPoints = points.filter(
-    (p): p is HistoryPoint & { observed: number } => typeof p.observed === "number",
+    (p): p is HistoryPoint & { observed: number } =>
+      typeof p.observed === "number",
   );
 
   if (points.length === 0 || observedPoints.length === 0) {
@@ -66,10 +67,7 @@ export function MiniHistoryChart({
   const yearSpan = Math.max(yearMax - yearMin, 1);
 
   function x(tahun: number): number {
-    return (
-      PADDING_X +
-      ((tahun - yearMin) / yearSpan) * (WIDTH - PADDING_X * 2)
-    );
+    return PADDING_X + ((tahun - yearMin) / yearSpan) * (WIDTH - PADDING_X * 2);
   }
   function y(prev: number): number {
     const innerHeight = HEIGHT - PADDING_TOP - PADDING_BOTTOM;
@@ -77,9 +75,18 @@ export function MiniHistoryChart({
     return PADDING_TOP + innerHeight * (1 - t);
   }
 
-  const path = observedPoints
+  const linePath = observedPoints
     .map((p, i) => `${i === 0 ? "M" : "L"}${x(p.tahun)},${y(p.observed)}`)
     .join(" ");
+  // Area path: trace the line, then close back along the baseline so the
+  // resulting polygon can be filled with a fade-to-transparent gradient.
+  const baselineY = HEIGHT - PADDING_BOTTOM;
+  const firstPoint = observedPoints[0];
+  const lastPoint = observedPoints[observedPoints.length - 1];
+  const areaPath =
+    firstPoint && lastPoint
+      ? `${linePath} L${x(lastPoint.tahun)},${baselineY} L${x(firstPoint.tahun)},${baselineY} Z`
+      : "";
 
   const titleSuffix =
     yearMin === yearMax ? `${yearMin}` : `${yearMin} – ${yearMax}`;
@@ -94,9 +101,69 @@ export function MiniHistoryChart({
         aria-label={`Tren prevalensi stunting tahun ${yearMin}–${yearMax}.`}
         className="h-auto w-full"
       >
+        <defs>
+          {/*
+            Two-layer gradient under the line:
+              1. Horizontal linear gradient with a stop at each year's
+                 x-position carrying that year's category colour. SVG
+                 interpolates between adjacent stops, so a Rendah→Sedang
+                 transition reads as a smooth green→yellow blend (and the
+                 transition lines up with the data point on the line).
+              2. A luminance mask that fades the result vertically from
+                 ~40% visibility at the line down to 0% at the baseline,
+                 keeping the chart calm and readable.
+            `gradientUnits="userSpaceOnUse"` so the offsets we compute map
+            directly to SVG coordinates (the same space the line/dots use).
+          */}
+          {firstPoint && lastPoint ? (
+            <linearGradient
+              id="history-area-x"
+              x1={x(firstPoint.tahun)}
+              y1="0"
+              x2={x(lastPoint.tahun)}
+              y2="0"
+              gradientUnits="userSpaceOnUse"
+            >
+              {observedPoints.map((p) => {
+                const span = Math.max(lastPoint.tahun - firstPoint.tahun, 1);
+                const offsetPct = ((p.tahun - firstPoint.tahun) / span) * 100;
+                const category = p.observedCategory ?? "Sedang";
+                return (
+                  <stop
+                    key={p.tahun}
+                    offset={`${offsetPct}%`}
+                    className={CATEGORY_TEXT_CLASS[category]}
+                    stopColor="currentColor"
+                  />
+                );
+              })}
+            </linearGradient>
+          ) : null}
+          <linearGradient id="history-area-fade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="white" stopOpacity={0.42} />
+            <stop offset="100%" stopColor="black" stopOpacity={1} />
+          </linearGradient>
+          <mask
+            id="history-area-mask"
+            maskUnits="userSpaceOnUse"
+            x="0"
+            y="0"
+            width={WIDTH}
+            height={HEIGHT}
+          >
+            <rect
+              x="0"
+              y="0"
+              width={WIDTH}
+              height={HEIGHT}
+              fill="url(#history-area-fade)"
+            />
+          </mask>
+        </defs>
         <g aria-hidden>
           {[0, 0.5, 1].map((t) => {
-            const yPos = PADDING_TOP + (HEIGHT - PADDING_TOP - PADDING_BOTTOM) * t;
+            const yPos =
+              PADDING_TOP + (HEIGHT - PADDING_TOP - PADDING_BOTTOM) * t;
             return (
               <line
                 key={t}
@@ -111,8 +178,16 @@ export function MiniHistoryChart({
             );
           })}
         </g>
+        {areaPath ? (
+          <path
+            d={areaPath}
+            fill="url(#history-area-x)"
+            stroke="none"
+            mask="url(#history-area-mask)"
+          />
+        ) : null}
         <path
-          d={path}
+          d={linePath}
           fill="none"
           stroke="currentColor"
           strokeWidth="2"

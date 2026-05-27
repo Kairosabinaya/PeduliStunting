@@ -113,18 +113,11 @@ export function RegionalSummaryCard({
         <span className="font-mono tabular-nums text-muted-foreground">
           {total.toLocaleString("id-ID")} {MAP_SUMMARY_COPY.totalRegionsLabel}
         </span>
-        <span
-          className={cn(
-            "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
-            modelVersion
-              ? "bg-primary/10 text-primary"
-              : "bg-muted text-muted-foreground",
-          )}
-        >
-          {modelVersion
-            ? `${MAP_SUMMARY_COPY.modelBadgePrefix} ${modelVersion}`
-            : MAP_SUMMARY_COPY.noModelLabel}
-        </span>
+        {modelVersion ? (
+          <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+            {`${MAP_SUMMARY_COPY.modelBadgePrefix} ${modelVersion}`}
+          </span>
+        ) : null}
       </footer>
     </aside>
   );

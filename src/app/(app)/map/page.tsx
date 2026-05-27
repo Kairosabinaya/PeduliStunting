@@ -18,6 +18,7 @@ import {
   getCachedIndicatorsByYear,
   getCachedPredictionsByYear,
   getCachedRegions,
+  getCachedRegionsBounds,
 } from "@/lib/cached-map-data";
 
 /**
@@ -43,6 +44,7 @@ export default async function MapPage({ searchParams }: MapPageProps) {
   let regions: Awaited<ReturnType<typeof getCachedRegions>>;
   let boundaries: Awaited<ReturnType<typeof getCachedBoundaries>>;
   let defaultModel: Awaited<ReturnType<typeof getCachedDefaultModel>>;
+  let bounds: Awaited<ReturnType<typeof getCachedRegionsBounds>>;
   let indicatorsByYear: Record<SupportedYear, readonly RegionIndicatorsDto[]>;
   let predictionsByYear: Record<SupportedYear, readonly ModelPredictionDto[]>;
   try {
@@ -50,11 +52,13 @@ export default async function MapPage({ searchParams }: MapPageProps) {
       regionsValue,
       boundariesValue,
       defaultModelValue,
+      boundsValue,
       ...indicatorPredictionPairs
     ] = await Promise.all([
       getCachedRegions(),
       getCachedBoundaries(),
       getCachedDefaultModel(),
+      getCachedRegionsBounds(),
       ...SUPPORTED_YEARS.flatMap((year) => [
         getCachedIndicatorsByYear(year),
         // We pass the model version conditionally below. Default to empty
@@ -66,6 +70,7 @@ export default async function MapPage({ searchParams }: MapPageProps) {
     regions = regionsValue;
     boundaries = boundariesValue;
     defaultModel = defaultModelValue;
+    bounds = boundsValue;
     indicatorsByYear = {} as Record<
       SupportedYear,
       readonly RegionIndicatorsDto[]
@@ -127,7 +132,11 @@ export default async function MapPage({ searchParams }: MapPageProps) {
     featureCollectionsByYear[year] = toFeatureCollection(features);
   }
 
-  if (Object.values(featureCollectionsByYear).every((fc) => fc.features.length === 0)) {
+  if (
+    Object.values(featureCollectionsByYear).every(
+      (fc) => fc.features.length === 0,
+    )
+  ) {
     return (
       <FullscreenError
         title={MAP_COPY.noBoundariesTitle}
@@ -153,6 +162,7 @@ export default async function MapPage({ searchParams }: MapPageProps) {
         predictionsByYear={predictionsByYear}
         defaultModel={defaultModel}
         predictedAvailable={predictedAvailable}
+        bounds={bounds}
       />
     </MapStateProvider>
   );
@@ -167,7 +177,11 @@ function FullscreenError({
 }) {
   return (
     <div className="fixed inset-0 z-0 flex items-center justify-center bg-background p-6">
-      <ErrorState title={title} description={description} className="max-w-md" />
+      <ErrorState
+        title={title}
+        description={description}
+        className="max-w-md"
+      />
     </div>
   );
 }

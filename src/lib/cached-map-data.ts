@@ -47,9 +47,7 @@ interface ModelMetadataSummary {
 }
 
 async function withUseCases<T>(
-  body: (
-    useCases: ReturnType<typeof makeUseCases>,
-  ) => Promise<T>,
+  body: (useCases: ReturnType<typeof makeUseCases>) => Promise<T>,
 ): Promise<T> {
   const supabase = createSupabaseAdminClient();
   const useCases = makeUseCases(supabase);
@@ -105,6 +103,62 @@ export function getCachedBoundaries(): Promise<readonly RegionBoundaryDto[]> {
 /** Reset the in-process boundary cache. Call after a re-import. */
 export function invalidateBoundariesCache(): void {
   boundariesPromise = null;
+}
+
+/**
+ * Derive a tight Indonesia bounding box from `regions.latitude/longitude`.
+ * Used by MapCanvas to set the default camera framing and the snap-back
+ * target — more accurate than a hand-tuned constant because it adapts to
+ * the live dataset (e.g. future pemekaran extends Papua eastward, etc.).
+ *
+ * Returned as `[[west, south], [east, north]]` to match the order MapLibre's
+ * `fitBounds` consumes.
+ */
+let boundsPromise: Promise<
+  readonly [readonly [number, number], readonly [number, number]]
+> | null = null;
+
+export function getCachedRegionsBounds(): Promise<
+  readonly [readonly [number, number], readonly [number, number]]
+> {
+  if (boundsPromise === null) {
+    boundsPromise = (async () => {
+      try {
+        const regions = await getCachedRegions();
+        const lons: number[] = [];
+        const lats: number[] = [];
+        for (const r of regions) {
+          if (typeof r.longitude === "number" && Number.isFinite(r.longitude)) {
+            lons.push(r.longitude);
+          }
+          if (typeof r.latitude === "number" && Number.isFinite(r.latitude)) {
+            lats.push(r.latitude);
+          }
+        }
+        if (lons.length === 0 || lats.length === 0) {
+          // Fallback to a conservative Indonesia bbox when coordinates are
+          // missing (fresh DB before the import scripts have run).
+          return [
+            [94.5, -11.5],
+            [141.5, 6.5],
+          ] as const;
+        }
+        // ~5% padding on each axis so edge islands have breathing room and
+        // the snap-back animation never lands with content kissing the
+        // viewport border.
+        const padLon = 0.5;
+        const padLat = 0.3;
+        return [
+          [Math.min(...lons) - padLon, Math.min(...lats) - padLat],
+          [Math.max(...lons) + padLon, Math.max(...lats) + padLat],
+        ] as const;
+      } catch (error) {
+        boundsPromise = null;
+        throw error;
+      }
+    })();
+  }
+  return boundsPromise;
 }
 
 export const getCachedIndicatorsByYear = unstable_cache(

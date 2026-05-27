@@ -186,7 +186,6 @@ export const MAP_SUMMARY_COPY = {
   distributionTitle: "Distribusi kategori",
   totalRegionsLabel: "wilayah dipetakan",
   modelBadgePrefix: "Model",
-  noModelLabel: "Tanpa model prediksi",
 } as const;
 
 /** Floating "Apa itu kategori stunting?" explainer copy. */
@@ -226,18 +225,12 @@ export const MAP_DETAIL_COPY = {
   rankLabel: "Peringkat nasional",
   rankUnavailable: "Belum tersedia",
   typeLabel: "Tipe wilayah",
-  codeLabel: "Kode BPS",
   historyTitlePrefix: "Riwayat",
   historyEmpty:
     "Belum ada data riwayat untuk wilayah ini. Coba pilih tahun lain.",
-  predictionTitle: "Prediksi GTWENOLR",
-  predictionEmpty:
-    "Prediksi belum tersedia untuk wilayah ini. Toggle ke data observasi atau import prediksi model lebih dahulu.",
-  showPredictionLabel: "Lihat prediksi model",
-  showObservedLabel: "Kembali ke data observasi",
   closeLabel: "Tutup",
   observedAxisLabel: "Observasi",
-  predictedAxisLabel: "Prediksi",
+  prevalenceAxisLabel: "Prevalensi",
 } as const;
 
 /** Vertical year rail (sits at the edge of the map). */
@@ -248,12 +241,7 @@ export const YEAR_RAIL_COPY = {
 } as const;
 
 /** Onboarding modal — bespoke for the Peduli Stunting domain. */
-export type OnboardingIcon =
-  | "map"
-  | "calendar"
-  | "click"
-  | "legend"
-  | "model";
+export type OnboardingIcon = "map" | "calendar" | "click" | "legend" | "model";
 
 export interface OnboardingStep {
   readonly id: string;
@@ -290,8 +278,7 @@ export const MAP_ONBOARDING_STEPS: readonly OnboardingStep[] = [
   {
     id: "select",
     title: "Klik wilayah untuk detail",
-    description:
-      "Panel detail memunculkan ringkasan kabupaten/kota terpilih.",
+    description: "Panel detail memunculkan ringkasan kabupaten/kota terpilih.",
     bullets: [
       "Skor prevalensi terbaru + badge kategori.",
       "Peringkat nasional dan tipe wilayah (Kabupaten/Kota).",
