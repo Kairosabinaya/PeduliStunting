@@ -39,8 +39,15 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // `cover` lets content render under the iOS notch / Dynamic Island; pages
+  // opt into `env(safe-area-inset-*)` padding where they need to avoid it.
+  // Without this, safe-area utilities are silently no-ops on iOS.
+  viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: BROWSER_THEME_COLOR.light },
+    {
+      media: "(prefers-color-scheme: light)",
+      color: BROWSER_THEME_COLOR.light,
+    },
     { media: "(prefers-color-scheme: dark)", color: BROWSER_THEME_COLOR.dark },
   ],
 };

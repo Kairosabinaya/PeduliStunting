@@ -31,6 +31,8 @@ import {
 import { useMapState } from "./map-state-context";
 import { MiniHistoryChart, type HistoryPoint } from "./mini-history-chart";
 
+export type RegionDetailPopupVariant = "docked" | "sheet";
+
 export interface RegionDetailPopupProps {
   readonly region: RegionDto;
   readonly tahun: number;
@@ -42,14 +44,12 @@ export interface RegionDetailPopupProps {
   /** Predicted history across all years (merged across siblings, same as history). */
   readonly predictionHistory: readonly ModelPredictionDto[];
   /**
-   * `true` when {@link region} is a sibling lookup, not the kode_bps the
-   * user actually clicked. Happens when a Papua-pemekaran code is selected
-   * but the active year predates the 2022 split, so we fall back to the
-   * pre-pemekaran province + code for historical accuracy.
+   * `docked` (default) renders the standalone glass panel used on desktop
+   * top-right. `sheet` strips the chrome and the close button (the sheet
+   * itself owns the drag-down dismissal) so the content nests cleanly
+   * inside the mobile bottom sheet.
    */
-  readonly isHistoricalFallback?: boolean;
-  /** The kode_bps the user actually clicked (may differ from `region`). */
-  readonly originalSelection?: RegionDto;
+  readonly variant?: RegionDetailPopupVariant;
   readonly className?: string;
 }
 
@@ -61,11 +61,11 @@ export function RegionDetailPopup({
   ranking,
   history,
   predictionHistory,
-  isHistoricalFallback = false,
-  originalSelection,
+  variant = "docked",
   className,
 }: RegionDetailPopupProps) {
   const { setWilayah } = useMapState();
+  const isSheet = variant === "sheet";
 
   const category =
     source === "predicted" ? null : (currentIndicator?.yCategory ?? null);
@@ -80,27 +80,22 @@ export function RegionDetailPopup({
   }));
 
   return (
-    <article className={cn("glass-panel space-y-5 rounded-2xl p-5", className)}>
+    <article
+      className={cn(
+        "space-y-5",
+        isSheet ? "w-full" : "glass-panel rounded-2xl p-5",
+        className,
+      )}
+    >
       <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-1">
+        <div className="min-w-0 space-y-1">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {MAP_DETAIL_COPY.eyebrow}
           </p>
-          <h2 className="text-2xl font-semibold text-foreground">
+          <h2 className="line-clamp-2 break-words text-xl font-semibold text-foreground md:text-2xl">
             {region.kabupatenKota}
           </h2>
           <p className="text-sm text-muted-foreground">{region.provinsi}</p>
-          {isHistoricalFallback && originalSelection ? (
-            <p className="mt-1 inline-flex items-start gap-1 rounded-md bg-info/10 px-2 py-1 text-[11px] leading-snug text-info">
-              <span aria-hidden>ⓘ</span>
-              <span>
-                Tahun {tahun} merujuk pada konteks{" "}
-                <strong>{region.provinsi}</strong> (pra-pemekaran 2022). Kode
-                aktif saat ini: {originalSelection.kodeBps} (
-                {originalSelection.provinsi}).
-              </span>
-            </p>
-          ) : null}
         </div>
         <div className="flex items-center gap-2">
           {category ? (
@@ -108,16 +103,20 @@ export function RegionDetailPopup({
           ) : (
             <Badge tone="neutral">Data tidak tersedia</Badge>
           )}
-          <button
-            type="button"
-            aria-label={MAP_DETAIL_COPY.closeLabel}
-            onClick={() => setWilayah(null)}
-            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-          >
-            <span aria-hidden className="text-2xl leading-none">
-              ×
-            </span>
-          </button>
+          {/* In the sheet variant the drag-down handle dismisses the panel,
+              so an extra close button would just compete for tap area. */}
+          {isSheet ? null : (
+            <button
+              type="button"
+              aria-label={MAP_DETAIL_COPY.closeLabel}
+              onClick={() => setWilayah(null)}
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+            >
+              <span aria-hidden className="text-2xl leading-none">
+                ×
+              </span>
+            </button>
+          )}
         </div>
       </header>
 
@@ -147,7 +146,17 @@ export function RegionDetailPopup({
       </dl>
 
       <MiniHistoryChart points={points} activeTahun={tahun} />
-      <HistoryTable rows={rows} activeTahun={tahun} />
+      {/* In the docked variant the article itself has no scroll, so a long
+          history would overflow the viewport. Cap the table at ~18 rem and
+          let it scroll internally. The sheet variant skips this — the
+          sheet body is already a scroll container. */}
+      <div
+        className={cn(
+          isSheet ? undefined : "max-h-72 overflow-y-auto md:max-h-none",
+        )}
+      >
+        <HistoryTable rows={rows} activeTahun={tahun} />
+      </div>
     </article>
   );
 }

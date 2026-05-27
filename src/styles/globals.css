@@ -232,6 +232,63 @@
   }
 }
 
+@layer utilities {
+  /**
+   * Dynamic viewport height. `100dvh` shrinks as the mobile browser chrome
+   * (address bar) expands, so a full-bleed map never has hidden pixels under
+   * the chrome. Falls back to `100vh` on browsers that predate dvh.
+   */
+  .h-dvh-screen {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  /**
+   * Header pill top padding that respects the iOS notch. `viewport-fit=cover`
+   * (set on the Next viewport export) is required for `env(safe-area-inset-*)`
+   * to resolve to non-zero values on iOS.
+   */
+  .pt-safe-3 {
+    padding-top: calc(env(safe-area-inset-top) + 0.75rem);
+  }
+
+  /* Extra-tall safe-area top padding for surfaces that sit right next to
+     the mobile browser URL bar (e.g. the /map header). The `1.25rem`
+     keeps the pill comfortably below the URL chrome on every iPhone and
+     Pixel device tested. */
+  .pt-safe-4 {
+    padding-top: calc(env(safe-area-inset-top) + 1.25rem);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-x {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Removes the grey flash iOS draws on tap. Apply to any custom-styled
+     interactive surface where the flash visibly clashes (e.g. glassy
+     overlays whose own active state is more subtle). */
+  .no-tap-highlight {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Hides the visible scrollbar track while preserving scroll/wheel
+     behaviour. Used on the bottom sheet body + map search dropdown:
+     both surfaces sit on top of the glassy map, where the OS-default
+     grey scroll track reads as visual noise. */
+  .scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

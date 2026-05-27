@@ -33,18 +33,33 @@ const TAB_COPY: Record<Tab, string> = {
   panduan: "Panduan peta",
 };
 
+export type MapInfoCardVariant = "floating" | "inline";
+
 export interface MapInfoCardProps {
+  /**
+   * `floating` renders the standalone glass card used on desktop (bottom-
+   * left of `/map`). `inline` removes the chrome so the card slots
+   * naturally into the mobile bottom-sheet content area without nesting
+   * `glass-panel` inside `glass-panel`.
+   */
+  readonly variant?: MapInfoCardVariant;
   readonly className?: string;
 }
 
-export function MapInfoCard({ className }: MapInfoCardProps) {
+export function MapInfoCard({
+  variant = "floating",
+  className,
+}: MapInfoCardProps) {
   const [tab, setTab] = useState<Tab>("kategori");
+  const isInline = variant === "inline";
 
   return (
     <section
       aria-label="Informasi peta"
       className={cn(
-        "glass-panel w-[min(20rem,calc(100vw-1.5rem))] rounded-2xl p-3 shadow-md",
+        isInline
+          ? "w-full"
+          : "glass-panel w-[min(20rem,calc(100vw-1.5rem))] rounded-2xl p-3 shadow-md",
         className,
       )}
     >
@@ -63,7 +78,7 @@ export function MapInfoCard({ className }: MapInfoCardProps) {
               aria-selected={active}
               onClick={() => setTab(key)}
               className={cn(
-                "flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+                "flex min-h-11 flex-1 items-center justify-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
                 active
                   ? "bg-surface text-foreground shadow-sm"
                   : "text-muted-foreground hover:text-foreground",

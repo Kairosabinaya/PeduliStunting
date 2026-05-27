@@ -15,10 +15,18 @@ import { cn } from "@/lib/cn";
 
 import type { RegionalSummary } from "./map-data";
 
+export type RegionalSummaryCardVariant = "docked" | "sheet";
+
 export interface RegionalSummaryCardProps {
   readonly summary: RegionalSummary;
   readonly tahun: number;
   readonly modelVersion: string | null;
+  /**
+   * `docked` (default) renders the standalone glass card used on desktop.
+   * `sheet` drops the chrome so the card sits cleanly inside the mobile
+   * bottom-sheet content area without nesting glass surfaces.
+   */
+  readonly variant?: RegionalSummaryCardVariant;
   readonly className?: string;
 }
 
@@ -26,14 +34,16 @@ export function RegionalSummaryCard({
   summary,
   tahun,
   modelVersion,
+  variant = "docked",
   className,
 }: RegionalSummaryCardProps) {
   const { averagePrevalence, distribution, total } = summary;
+  const isSheet = variant === "sheet";
   return (
     <aside
       aria-labelledby="regional-summary-title"
       className={cn(
-        "glass-panel w-[min(20rem,100%)] rounded-2xl p-4",
+        isSheet ? "w-full" : "glass-panel w-[min(20rem,100%)] rounded-2xl p-4",
         className,
       )}
     >

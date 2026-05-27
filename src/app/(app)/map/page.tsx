@@ -20,6 +20,8 @@ import {
   getCachedRegions,
   getCachedRegionsBounds,
 } from "@/lib/cached-map-data";
+import { fetchCurrentProfile } from "@/lib/account-cache";
+import { requireServerSession } from "@/lib/server-session";
 
 /**
  * Server "shell" for /map. Fetches every dataset up-front (all 4 years of
@@ -40,6 +42,16 @@ interface MapPageProps {
 export default async function MapPage({ searchParams }: MapPageProps) {
   const rawSearch = await searchParams;
   const parsed = parseMapSearchParams(rawSearch);
+
+  // Same identity-resolution path the global `(app)/layout.tsx` uses, but
+  // run again here because /map's header lives inside `MapShell` (deeper
+  // than the layout) and needs the resolved display name + email.
+  const session = await requireServerSession();
+  const profileResult = await fetchCurrentProfile(session.userId);
+  const displayName =
+    profileResult.ok && profileResult.value
+      ? profileResult.value.displayName
+      : session.email;
 
   let regions: Awaited<ReturnType<typeof getCachedRegions>>;
   let boundaries: Awaited<ReturnType<typeof getCachedBoundaries>>;
@@ -163,6 +175,8 @@ export default async function MapPage({ searchParams }: MapPageProps) {
         defaultModel={defaultModel}
         predictedAvailable={predictedAvailable}
         bounds={bounds}
+        displayName={displayName ?? null}
+        email={session.email ?? null}
       />
     </MapStateProvider>
   );

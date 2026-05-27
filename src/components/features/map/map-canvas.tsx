@@ -29,11 +29,13 @@ import type { FeatureCollection, Geometry } from "geojson";
 import type maplibregl from "maplibre-gl";
 import type { ExpressionSpecification, LngLatBoundsLike } from "maplibre-gl";
 
+import type { RegionDto } from "@/application/region/dtos";
 import type { MapFeatureProperties } from "./map-data";
 
 import { Badge } from "@/components/primitives/badge";
 import { CATEGORY_BADGE_TONE, type MapSource } from "@/config/map";
 import { cn } from "@/lib/cn";
+import { useMediaQuery } from "@/lib/use-media-query";
 
 import { useMapState } from "./map-state-context";
 
@@ -97,6 +99,14 @@ export interface MapCanvasProps {
     readonly [number, number],
     readonly [number, number],
   ];
+  /**
+   * Master list of regions. Used only by the programmatic auto-zoom
+   * effect so it can fall back to a sibling kodeBps when the user-
+   * selected code has no geometry in the active-year FeatureCollection
+   * (typical for Papua pemekaran codes viewed in a year they don't
+   * exist in).
+   */
+  readonly regions: readonly RegionDto[];
   readonly className?: string;
 }
 
@@ -176,6 +186,7 @@ export function MapCanvas({
   source,
   selectedKodeBps,
   bounds,
+  regions,
   className,
 }: MapCanvasProps) {
   const { setWilayah, setIsInteracting } = useMapState();
@@ -203,6 +214,16 @@ export function MapCanvas({
   const mapRef = useRef<MapRef | null>(null);
   const [palette, setPalette] = useState(() => resolveCategoryHexes());
   const [hover, setHover] = useState<HoverTip | null>(null);
+  // Touch-only devices (mobile, most tablets) get no hover preview — tap
+  // directly opens the sheet, so a tooltip would just steal the first tap.
+  // Hybrid devices (Surface, iPad with trackpad) report `hover: hover` and
+  // keep the desktop behaviour.
+  const canHover = useMediaQuery("(hover: hover) and (pointer: fine)");
+  // Tracks the most recent kodeBps we ran `fitBounds` against. Both the
+  // click handler and the search-driven prop-change effect write to this
+  // ref so they don't double-zoom on the same selection (click sets it
+  // synchronously before the prop change reaches the effect).
+  const zoomedKodeBpsRef = useRef<string | null>(null);
   /**
    * `mapReady` flips to `true` only after `<Map onLoad>` fires, guaranteeing
    * the underlying maplibre instance + style are fully initialised before we
@@ -288,6 +309,56 @@ export function MapCanvas({
     [selectedKodeBps],
   );
 
+  // Programmatic selection (e.g. from the header search bar) should pan +
+  // zoom to the picked region just like a real click does. The click
+  // handler writes `zoomedKodeBpsRef` synchronously before it dispatches
+  // the state change, so this effect can detect "selection arrived from
+  // somewhere other than a click" and run the fitBounds itself. Without
+  // this, search-selected regions would only highlight; the camera would
+  // stay on Indonesia and the user would have to scroll/hunt manually.
+  useEffect(() => {
+    if (!mapReady) return;
+    if (selectedKodeBps === null) {
+      zoomedKodeBpsRef.current = null;
+      return;
+    }
+    if (zoomedKodeBpsRef.current === selectedKodeBps) return;
+    const ref = mapRef.current;
+    const map = ref?.getMap();
+    if (!map) return;
+
+    const features = stableFeatureCollection.features;
+    let feature = features.find(
+      (f) => f.properties?.kodeBps === selectedKodeBps,
+    );
+    if (!feature?.geometry) {
+      // Selected code has no geometry in the active-year FC — typical when
+      // the user searches a Papua-pemekaran code while a year predating
+      // (or post-dating) the split is active. Fall back to a sibling
+      // feature carrying the same kabupatenKota + tipe so the camera still
+      // flies to the physical region.
+      const selRegion = regions.find((r) => r.kodeBps === selectedKodeBps);
+      if (selRegion) {
+        feature = features.find(
+          (f) =>
+            f.geometry !== null &&
+            f.properties?.tipe === selRegion.tipe &&
+            f.properties?.kabupatenKota === selRegion.kabupatenKota,
+        );
+      }
+    }
+    if (!feature?.geometry) return;
+
+    const bbox = computeFeatureBbox(feature.geometry as Geometry);
+    if (!bbox) return;
+    zoomedKodeBpsRef.current = selectedKodeBps;
+    map.fitBounds(bbox as LngLatBoundsLike, {
+      padding: 80,
+      duration: 800,
+      maxZoom: 8,
+    });
+  }, [mapReady, regions, selectedKodeBps, stableFeatureCollection]);
+
   const hoverStrokePaint = useMemo(
     () => ({
       "line-color": palette.focus,
@@ -342,6 +413,10 @@ export function MapCanvas({
       }
       const kodeBps = feature.properties?.kodeBps;
       if (typeof kodeBps !== "string") return;
+      // Mark this kodeBps as already-zoomed so the prop-change effect that
+      // handles search-driven selections doesn't fire a second fitBounds
+      // for the same target.
+      zoomedKodeBpsRef.current = kodeBps;
       setWilayah(kodeBps);
       if (feature.geometry) {
         const bbox = computeFeatureBbox(feature.geometry as Geometry);
@@ -612,23 +687,30 @@ export function MapCanvas({
       setIsInteracting(false);
     };
 
-    map.on("mousemove", onMouseMove);
-    map.on("mouseleave", onMouseLeave);
-    map.getCanvas().addEventListener("mouseleave", onMouseLeave);
+    // Hover listeners only matter on devices that can actually hover. On
+    // touch-only devices synthesised mouse events from a tap would
+    // otherwise flash a tooltip a frame before the bottom sheet opens.
+    if (canHover) {
+      map.on("mousemove", onMouseMove);
+      map.on("mouseleave", onMouseLeave);
+      map.getCanvas().addEventListener("mouseleave", onMouseLeave);
+    }
     map.on("idle", onIdle);
     map.on("movestart", onMoveStart);
     map.on("moveend", onMoveEnd);
 
     return () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
-      map.off("mousemove", onMouseMove);
-      map.off("mouseleave", onMouseLeave);
-      map.getCanvas().removeEventListener("mouseleave", onMouseLeave);
+      if (canHover) {
+        map.off("mousemove", onMouseMove);
+        map.off("mouseleave", onMouseLeave);
+        map.getCanvas().removeEventListener("mouseleave", onMouseLeave);
+      }
       map.off("idle", onIdle);
       map.off("movestart", onMoveStart);
       map.off("moveend", onMoveEnd);
     };
-  }, [mapReady, setIsInteracting]);
+  }, [canHover, mapReady, setIsInteracting]);
 
   /**
    * Re-apply basemap paint properties (sea + land bg) whenever the user
@@ -761,10 +843,16 @@ export function MapCanvas({
         dragRotate={false}
         pitchWithRotate={false}
         touchZoomRotate={true}
+        touchPitch={false}
         maxZoom={9}
         minZoom={2}
       >
-        <AttributionControl position="top-left" compact />
+        {/* Anchored bottom-right so the search bar in the new `/map`
+            header (top-left on mobile) never overlaps the basemap
+            attribution. Bottom-left is taken by the desktop info card
+            cluster, so bottom-right is the only consistently clear
+            corner across breakpoints. */}
+        <AttributionControl position="bottom-right" compact />
 
         <Source
           id={REGION_SOURCE_ID}
@@ -787,7 +875,7 @@ export function MapCanvas({
           />
         </Source>
 
-        {hover ? (
+        {canHover && hover ? (
           <Popup
             longitude={hover.lng}
             latitude={hover.lat}

@@ -94,7 +94,10 @@ const config: Config = {
         lg: ["1.125rem", { lineHeight: "1.75rem" }],
         xl: ["1.25rem", { lineHeight: "1.875rem" }],
         "2xl": ["1.5rem", { lineHeight: "2rem" }],
-        "3xl": ["clamp(1.75rem, 1.4rem + 1.4vw, 2.125rem)", { lineHeight: "1.2" }],
+        "3xl": [
+          "clamp(1.75rem, 1.4rem + 1.4vw, 2.125rem)",
+          { lineHeight: "1.2" },
+        ],
         "4xl": ["clamp(2rem, 1.6rem + 2vw, 2.75rem)", { lineHeight: "1.15" }],
         "5xl": ["clamp(2.5rem, 1.8rem + 3vw, 3.75rem)", { lineHeight: "1.1" }],
       },
@@ -131,6 +134,13 @@ const config: Config = {
         base: "0",
         elevated: "10",
         sticky: "100",
+        // `header` sits above the map canvas and floating overlays. The
+        // mobile `sheet` is intentionally above the header so a fully-
+        // expanded sheet covers the header pill (matches Google Maps
+        // behaviour, where the place sheet eats the search bar when
+        // dragged to the top).
+        header: "900",
+        sheet: "960",
         overlay: "1000",
         modal: "1100",
         popover: "1200",

@@ -240,6 +240,40 @@ export const YEAR_RAIL_COPY = {
   pendingHint: "Memuat …",
 } as const;
 
+/**
+ * Snap points (as ratios of the dynamic viewport height) for the mobile
+ * bottom sheet. `peek` is the default landing state: shows summary header
+ * without obscuring most of the map. `half` is the comfortable reading
+ * state. `full` is the immersive state that scrolls a long history table.
+ *
+ * Kept conservative — 0.94 instead of 1.0 so the drag handle never collides
+ * with the iOS Dynamic Island in `viewport-fit=cover` mode.
+ */
+export const SHEET_SNAPS = {
+  peek: 0.22,
+  half: 0.6,
+  full: 0.94,
+} as const;
+
+/** Copy for the mobile bottom sheet primitive used on `/map`. */
+export const MAP_SHEET_COPY = {
+  dragHandleAria: "Tarik untuk perluas atau ciutkan panel",
+  inlineInfoSummary: "Tentang peta",
+} as const;
+
+/** Search input copy and limits. */
+export const MAP_SEARCH_COPY = {
+  placeholder: "Cari kabupaten/kota…",
+  ariaLabel: "Cari wilayah pada peta",
+  emptyTitle: "Tidak ada wilayah ditemukan",
+  emptyDescription: "Coba ejaan lain atau pakai nama provinsi.",
+  resultsAriaLabel: "Hasil pencarian wilayah",
+  clearLabel: "Bersihkan kueri",
+} as const;
+
+/** Maximum results shown in the search dropdown. */
+export const MAP_SEARCH_MAX_RESULTS = 8;
+
 /** Onboarding modal — bespoke for the Peduli Stunting domain. */
 export type OnboardingIcon = "map" | "calendar" | "click" | "legend" | "model";
 

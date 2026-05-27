@@ -50,8 +50,15 @@ export function FloatingHeader({ displayName, email }: FloatingHeaderProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // `/map` owns its own header (`<MapHeader>`) so the global pill would
+  // just double up at the top of the viewport. Bail out before any render
+  // work so we don't fight the map header for the fixed-top region.
+  if (pathname?.startsWith("/map")) {
+    return null;
+  }
+
   return (
-    <header className="pointer-events-none fixed inset-x-0 top-0 z-40 flex justify-center px-3 pt-3 md:px-6 md:pt-5">
+    <header className="pt-safe-3 safe-x pointer-events-none fixed inset-x-0 top-0 z-header flex justify-center px-3 md:px-6">
       <div className="glass-panel pointer-events-auto flex w-fit max-w-full items-center gap-3 rounded-2xl px-3 py-2 md:px-4 md:py-2">
         <Link
           href="/map"
@@ -67,18 +74,18 @@ export function FloatingHeader({ displayName, email }: FloatingHeaderProps) {
           <Image
             src="/brand/logo-horizontal-color.png"
             alt={APP_NAME}
-            width={140}
-            height={36}
+            width={160}
+            height={40}
             priority
-            className="block h-9 w-auto dark:hidden"
+            className="block h-8 w-auto dark:hidden sm:h-9 md:h-10"
           />
           <Image
             src="/brand/logo-horizontal-white.png"
             alt={APP_NAME}
-            width={140}
-            height={36}
+            width={160}
+            height={40}
             priority
-            className="hidden h-9 w-auto dark:block"
+            className="hidden h-8 w-auto dark:block sm:h-9 md:h-10"
           />
         </Link>
 
@@ -94,7 +101,7 @@ export function FloatingHeader({ displayName, email }: FloatingHeaderProps) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+                  "inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
                   active
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -154,7 +161,7 @@ export function FloatingHeader({ displayName, email }: FloatingHeaderProps) {
                 aria-current={active ? "page" : undefined}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "flex flex-col gap-0.5 rounded-lg px-3 py-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+                  "flex min-h-11 flex-col justify-center gap-0.5 rounded-lg px-3 py-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
                   active
                     ? "bg-primary/10 text-primary"
                     : "text-foreground hover:bg-muted",
@@ -174,13 +181,13 @@ export function FloatingHeader({ displayName, email }: FloatingHeaderProps) {
 }
 
 /**
- * Circular avatar that, on hover or click, reveals a small dropdown with
- * the user's name + email and shortcuts to the profile page / sign-out
- * action. Replaces the legacy "email + Akun nav-link" pair.
+ * Circular avatar that opens a small dropdown with the user's name + email
+ * and shortcuts to the profile page / sign-out action.
  *
- * Hover opens it for desktop discoverability; click toggles it for touch
- * + keyboard. A click-outside listener closes the menu so it never gets
- * stuck open after navigation.
+ * Click-only by design — hover-to-open is unreliable on hybrid devices
+ * (Surface, iPad with trackpad) and confusing on touch. Keyboard users
+ * focus + Enter/Space. A document-level click-outside listener closes the
+ * menu so it never gets stuck open after navigation.
  */
 function AvatarMenu({
   displayName,
@@ -213,19 +220,14 @@ function AvatarMenu({
   }, [open]);
 
   return (
-    <div
-      ref={wrapperRef}
-      className="relative"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-    >
+    <div ref={wrapperRef} className="relative">
       <button
         type="button"
         aria-label={displayName ?? email ?? "Akun pengguna"}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
-        className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-semibold uppercase tracking-wide text-primary-foreground shadow-sm transition-colors hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+        className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-primary text-sm font-semibold uppercase tracking-wide text-primary-foreground shadow-sm transition-colors hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
       >
         {initials}
       </button>
@@ -233,7 +235,11 @@ function AvatarMenu({
         <div
           role="menu"
           aria-label="Menu akun"
-          className="glass-panel absolute right-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-2xl p-1.5 shadow-md"
+          /* `right-0` keeps the dropdown anchored to the avatar; the
+             `min/calc` width clamp prevents overflow on 360 px viewports
+             where the header pill itself only has 1.5 rem of edge padding
+             (px-3 × 2). Tokens, not magic values. */
+          className="glass-panel absolute right-0 top-full z-popover mt-2 w-[min(16rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl p-1.5 shadow-md"
         >
           <div className="px-3 py-2">
             {displayName ? (
@@ -250,7 +256,7 @@ function AvatarMenu({
             href="/account"
             role="menuitem"
             onClick={() => setOpen(false)}
-            className="flex items-center rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+            className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
           >
             Profil
           </Link>
@@ -258,7 +264,7 @@ function AvatarMenu({
             <button
               type="submit"
               role="menuitem"
-              className="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm font-medium text-danger hover:bg-danger/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+              className="flex min-h-11 w-full items-center rounded-lg px-3 text-left text-sm font-medium text-danger hover:bg-danger/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
             >
               Keluar
             </button>
