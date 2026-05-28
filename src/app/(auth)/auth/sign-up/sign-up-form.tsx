@@ -85,40 +85,38 @@ export function SignUpForm({ redirectTo }: SignUpFormProps) {
               leftIcon={<UserIcon />}
             />
           </div>
-          <div className="grid gap-3.5 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="signup-email" required>
-                {AUTH_LABELS.email}
-              </Label>
-              <Input
-                id="signup-email"
-                name="email"
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                required
-                placeholder={AUTH_LABELS.emailPlaceholder}
-                errorMessage={fieldError(state, "email")}
-                leftIcon={<MailIcon />}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="signup-password" required>
-                {AUTH_LABELS.password}
-              </Label>
-              <PasswordInput
-                id="signup-password"
-                name="password"
-                autoComplete="new-password"
-                required
-                errorMessage={fieldError(state, "password")}
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                leftIcon={<LockIcon />}
-              />
-            </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="signup-email" required>
+              {AUTH_LABELS.email}
+            </Label>
+            <Input
+              id="signup-email"
+              name="email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              required
+              placeholder={AUTH_LABELS.emailPlaceholder}
+              errorMessage={fieldError(state, "email")}
+              leftIcon={<MailIcon />}
+            />
           </div>
-          <PasswordStrength value={password} />
+          <div className="space-y-1.5">
+            <Label htmlFor="signup-password" required>
+              {AUTH_LABELS.password}
+            </Label>
+            <PasswordInput
+              id="signup-password"
+              name="password"
+              autoComplete="new-password"
+              required
+              errorMessage={fieldError(state, "password")}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              leftIcon={<LockIcon />}
+            />
+            <PasswordStrength value={password} />
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="signup-confirm" required>
               {AUTH_LABELS.confirmPassword}
