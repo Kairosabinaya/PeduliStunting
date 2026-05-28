@@ -27,6 +27,7 @@ import {
 import { fetchCurrentProfile } from "@/lib/account-cache";
 import { requireServerSession } from "@/lib/server-session";
 
+import { AvatarEditor } from "./_components/avatar-editor";
 import { ProfileForm } from "./_components/profile-form";
 import { SignOutDialog } from "./_components/sign-out-dialog";
 
@@ -76,8 +77,9 @@ async function AccountContent() {
     <div className="grid gap-6 lg:grid-cols-3">
       <section
         aria-labelledby="account-profile-card"
-        className="lg:col-span-2"
+        className="space-y-6 lg:col-span-2"
       >
+        <AvatarEditor profile={result.value} email={session.email} />
         <Card padding="lg">
           <CardHeader>
             <CardTitle id="account-profile-card">
@@ -94,10 +96,7 @@ async function AccountContent() {
       </section>
 
       <aside className="space-y-6">
-        <AccountDetailsCard
-          profile={result.value}
-          email={session.email}
-        />
+        <AccountDetailsCard profile={result.value} email={session.email} />
         <SignOutCard />
       </aside>
     </div>

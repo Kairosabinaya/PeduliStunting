@@ -28,6 +28,7 @@ import { SupabaseChildImmunizationRepository } from "@/infrastructure/supabase/h
 import { SupabaseMilestoneRepository } from "@/infrastructure/supabase/health-plan/supabase-milestone-repository";
 import { SupabaseChildMilestoneRepository } from "@/infrastructure/supabase/health-plan/supabase-child-milestone-repository";
 import { SupabaseUserProfileRepository } from "@/infrastructure/supabase/account/supabase-user-profile-repository";
+import { SupabaseAvatarStorage } from "@/infrastructure/supabase/account/supabase-avatar-storage";
 
 import { ListRegionsUseCase } from "@/application/region/use-cases/list-regions";
 import { GetRegionByKodeBpsUseCase } from "@/application/region/use-cases/get-region-by-kode-bps";
@@ -54,6 +55,8 @@ import { ListChildMilestonesUseCase } from "@/application/health-plan/use-cases/
 import { UpsertChildMilestoneUseCase } from "@/application/health-plan/use-cases/upsert-child-milestone";
 import { GetCurrentProfileUseCase } from "@/application/account/use-cases/get-current-profile";
 import { UpdateUserProfileUseCase } from "@/application/account/use-cases/update-user-profile";
+import { UpdateUserAvatarUseCase } from "@/application/account/use-cases/update-user-avatar";
+import { UploadPendingAvatarUseCase } from "@/application/account/use-cases/upload-pending-avatar";
 
 export interface AppContainer {
   readonly clock: Clock;
@@ -103,6 +106,17 @@ export interface UseCases {
   // account
   readonly getCurrentProfile: GetCurrentProfileUseCase;
   readonly updateUserProfile: UpdateUserProfileUseCase;
+  readonly updateUserAvatar: UpdateUserAvatarUseCase;
+}
+
+/**
+ * Privileged use cases that require the service-role admin client. These
+ * exist for paths where the user does not yet hold a session (e.g.
+ * pre-verification avatar upload during sign-up). See ADR-0008 for the
+ * justification of using service-role outside isolated admin paths.
+ */
+export interface AdminUseCases {
+  readonly uploadPendingAvatar: UploadPendingAvatarUseCase;
 }
 
 /**
@@ -131,6 +145,7 @@ export function makeUseCases(client: TypedSupabaseClient): UseCases {
   const milestoneRepo = new SupabaseMilestoneRepository(client);
   const childMilestoneRepo = new SupabaseChildMilestoneRepository(client);
   const profileRepo = new SupabaseUserProfileRepository(client);
+  const avatarStorage = new SupabaseAvatarStorage(client);
 
   return {
     listRegions: new ListRegionsUseCase(regionRepo),
@@ -184,5 +199,21 @@ export function makeUseCases(client: TypedSupabaseClient): UseCases {
     upsertChildMilestone: new UpsertChildMilestoneUseCase(childMilestoneRepo),
     getCurrentProfile: new GetCurrentProfileUseCase(profileRepo),
     updateUserProfile: new UpdateUserProfileUseCase(profileRepo),
+    updateUserAvatar: new UpdateUserAvatarUseCase(profileRepo, avatarStorage),
+  };
+}
+
+/**
+ * Build the privileged (service-role) use case registry. Pass a client
+ * obtained via `createSupabaseAdminClient()` only. The factory exists in
+ * a separate function so misuse — wiring the regular session-backed
+ * client into a privileged action — is harder.
+ */
+export function makeAdminUseCases(
+  adminClient: TypedSupabaseClient,
+): AdminUseCases {
+  const avatarStorage = new SupabaseAvatarStorage(adminClient);
+  return {
+    uploadPendingAvatar: new UploadPendingAvatarUseCase(avatarStorage),
   };
 }

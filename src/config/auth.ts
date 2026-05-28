@@ -99,10 +99,45 @@ export const AUTH_LABELS = {
   displayName: "Nama tampilan",
   emailPlaceholder: "anda@email.com",
   displayNamePlaceholder: "Nama lengkap atau panggilan",
-  passwordHint: "Minimal 8 karakter.",
+  passwordHint: "Minimal 8 karakter, kombinasi huruf dan angka.",
   showPassword: "Tampilkan kata sandi",
   hidePassword: "Sembunyikan kata sandi",
   backToHome: "Kembali ke beranda",
+  avatar: {
+    label: "Foto profil",
+    optional: "Opsional",
+    hint: "JPG, PNG, atau WebP. Maksimal 2 MB.",
+    upload: "Pilih foto",
+    change: "Ganti foto",
+    remove: "Hapus foto",
+    uploading: "Mengunggah...",
+    dropHere: "Lepaskan foto di sini",
+    drag: "Tarik foto ke sini atau klik untuk pilih",
+    previewAlt: "Pratinjau foto profil",
+  },
+  passwordStrength: {
+    label: "Kekuatan kata sandi",
+    weak: "Lemah",
+    fair: "Cukup",
+    good: "Bagus",
+    strong: "Kuat",
+  },
+  stepper: {
+    step1: "Isi data",
+    step2: "Verifikasi email",
+  },
+  trustSignals: {
+    encrypted: "Data terenkripsi end-to-end",
+    free: "Gratis selamanya",
+    official: "Konten Buku KIA Kemenkes RI",
+  },
+} as const;
+
+export const AVATAR_VALIDATION_MESSAGES = {
+  tooLarge: "Ukuran foto maksimal 2 MB.",
+  tooSmall: "File foto terlalu kecil atau rusak.",
+  mimeInvalid: "Format foto harus JPG, PNG, atau WebP.",
+  uploadFailed: "Tidak bisa mengunggah foto. Silakan coba lagi.",
 } as const;
 
 export const AUTH_SUCCESS_MESSAGES = {
@@ -122,10 +157,8 @@ export const AUTH_SUCCESS_MESSAGES = {
  */
 export const AUTH_ERROR_MESSAGES: Readonly<Record<string, string>> = {
   google: "Tidak bisa membuka layanan Google. Silakan coba lagi sebentar.",
-  callback_failed:
-    "Sesi tidak bisa diselesaikan. Silakan masuk ulang.",
-  session_expired:
-    "Sesi Anda telah berakhir. Masuk kembali untuk melanjutkan.",
+  callback_failed: "Sesi tidak bisa diselesaikan. Silakan masuk ulang.",
+  session_expired: "Sesi Anda telah berakhir. Masuk kembali untuk melanjutkan.",
   reset_token_invalid:
     "Tautan reset tidak valid atau sudah kadaluarsa. Silakan minta tautan baru.",
 };
@@ -133,7 +166,9 @@ export const AUTH_ERROR_MESSAGES: Readonly<Record<string, string>> = {
 export const AUTH_FALLBACK_ERROR =
   "Terjadi kesalahan pada layanan masuk. Silakan coba lagi.";
 
-export function getAuthErrorMessage(code: string | null | undefined): string | null {
+export function getAuthErrorMessage(
+  code: string | null | undefined,
+): string | null {
   if (!code) return null;
   return AUTH_ERROR_MESSAGES[code] ?? AUTH_FALLBACK_ERROR;
 }

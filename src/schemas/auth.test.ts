@@ -91,7 +91,9 @@ describe("SignUpSchema", () => {
     });
     expect(result.success).toBe(false);
     if (result.success) return;
-    expect(result.error.flatten().fieldErrors.confirmPassword?.[0]).toBeTruthy();
+    expect(
+      result.error.flatten().fieldErrors.confirmPassword?.[0],
+    ).toBeTruthy();
   });
 
   it("enforces display-name bounds", () => {
@@ -106,6 +108,31 @@ describe("SignUpSchema", () => {
     expect(tooShort.success).toBe(false);
     expect(tooLong.success).toBe(false);
   });
+
+  it("accepts a valid avatarPendingPath", () => {
+    const result = SignUpSchema.safeParse({
+      ...valid,
+      avatarPendingPath: "_signup/0123abcd-0123-4567-89ab-0123456789ab.jpg",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.avatarPendingPath).toBe(
+        "_signup/0123abcd-0123-4567-89ab-0123456789ab.jpg",
+      );
+    }
+  });
+
+  it("rejects an avatarPendingPath outside _signup/", () => {
+    const result = SignUpSchema.safeParse({
+      ...valid,
+      avatarPendingPath: "users/abc/avatar.jpg",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("allows the avatarPendingPath to be omitted", () => {
+    expect(SignUpSchema.safeParse(valid).success).toBe(true);
+  });
 });
 
 describe("RequestPasswordResetSchema", () => {
@@ -117,9 +144,9 @@ describe("RequestPasswordResetSchema", () => {
     expect(RequestPasswordResetSchema.safeParse({ email: "" }).success).toBe(
       false,
     );
-    expect(
-      RequestPasswordResetSchema.safeParse({ email: "bad" }).success,
-    ).toBe(false);
+    expect(RequestPasswordResetSchema.safeParse({ email: "bad" }).success).toBe(
+      false,
+    );
   });
 });
 

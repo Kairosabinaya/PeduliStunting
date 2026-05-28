@@ -8,6 +8,7 @@ import {
   SIGN_IN_ROUTE,
   UPDATE_PASSWORD_ROUTE,
 } from "@/config/routes";
+import { env } from "@/config/env";
 import { AppErrors, type AppError } from "@/domain/errors/app-error";
 import { err, ok, type Result } from "@/domain/shared/result";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
@@ -84,16 +85,33 @@ export async function signInWithPassword(
   redirect(safeRedirect(parsed.data.redirectTo));
 }
 
+/**
+ * Resolves the public URL of an avatar uploaded to the `_signup/` folder
+ * during the pre-signup flow. The path was validated by the SignUpSchema
+ * (regex-locked to `_signup/{uuid}.{ext}`) so the join is safe.
+ */
+function avatarPublicUrlFromPendingPath(pendingPath: string): string | null {
+  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl) return null;
+  return `${supabaseUrl}/storage/v1/object/public/avatars/${pendingPath}`;
+}
+
 /** Email + password sign-up. Sends a confirmation email when required. */
 export async function signUpWithPassword(
   _previous: AuthActionResult | null,
   formData: FormData,
 ): Promise<AuthActionResult> {
+  const rawAvatarPendingPath = formData.get("avatarPendingPath");
+  const avatarPendingPath =
+    typeof rawAvatarPendingPath === "string" && rawAvatarPendingPath.length > 0
+      ? rawAvatarPendingPath
+      : undefined;
   const parsed = SignUpSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
     confirmPassword: formData.get("confirmPassword"),
     displayName: formData.get("displayName"),
+    avatarPendingPath,
     redirectTo: formData.get("redirectTo") ?? undefined,
   });
   if (!parsed.success) {
@@ -103,11 +121,20 @@ export async function signUpWithPassword(
   const target = safeRedirect(parsed.data.redirectTo);
   const callback = new URL("/auth/callback", APP_URL);
   callback.searchParams.set("next", target);
+  const metadata: Record<string, string> = {
+    display_name: parsed.data.displayName,
+  };
+  if (parsed.data.avatarPendingPath) {
+    const avatarUrl = avatarPublicUrlFromPendingPath(
+      parsed.data.avatarPendingPath,
+    );
+    if (avatarUrl) metadata.avatar_url = avatarUrl;
+  }
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
-      data: { display_name: parsed.data.displayName },
+      data: metadata,
       emailRedirectTo: callback.toString(),
     },
   });

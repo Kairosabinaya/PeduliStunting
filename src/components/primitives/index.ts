@@ -1,3 +1,4 @@
+export { Avatar, avatarVariants, type AvatarProps } from "./avatar";
 export { Badge, badgeVariants, type BadgeProps } from "./badge";
 export { Button, buttonVariants, type ButtonProps } from "./button";
 export {

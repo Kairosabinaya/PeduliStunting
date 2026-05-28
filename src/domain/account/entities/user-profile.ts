@@ -9,6 +9,7 @@ export type ThemePreference = (typeof THEME_PREFERENCES)[number];
 export class UserProfile {
   readonly userId: UserId;
   readonly displayName: string | null;
+  readonly avatarUrl: string | null;
   readonly role: UserRole;
   readonly themePreference: ThemePreference;
   readonly locale: string;
@@ -16,12 +17,14 @@ export class UserProfile {
   constructor(props: {
     userId: UserId;
     displayName: string | null;
+    avatarUrl: string | null;
     role: UserRole;
     themePreference: ThemePreference;
     locale: string;
   }) {
     this.userId = props.userId;
     this.displayName = props.displayName;
+    this.avatarUrl = props.avatarUrl;
     this.role = props.role;
     this.themePreference = props.themePreference;
     this.locale = props.locale;

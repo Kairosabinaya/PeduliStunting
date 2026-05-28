@@ -8,6 +8,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { signOut } from "@/app/(auth)/actions";
 import { PRIMARY_NAV } from "@/config/navigation";
 import { APP_NAME } from "@/config/app";
+import { Avatar } from "@/components/primitives/avatar";
 import { Button } from "@/components/primitives/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/cn";
@@ -15,29 +16,13 @@ import { cn } from "@/lib/cn";
 interface FloatingHeaderProps {
   readonly displayName?: string | null | undefined;
   readonly email?: string | null | undefined;
+  readonly avatarUrl?: string | null | undefined;
 }
 
 function isActive(pathname: string | null, href: string): boolean {
   if (!pathname) return false;
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
-}
-
-function initialsOf(name?: string | null, email?: string | null): string {
-  // Two-letter avatar fallback. Prefer display name initials, then the first
-  // two characters of the email's local part — never leaks PII beyond what
-  // is already in the header.
-  if (name && name.trim().length > 0) {
-    const parts = name.trim().split(/\s+/);
-    const first = parts[0]?.[0] ?? "";
-    const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : "";
-    const joined = `${first}${last}`.toUpperCase();
-    if (joined.length > 0) return joined;
-  }
-  if (email && email.length > 0) {
-    return email.slice(0, 2).toUpperCase();
-  }
-  return "PS";
 }
 
 /**
@@ -106,7 +91,11 @@ function useAutoHideOnScroll(reducedMotion: boolean): boolean {
  * Reduced-motion users keep the header permanently visible (sliding the
  * header without easing would be jarring for that audience).
  */
-export function FloatingHeader({ displayName, email }: FloatingHeaderProps) {
+export function FloatingHeader({
+  displayName,
+  email,
+  avatarUrl,
+}: FloatingHeaderProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const reducedMotion = useReducedMotionPreference();
@@ -192,7 +181,11 @@ export function FloatingHeader({ displayName, email }: FloatingHeaderProps) {
 
         <div className="flex items-center gap-1">
           <ThemeToggle />
-          <AvatarMenu displayName={displayName ?? null} email={email ?? null} />
+          <AvatarMenu
+            displayName={displayName ?? null}
+            email={email ?? null}
+            avatarUrl={avatarUrl ?? null}
+          />
           <Button
             type="button"
             variant="ghost"
@@ -269,13 +262,14 @@ export function FloatingHeader({ displayName, email }: FloatingHeaderProps) {
 function AvatarMenu({
   displayName,
   email,
+  avatarUrl,
 }: {
   readonly displayName: string | null;
   readonly email: string | null;
+  readonly avatarUrl: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const initials = initialsOf(displayName, email);
 
   useEffect(() => {
     if (!open) return;
@@ -304,9 +298,15 @@ function AvatarMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
-        className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-primary text-sm font-semibold uppercase tracking-wide text-primary-foreground shadow-sm transition-colors hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+        className="inline-flex h-11 w-11 items-center justify-center rounded-full shadow-sm transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
-        {initials}
+        <Avatar
+          src={avatarUrl}
+          displayName={displayName}
+          email={email}
+          size="lg"
+          aria-hidden
+        />
       </button>
       {open ? (
         <div

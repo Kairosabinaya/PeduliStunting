@@ -3,24 +3,20 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { UserProfileDto } from "@/application/account/dtos";
 
-import {
-  ACCOUNT_FORM_COPY,
-  ACCOUNT_GENERIC_ERROR,
-} from "@/config/account";
+import { ACCOUNT_FORM_COPY, ACCOUNT_GENERIC_ERROR } from "@/config/account";
 
 const setThemeMock = vi.fn();
-const updateProfileMock =
-  vi.fn<
-    (
-      previous: unknown,
-      formData: FormData,
-    ) => Promise<{
-      ok: boolean;
-      message?: string;
-      fieldErrors?: Readonly<Record<string, readonly string[]>>;
-      profile?: UserProfileDto;
-    }>
-  >();
+const updateProfileMock = vi.fn<
+  (
+    previous: unknown,
+    formData: FormData,
+  ) => Promise<{
+    ok: boolean;
+    message?: string;
+    fieldErrors?: Readonly<Record<string, readonly string[]>>;
+    profile?: UserProfileDto;
+  }>
+>();
 
 vi.mock("@/components/theme/theme-provider", () => ({
   useTheme: () => ({
@@ -45,6 +41,7 @@ const { ProfileForm } = await import("./profile-form");
 const baseProfile: UserProfileDto = {
   userId: "11111111-1111-1111-1111-111111111111",
   displayName: "Bunda Aira",
+  avatarUrl: null,
   role: "user",
   themePreference: "system",
   locale: "id-ID",
@@ -114,10 +111,9 @@ describe("ProfileForm", () => {
       profile: { ...baseProfile, themePreference: "dark" },
     });
     render(<ProfileForm profile={baseProfile} />);
-    fireEvent.change(
-      screen.getByLabelText(ACCOUNT_FORM_COPY.themeLabel),
-      { target: { value: "dark" } },
-    );
+    fireEvent.change(screen.getByLabelText(ACCOUNT_FORM_COPY.themeLabel), {
+      target: { value: "dark" },
+    });
     fireEvent.click(
       screen.getByRole("button", { name: ACCOUNT_FORM_COPY.submit }),
     );

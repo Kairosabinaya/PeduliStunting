@@ -15,12 +15,17 @@ export default async function AppLayout({ children }: AppLayoutProps) {
     profileResult.ok && profileResult.value
       ? profileResult.value.displayName
       : session.email;
+  const avatarUrl =
+    profileResult.ok && profileResult.value
+      ? profileResult.value.avatarUrl
+      : null;
 
   return (
     <div className="min-h-dvh bg-background">
       <FloatingHeader
         displayName={displayName ?? undefined}
         email={session.email ?? undefined}
+        avatarUrl={avatarUrl ?? undefined}
       />
       <div className="pb-12 pt-24 md:pt-28">
         <div className="mx-auto w-full max-w-6xl px-4 md:px-6">{children}</div>

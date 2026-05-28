@@ -93,9 +93,20 @@ export function mapProfileRow(
     new UserProfile({
       userId: asUserId(row.user_id),
       displayName: row.display_name,
+      avatarUrl: row.avatar_url,
       role: roleResult.data as UserRole,
       themePreference: themeResult.data as ThemePreference,
       locale: row.locale,
     }),
   );
 }
+
+/* ───────────────────────── avatar update input ───────────────────────── */
+
+export const updateAvatarInputSchema = z
+  .object({
+    avatarUrl: z.string().url("Avatar URL tidak valid.").nullable(),
+  })
+  .strict();
+
+export type UpdateAvatarInput = z.infer<typeof updateAvatarInputSchema>;

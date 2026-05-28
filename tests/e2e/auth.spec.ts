@@ -11,9 +11,7 @@ test.describe("auth flows (anonymous)", () => {
     ).toBeVisible();
     await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
     await expect(page.getByLabel("Kata sandi", { exact: true })).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /^masuk$/i }),
-    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /^masuk$/i })).toBeVisible();
     await expect(
       page.getByRole("button", { name: /lanjutkan dengan google/i }),
     ).toBeVisible();
@@ -61,12 +59,46 @@ test.describe("auth flows (anonymous)", () => {
     await expect(
       page.getByRole("heading", { name: /buat akun baru/i, level: 1 }),
     ).toBeVisible();
+    await expect(
+      page.getByRole("navigation", { name: /tahap pendaftaran/i }),
+    ).toBeVisible();
+    await expect(page.getByLabel(/^foto profil$/i)).toBeVisible();
     await expect(page.getByLabel(/nama tampilan/i)).toBeVisible();
     await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
     await expect(page.getByLabel("Kata sandi", { exact: true })).toBeVisible();
     await expect(page.getByLabel(/konfirmasi kata sandi/i)).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /^daftar$/i }),
+      page.getByRole("group", { name: /kekuatan kata sandi/i }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /^daftar$/i })).toBeVisible();
+  });
+
+  test("password strength updates as the user types", async ({ page }) => {
+    await page.goto("/auth/sign-up");
+
+    const passwordField = page.getByLabel("Kata sandi", { exact: true });
+    const strength = page.getByRole("group", {
+      name: /kekuatan kata sandi/i,
+    });
+
+    await passwordField.fill("abc");
+    await expect(strength).toContainText(/lemah/i);
+
+    await passwordField.fill("abcdefgh");
+    await expect(strength).toContainText(/cukup/i);
+
+    await passwordField.fill("abcdEFGH12!@");
+    await expect(strength).toContainText(/kuat/i);
+  });
+
+  test("confirm password shows a live mismatch hint", async ({ page }) => {
+    await page.goto("/auth/sign-up");
+
+    await page.getByLabel("Kata sandi", { exact: true }).fill("password1");
+    await page.getByLabel(/konfirmasi kata sandi/i).fill("different");
+
+    await expect(
+      page.getByText(/konfirmasi kata sandi tidak sama/i),
     ).toBeVisible();
   });
 

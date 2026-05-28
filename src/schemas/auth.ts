@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { AvatarPendingPathSchema } from "./avatar";
+
 /**
  * Auth boundary schemas. Server Actions consume these to validate FormData
  * before talking to Supabase Auth. Constants are single-sourced here so the
@@ -21,13 +23,25 @@ const emailSchema = z
 
 const passwordSchema = z
   .string()
-  .min(PASSWORD_MIN_LENGTH, `Kata sandi minimal ${PASSWORD_MIN_LENGTH} karakter.`)
-  .max(PASSWORD_MAX_LENGTH, `Kata sandi maksimal ${PASSWORD_MAX_LENGTH} karakter.`);
+  .min(
+    PASSWORD_MIN_LENGTH,
+    `Kata sandi minimal ${PASSWORD_MIN_LENGTH} karakter.`,
+  )
+  .max(
+    PASSWORD_MAX_LENGTH,
+    `Kata sandi maksimal ${PASSWORD_MAX_LENGTH} karakter.`,
+  );
 
 const displayNameSchema = z
   .string()
-  .min(DISPLAY_NAME_MIN_LENGTH, `Nama tampilan minimal ${DISPLAY_NAME_MIN_LENGTH} karakter.`)
-  .max(DISPLAY_NAME_MAX_LENGTH, `Nama tampilan maksimal ${DISPLAY_NAME_MAX_LENGTH} karakter.`);
+  .min(
+    DISPLAY_NAME_MIN_LENGTH,
+    `Nama tampilan minimal ${DISPLAY_NAME_MIN_LENGTH} karakter.`,
+  )
+  .max(
+    DISPLAY_NAME_MAX_LENGTH,
+    `Nama tampilan maksimal ${DISPLAY_NAME_MAX_LENGTH} karakter.`,
+  );
 
 const redirectToSchema = z.string().optional();
 
@@ -43,6 +57,7 @@ export const SignUpSchema = z
     password: passwordSchema,
     confirmPassword: z.string().min(1, "Konfirmasi kata sandi wajib diisi."),
     displayName: displayNameSchema,
+    avatarPendingPath: AvatarPendingPathSchema.optional(),
     redirectTo: redirectToSchema,
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -66,5 +81,7 @@ export const UpdatePasswordSchema = z
 
 export type SignInInput = z.infer<typeof SignInSchema>;
 export type SignUpInput = z.infer<typeof SignUpSchema>;
-export type RequestPasswordResetInput = z.infer<typeof RequestPasswordResetSchema>;
+export type RequestPasswordResetInput = z.infer<
+  typeof RequestPasswordResetSchema
+>;
 export type UpdatePasswordInput = z.infer<typeof UpdatePasswordSchema>;
