@@ -89,50 +89,6 @@ export const UPDATE_PASSWORD_COPY: AuthPageCopy = {
   footerLink: { href: "/auth/sign-in", label: "Batal, kembali ke masuk" },
 };
 
-/* ─────────────────────────── Brand panel data ─────────────────────────── */
-
-export interface AuthStat {
-  readonly value: string;
-  readonly label: string;
-  readonly hint?: string;
-}
-
-/**
- * Three social-proof stats rendered in the auth brand panel. Values are
- * static so the public auth route does not touch the database (project guidelines
- * §7). Update the numbers in lockstep with the underlying schema
- * (regions table count, indicator_dictionary catalog, supported years).
- */
-export const AUTH_STATS: readonly [AuthStat, AuthStat, AuthStat] = [
-  {
-    value: "540",
-    label: "Kabupaten/Kota terpantau",
-    hint: "Seluruh wilayah administratif di Indonesia",
-  },
-  {
-    value: "4",
-    label: "Tahun data, 2021–2024",
-    hint: "Sumber: BPS, Susenas, Kemenkes RI",
-  },
-  {
-    value: "20",
-    label: "Prediktor stunting",
-    hint: "X1–X20 berdasarkan literatur Buku KIA",
-  },
-] as const;
-
-export interface AuthMapPreviewCopy {
-  readonly title: string;
-  readonly caption: string;
-  readonly alt: string;
-}
-
-export const AUTH_MAP_PREVIEW_COPY: AuthMapPreviewCopy = {
-  title: "Prevalensi nasional",
-  caption: "Klasifikasi stunting per kabupaten/kota, 2021–2024.",
-  alt: "Pratinjau peta prevalensi stunting Indonesia dengan beberapa wilayah disorot warna brand.",
-} as const;
-
 export const AUTH_LABELS = {
   signInSubmit: "Masuk",
   signUpSubmit: "Daftar",

@@ -33,11 +33,11 @@ export function AuthSectionHeader({
   children,
 }: AuthSectionHeaderProps) {
   return (
-    <header className="space-y-4">
+    <header className="space-y-3">
       <p className="eyebrow">{eyebrow}</p>
-      <div className="space-y-3">
+      <div className="space-y-2">
         <h1 className="auth-headline text-foreground">{title}</h1>
-        <p className="text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
+        <p className="text-pretty text-sm leading-relaxed text-muted-foreground">
           {description}
         </p>
       </div>

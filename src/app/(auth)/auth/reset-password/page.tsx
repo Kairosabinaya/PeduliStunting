@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <AuthSectionHeader
         eyebrow={RESET_PASSWORD_COPY.eyebrow}
         title={RESET_PASSWORD_COPY.title}

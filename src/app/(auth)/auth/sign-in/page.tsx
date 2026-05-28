@@ -22,7 +22,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
   const { redirect, error } = await searchParams;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <AuthSectionHeader
         eyebrow={SIGN_IN_COPY.eyebrow}
         title={SIGN_IN_COPY.title}

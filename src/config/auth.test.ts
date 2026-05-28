@@ -6,8 +6,6 @@ import {
   AUTH_EYEBROW,
   AUTH_FALLBACK_ERROR,
   AUTH_LABELS,
-  AUTH_MAP_PREVIEW_COPY,
-  AUTH_STATS,
   AUTH_SUCCESS_MESSAGES,
   RESET_PASSWORD_COPY,
   SIGN_IN_COPY,
@@ -61,20 +59,6 @@ describe("auth config", () => {
   describe("brand panel data", () => {
     it("exposes a distinct eyebrow constant", () => {
       expect(AUTH_EYEBROW.length).toBeGreaterThan(0);
-    });
-
-    it("provides three stats with value + label", () => {
-      expect(AUTH_STATS).toHaveLength(3);
-      for (const stat of AUTH_STATS) {
-        expect(stat.value.length).toBeGreaterThan(0);
-        expect(stat.label.length).toBeGreaterThan(0);
-      }
-    });
-
-    it("provides map preview copy with title, caption, and alt", () => {
-      expect(AUTH_MAP_PREVIEW_COPY.title.length).toBeGreaterThan(0);
-      expect(AUTH_MAP_PREVIEW_COPY.caption.length).toBeGreaterThan(0);
-      expect(AUTH_MAP_PREVIEW_COPY.alt.length).toBeGreaterThan(0);
     });
   });
 

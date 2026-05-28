@@ -131,7 +131,7 @@ export function AvatarUploader({ displayName, email }: AvatarUploaderProps) {
   const uploadSucceeded = Boolean(state?.ok && state?.pendingPath);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="flex items-center gap-2">
         <label
           htmlFor={inputId}
@@ -145,7 +145,7 @@ export function AvatarUploader({ displayName, email }: AvatarUploaderProps) {
       </div>
 
       <div
-        className={`relative flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed p-4 transition-colors ${
+        className={`relative flex items-center gap-3 rounded-xl border-2 border-dashed p-3 transition-colors ${
           isDragOver
             ? "border-brand-400 bg-brand-50/60 dark:bg-brand-900/30"
             : "border-border bg-muted/40"
@@ -158,7 +158,7 @@ export function AvatarUploader({ displayName, email }: AvatarUploaderProps) {
           src={pending?.previewUrl}
           displayName={displayName ?? null}
           email={email ?? null}
-          size="2xl"
+          size="xl"
           ring="default"
           alt={AUTH_LABELS.avatar.previewAlt}
         />
@@ -173,52 +173,44 @@ export function AvatarUploader({ displayName, email }: AvatarUploaderProps) {
           onChange={(event) => onFiles(event.target.files)}
         />
 
-        <div className="flex w-full flex-col items-center gap-2 sm:flex-row sm:justify-center">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            loading={isPending}
-            onClick={() => inputRef.current?.click()}
-          >
-            {pending ? AUTH_LABELS.avatar.change : AUTH_LABELS.avatar.upload}
-          </Button>
-          {pending ? (
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
-              onClick={onClear}
-              disabled={isPending}
+              loading={isPending}
+              onClick={() => inputRef.current?.click()}
             >
-              {AUTH_LABELS.avatar.remove}
+              {pending ? AUTH_LABELS.avatar.change : AUTH_LABELS.avatar.upload}
             </Button>
-          ) : null}
-        </div>
-
-        <p
-          id={hintId}
-          className="text-center text-xs text-muted-foreground"
-          aria-live="polite"
-        >
-          {isDragOver
-            ? AUTH_LABELS.avatar.dropHere
-            : pending
-              ? `${pending.name} · ${formatSize(pending.sizeBytes)}`
-              : AUTH_LABELS.avatar.drag}
-        </p>
-
-        {isPending ? (
+            {pending ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={onClear}
+                disabled={isPending}
+              >
+                {AUTH_LABELS.avatar.remove}
+              </Button>
+            ) : null}
+          </div>
           <p
-            className="text-center text-xs font-medium text-primary"
+            id={hintId}
+            className="truncate text-xs text-muted-foreground"
             aria-live="polite"
           >
-            {AUTH_LABELS.avatar.uploading}
+            {isPending
+              ? AUTH_LABELS.avatar.uploading
+              : isDragOver
+                ? AUTH_LABELS.avatar.dropHere
+                : pending
+                  ? `${pending.name} · ${formatSize(pending.sizeBytes)}`
+                  : AUTH_LABELS.avatar.hint}
           </p>
-        ) : null}
+        </div>
       </div>
-
-      <p className="text-xs text-muted-foreground">{AUTH_LABELS.avatar.hint}</p>
 
       {errorMessage ? (
         <p role="alert" className="text-xs font-medium text-danger">

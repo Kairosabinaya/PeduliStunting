@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function UpdatePasswordPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <AuthSectionHeader
         eyebrow={UPDATE_PASSWORD_COPY.eyebrow}
         title={UPDATE_PASSWORD_COPY.title}

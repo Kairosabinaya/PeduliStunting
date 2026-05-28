@@ -20,7 +20,7 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
   const { redirect } = await searchParams;
 
   return (
-    <div className="space-y-8" data-auth-wide>
+    <div className="space-y-5">
       <AuthSectionHeader
         eyebrow={SIGN_UP_COPY.eyebrow}
         title={SIGN_UP_COPY.title}

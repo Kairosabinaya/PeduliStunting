@@ -65,31 +65,28 @@ export function SignUpForm({ redirectTo }: SignUpFormProps) {
       : undefined;
 
   return (
-    <div className="space-y-6">
-      <form action={action} className="space-y-5" noValidate>
+    <div className="space-y-5">
+      <form action={action} className="space-y-4" noValidate>
         <input type="hidden" name="redirectTo" value={redirectTo ?? ""} />
 
-        <div className="grid gap-5 lg:grid-cols-[200px_1fr] lg:gap-6">
-          <div className="lg:order-first">
-            <AvatarUploader />
+        <MotionStack stagger={0.04} className="space-y-3.5">
+          <AvatarUploader />
+          <div className="space-y-1.5">
+            <Label htmlFor="signup-name" required>
+              {AUTH_LABELS.displayName}
+            </Label>
+            <Input
+              id="signup-name"
+              name="displayName"
+              autoComplete="name"
+              required
+              placeholder={AUTH_LABELS.displayNamePlaceholder}
+              errorMessage={fieldError(state, "displayName")}
+              leftIcon={<UserIcon />}
+            />
           </div>
-
-          <MotionStack stagger={0.05} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="signup-name" required>
-                {AUTH_LABELS.displayName}
-              </Label>
-              <Input
-                id="signup-name"
-                name="displayName"
-                autoComplete="name"
-                required
-                placeholder={AUTH_LABELS.displayNamePlaceholder}
-                errorMessage={fieldError(state, "displayName")}
-                leftIcon={<UserIcon />}
-              />
-            </div>
-            <div className="space-y-2">
+          <div className="grid gap-3.5 sm:grid-cols-2">
+            <div className="space-y-1.5">
               <Label htmlFor="signup-email" required>
                 {AUTH_LABELS.email}
               </Label>
@@ -105,7 +102,7 @@ export function SignUpForm({ redirectTo }: SignUpFormProps) {
                 leftIcon={<MailIcon />}
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <Label htmlFor="signup-password" required>
                 {AUTH_LABELS.password}
               </Label>
@@ -114,33 +111,32 @@ export function SignUpForm({ redirectTo }: SignUpFormProps) {
                 name="password"
                 autoComplete="new-password"
                 required
-                hint={AUTH_LABELS.passwordHint}
                 errorMessage={fieldError(state, "password")}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 leftIcon={<LockIcon />}
               />
-              <PasswordStrength value={password} />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="signup-confirm" required>
-                {AUTH_LABELS.confirmPassword}
-              </Label>
-              <PasswordInput
-                id="signup-confirm"
-                name="confirmPassword"
-                autoComplete="new-password"
-                required
-                errorMessage={
-                  fieldError(state, "confirmPassword") ?? liveMismatch
-                }
-                value={confirmPassword}
-                onChange={(event) => setConfirmPassword(event.target.value)}
-                leftIcon={<LockIcon />}
-              />
-            </div>
-          </MotionStack>
-        </div>
+          </div>
+          <PasswordStrength value={password} />
+          <div className="space-y-1.5">
+            <Label htmlFor="signup-confirm" required>
+              {AUTH_LABELS.confirmPassword}
+            </Label>
+            <PasswordInput
+              id="signup-confirm"
+              name="confirmPassword"
+              autoComplete="new-password"
+              required
+              errorMessage={
+                fieldError(state, "confirmPassword") ?? liveMismatch
+              }
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              leftIcon={<LockIcon />}
+            />
+          </div>
+        </MotionStack>
 
         {generalError ? (
           <AuthFeedback tone="error">{generalError}</AuthFeedback>

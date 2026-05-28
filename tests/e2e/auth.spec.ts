@@ -24,12 +24,6 @@ test.describe("auth flows (anonymous)", () => {
     await expect(
       page.getByRole("complementary", { name: /panel sambutan/i }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("list", { name: /statistik peduli stunting/i }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("figure", { name: /pratinjau peta prevalensi stunting/i }),
-    ).toBeVisible();
   });
 
   test("submitting an empty sign-in form surfaces inline validation", async ({
