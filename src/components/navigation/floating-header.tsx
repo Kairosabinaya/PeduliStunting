@@ -17,6 +17,8 @@ interface FloatingHeaderProps {
   readonly displayName?: string | null | undefined;
   readonly email?: string | null | undefined;
   readonly avatarUrl?: string | null | undefined;
+  /** Reveal the admin link inside the avatar dropdown. */
+  readonly isAdmin?: boolean | undefined;
 }
 
 function isActive(pathname: string | null, href: string): boolean {
@@ -95,6 +97,7 @@ export function FloatingHeader({
   displayName,
   email,
   avatarUrl,
+  isAdmin = false,
 }: FloatingHeaderProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -185,6 +188,7 @@ export function FloatingHeader({
             displayName={displayName ?? null}
             email={email ?? null}
             avatarUrl={avatarUrl ?? null}
+            isAdmin={isAdmin}
           />
           <Button
             type="button"
@@ -263,10 +267,12 @@ function AvatarMenu({
   displayName,
   email,
   avatarUrl,
+  isAdmin,
 }: {
   readonly displayName: string | null;
   readonly email: string | null;
   readonly avatarUrl: string | null;
+  readonly isAdmin: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -337,6 +343,16 @@ function AvatarMenu({
           >
             Profil
           </Link>
+          {isAdmin ? (
+            <Link
+              href="/admin/users"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className="flex min-h-11 items-center rounded-lg px-3 text-sm font-medium text-primary hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus dark:hover:bg-brand-900"
+            >
+              Kelola pengguna
+            </Link>
+          ) : null}
           <form action={signOut}>
             <button
               type="submit"

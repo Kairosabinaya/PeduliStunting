@@ -19,6 +19,10 @@ export const RESET_PASSWORD_ROUTE = "/auth/reset-password";
  */
 export const CHECK_EMAIL_ROUTE = "/auth/check-email";
 
+/** Admin-only management surface. Layout guard enforces the `admin` role. */
+export const ADMIN_ROUTE_PREFIX = "/admin";
+export const ADMIN_USERS_ROUTE = "/admin/users";
+
 /**
  * Auth routes that an authenticated session is allowed to visit. The
  * update-password page must remain reachable for users coming back from the

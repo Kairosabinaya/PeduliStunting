@@ -29,6 +29,7 @@ import { SupabaseMilestoneRepository } from "@/infrastructure/supabase/health-pl
 import { SupabaseChildMilestoneRepository } from "@/infrastructure/supabase/health-plan/supabase-child-milestone-repository";
 import { SupabaseUserProfileRepository } from "@/infrastructure/supabase/account/supabase-user-profile-repository";
 import { SupabaseAvatarStorage } from "@/infrastructure/supabase/account/supabase-avatar-storage";
+import { SupabaseAdminAccountRepository } from "@/infrastructure/supabase/account/supabase-admin-account-repository";
 
 import { ListRegionsUseCase } from "@/application/region/use-cases/list-regions";
 import { GetRegionByKodeBpsUseCase } from "@/application/region/use-cases/get-region-by-kode-bps";
@@ -57,6 +58,8 @@ import { GetCurrentProfileUseCase } from "@/application/account/use-cases/get-cu
 import { UpdateUserProfileUseCase } from "@/application/account/use-cases/update-user-profile";
 import { UpdateUserAvatarUseCase } from "@/application/account/use-cases/update-user-avatar";
 import { UploadPendingAvatarUseCase } from "@/application/account/use-cases/upload-pending-avatar";
+import { ListAdminAccountsUseCase } from "@/application/account/use-cases/list-admin-accounts";
+import { DeleteUserAccountUseCase } from "@/application/account/use-cases/delete-user-account";
 
 export interface AppContainer {
   readonly clock: Clock;
@@ -117,6 +120,8 @@ export interface UseCases {
  */
 export interface AdminUseCases {
   readonly uploadPendingAvatar: UploadPendingAvatarUseCase;
+  readonly listAdminAccounts: ListAdminAccountsUseCase;
+  readonly deleteUserAccount: DeleteUserAccountUseCase;
 }
 
 /**
@@ -213,7 +218,10 @@ export function makeAdminUseCases(
   adminClient: TypedSupabaseClient,
 ): AdminUseCases {
   const avatarStorage = new SupabaseAvatarStorage(adminClient);
+  const adminAccountsRepo = new SupabaseAdminAccountRepository(adminClient);
   return {
     uploadPendingAvatar: new UploadPendingAvatarUseCase(avatarStorage),
+    listAdminAccounts: new ListAdminAccountsUseCase(adminAccountsRepo),
+    deleteUserAccount: new DeleteUserAccountUseCase(adminAccountsRepo),
   };
 }

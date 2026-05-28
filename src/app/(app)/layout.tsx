@@ -19,6 +19,10 @@ export default async function AppLayout({ children }: AppLayoutProps) {
     profileResult.ok && profileResult.value
       ? profileResult.value.avatarUrl
       : null;
+  const isAdmin =
+    profileResult.ok && profileResult.value
+      ? profileResult.value.role === "admin"
+      : false;
 
   return (
     <div className="min-h-dvh bg-background">
@@ -26,6 +30,7 @@ export default async function AppLayout({ children }: AppLayoutProps) {
         displayName={displayName ?? undefined}
         email={session.email ?? undefined}
         avatarUrl={avatarUrl ?? undefined}
+        isAdmin={isAdmin}
       />
       <div className="pb-12 pt-24 md:pt-28">
         <div className="mx-auto w-full max-w-6xl px-4 md:px-6">{children}</div>
