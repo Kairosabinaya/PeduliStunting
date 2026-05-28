@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AuthSectionHeader } from "@/app/(auth)/_components/auth-section-header";
 import { AuthStepper } from "@/app/(auth)/_components/auth-stepper";
 import { SIGN_UP_COPY } from "@/config/auth";
 
@@ -20,17 +21,13 @@ export default async function SignUpPage({ searchParams }: SignUpPageProps) {
 
   return (
     <div className="space-y-8" data-auth-wide>
-      <header className="space-y-4">
+      <AuthSectionHeader
+        eyebrow={SIGN_UP_COPY.eyebrow}
+        title={SIGN_UP_COPY.title}
+        description={SIGN_UP_COPY.description}
+      >
         <AuthStepper currentStep={1} />
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">
-            {SIGN_UP_COPY.title}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {SIGN_UP_COPY.description}
-          </p>
-        </div>
-      </header>
+      </AuthSectionHeader>
       <SignUpForm redirectTo={redirect} />
       <p className="text-sm text-muted-foreground">
         {SIGN_UP_COPY.footerPrompt}{" "}

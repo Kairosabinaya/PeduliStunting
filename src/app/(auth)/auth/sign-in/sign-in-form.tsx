@@ -11,10 +11,12 @@ import {
 import { AuthFeedback } from "@/app/(auth)/_components/auth-feedback";
 import { AuthSeparator } from "@/app/(auth)/_components/auth-separator";
 import { GoogleForm } from "@/app/(auth)/_components/google-form";
+import { MotionStack } from "@/app/(auth)/_components/motion-stack";
 import { PasswordInput } from "@/app/(auth)/_components/password-input";
 import { Button } from "@/components/primitives/button";
 import { Input } from "@/components/primitives/input";
 import { Label } from "@/components/primitives/label";
+import { LockIcon, MailIcon } from "@/app/(auth)/_components/field-icons";
 import { AUTH_LABELS, getAuthErrorMessage } from "@/config/auth";
 import { RESET_PASSWORD_ROUTE } from "@/config/routes";
 
@@ -51,45 +53,49 @@ export function SignInForm({ redirectTo, errorCode }: SignInFormProps) {
 
   return (
     <div className="space-y-6">
-      <form action={action} className="space-y-4" noValidate>
+      <form action={action} noValidate>
         <input type="hidden" name="redirectTo" value={redirectTo ?? ""} />
-        <div className="space-y-2">
-          <Label htmlFor="signin-email" required>
-            {AUTH_LABELS.email}
-          </Label>
-          <Input
-            id="signin-email"
-            name="email"
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            required
-            placeholder={AUTH_LABELS.emailPlaceholder}
-            errorMessage={fieldError(state, "email")}
-          />
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <Label htmlFor="signin-password" required>
-              {AUTH_LABELS.password}
+        <MotionStack stagger={0.05} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="signin-email" required>
+              {AUTH_LABELS.email}
             </Label>
-            <Link
-              href={RESET_PASSWORD_ROUTE}
-              className="text-xs font-medium text-primary hover:underline focus-visible:outline-none focus-visible:underline"
-            >
-              {AUTH_LABELS.forgotPassword}
-            </Link>
+            <Input
+              id="signin-email"
+              name="email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              required
+              placeholder={AUTH_LABELS.emailPlaceholder}
+              errorMessage={fieldError(state, "email")}
+              leftIcon={<MailIcon />}
+            />
           </div>
-          <PasswordInput
-            id="signin-password"
-            name="password"
-            autoComplete="current-password"
-            required
-            errorMessage={fieldError(state, "password")}
-          />
-        </div>
-        {banner ? <AuthFeedback tone="error">{banner}</AuthFeedback> : null}
-        <SubmitButton />
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-2">
+              <Label htmlFor="signin-password" required>
+                {AUTH_LABELS.password}
+              </Label>
+              <Link
+                href={RESET_PASSWORD_ROUTE}
+                className="text-xs font-medium text-primary transition-colors hover:underline focus-visible:underline focus-visible:outline-none"
+              >
+                {AUTH_LABELS.forgotPassword}
+              </Link>
+            </div>
+            <PasswordInput
+              id="signin-password"
+              name="password"
+              autoComplete="current-password"
+              required
+              errorMessage={fieldError(state, "password")}
+              leftIcon={<LockIcon />}
+            />
+          </div>
+          {banner ? <AuthFeedback tone="error">{banner}</AuthFeedback> : null}
+          <SubmitButton />
+        </MotionStack>
       </form>
 
       <AuthSeparator label={AUTH_LABELS.separator} />

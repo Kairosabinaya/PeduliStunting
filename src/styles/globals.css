@@ -420,6 +420,37 @@
     margin-right: calc(50% - 50vw);
   }
 
+  /* ───────────────────── Auth page typography & overlays ─────────────────
+     Auth-specific display headline scale, tuned smaller than the edukasi
+     `.display-headline` (which goes hero-size). The clamp keeps the title
+     readable on 360 px without leaving deserts of whitespace on 1440 px. */
+  .auth-headline {
+    font-weight: 700;
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  /* Radial aurora overlay sitting behind the animated blobs in the auth
+     brand panel. Stops are pulled from the project palette only (brand
+     scale + accent green) — no rogue hues. `mix-blend-mode: screen`
+     lifts the highlight without crushing the gradient underneath. */
+  .auth-aurora {
+    background-image:
+      radial-gradient(
+        circle at 18% 22%,
+        rgb(122 188 226 / 0.35) 0%,
+        rgb(122 188 226 / 0) 55%
+      ),
+      radial-gradient(
+        circle at 82% 78%,
+        rgb(184 226 200 / 0.32) 0%,
+        rgb(184 226 200 / 0) 60%
+      );
+    mix-blend-mode: screen;
+  }
+
   /* ─────────────────────── Auth brand panel blob animation ───────────────
      CSS-only blob morphing for the sign-in/up brand panel. Two ambient
      halos drift slowly so the panel feels alive without taking on the

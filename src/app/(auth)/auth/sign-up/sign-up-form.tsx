@@ -10,7 +10,13 @@ import {
 import { AuthFeedback } from "@/app/(auth)/_components/auth-feedback";
 import { AuthSeparator } from "@/app/(auth)/_components/auth-separator";
 import { AvatarUploader } from "@/app/(auth)/_components/avatar-uploader";
+import {
+  LockIcon,
+  MailIcon,
+  UserIcon,
+} from "@/app/(auth)/_components/field-icons";
 import { GoogleForm } from "@/app/(auth)/_components/google-form";
+import { MotionStack } from "@/app/(auth)/_components/motion-stack";
 import { PasswordInput } from "@/app/(auth)/_components/password-input";
 import { PasswordStrength } from "@/app/(auth)/_components/password-strength";
 import { Button } from "@/components/primitives/button";
@@ -68,7 +74,7 @@ export function SignUpForm({ redirectTo }: SignUpFormProps) {
             <AvatarUploader />
           </div>
 
-          <div className="space-y-4">
+          <MotionStack stagger={0.05} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="signup-name" required>
                 {AUTH_LABELS.displayName}
@@ -80,6 +86,7 @@ export function SignUpForm({ redirectTo }: SignUpFormProps) {
                 required
                 placeholder={AUTH_LABELS.displayNamePlaceholder}
                 errorMessage={fieldError(state, "displayName")}
+                leftIcon={<UserIcon />}
               />
             </div>
             <div className="space-y-2">
@@ -95,6 +102,7 @@ export function SignUpForm({ redirectTo }: SignUpFormProps) {
                 required
                 placeholder={AUTH_LABELS.emailPlaceholder}
                 errorMessage={fieldError(state, "email")}
+                leftIcon={<MailIcon />}
               />
             </div>
             <div className="space-y-2">
@@ -110,6 +118,7 @@ export function SignUpForm({ redirectTo }: SignUpFormProps) {
                 errorMessage={fieldError(state, "password")}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
+                leftIcon={<LockIcon />}
               />
               <PasswordStrength value={password} />
             </div>
@@ -127,9 +136,10 @@ export function SignUpForm({ redirectTo }: SignUpFormProps) {
                 }
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
+                leftIcon={<LockIcon />}
               />
             </div>
-          </div>
+          </MotionStack>
         </div>
 
         {generalError ? (

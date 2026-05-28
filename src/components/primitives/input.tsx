@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+import { forwardRef, type ReactNode } from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/cn";
@@ -25,12 +25,20 @@ const inputVariants = cva(
 );
 
 export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
+  extends
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
     VariantProps<typeof inputVariants> {
   /** Optional description rendered below the field. */
   readonly hint?: string | undefined;
   /** Validation error message (sets `aria-invalid` and tone="error"). */
   readonly errorMessage?: string | undefined;
+  /**
+   * Decorative icon rendered inside the input, anchored to the left edge.
+   * Pass an inline SVG sized 16-18 px; the wrapper absolutely positions
+   * it and the field gets `pl-10` to compensate. The icon is marked
+   * `aria-hidden` so the associated `<Label>` remains the only label.
+   */
+  readonly leftIcon?: ReactNode;
 }
 
 /**
@@ -52,7 +60,7 @@ export interface InputProps
  * ```
  */
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { className, size, tone, hint, errorMessage, id, ...rest },
+  { className, size, tone, hint, errorMessage, leftIcon, id, ...rest },
   ref,
 ) {
   const describedById = errorMessage
@@ -63,14 +71,28 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const resolvedTone = errorMessage ? "error" : tone;
   return (
     <div className="w-full">
-      <input
-        ref={ref}
-        id={id}
-        aria-invalid={errorMessage ? true : undefined}
-        aria-describedby={describedById}
-        className={cn(inputVariants({ size, tone: resolvedTone }), className)}
-        {...rest}
-      />
+      <div className="relative">
+        {leftIcon ? (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground"
+          >
+            {leftIcon}
+          </span>
+        ) : null}
+        <input
+          ref={ref}
+          id={id}
+          aria-invalid={errorMessage ? true : undefined}
+          aria-describedby={describedById}
+          className={cn(
+            inputVariants({ size, tone: resolvedTone }),
+            leftIcon ? "pl-10" : null,
+            className,
+          )}
+          {...rest}
+        />
+      </div>
       {errorMessage ? (
         <p id={`${id}-error`} className="mt-1.5 text-xs text-danger">
           {errorMessage}

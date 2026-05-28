@@ -3,11 +3,10 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
-import {
-  updatePassword,
-  type AuthActionResult,
-} from "@/app/(auth)/actions";
+import { updatePassword, type AuthActionResult } from "@/app/(auth)/actions";
 import { AuthFeedback } from "@/app/(auth)/_components/auth-feedback";
+import { LockIcon } from "@/app/(auth)/_components/field-icons";
+import { MotionStack } from "@/app/(auth)/_components/motion-stack";
 import { PasswordInput } from "@/app/(auth)/_components/password-input";
 import { Button } from "@/components/primitives/button";
 import { Label } from "@/components/primitives/label";
@@ -39,41 +38,45 @@ export function UpdatePasswordForm() {
   const succeeded = state?.ok === true;
 
   return (
-    <form action={action} className="space-y-4" noValidate>
-      <div className="space-y-2">
-        <Label htmlFor="update-password" required>
-          {AUTH_LABELS.password}
-        </Label>
-        <PasswordInput
-          id="update-password"
-          name="password"
-          autoComplete="new-password"
-          required
-          hint={AUTH_LABELS.passwordHint}
-          errorMessage={fieldError(state, "password")}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="update-confirm" required>
-          {AUTH_LABELS.confirmPassword}
-        </Label>
-        <PasswordInput
-          id="update-confirm"
-          name="confirmPassword"
-          autoComplete="new-password"
-          required
-          errorMessage={fieldError(state, "confirmPassword")}
-        />
-      </div>
-      {generalError ? (
-        <AuthFeedback tone="error">{generalError}</AuthFeedback>
-      ) : null}
-      {succeeded ? (
-        <AuthFeedback tone="success">
-          {AUTH_SUCCESS_MESSAGES.passwordUpdated}
-        </AuthFeedback>
-      ) : null}
-      <SubmitButton />
+    <form action={action} noValidate>
+      <MotionStack stagger={0.05} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="update-password" required>
+            {AUTH_LABELS.password}
+          </Label>
+          <PasswordInput
+            id="update-password"
+            name="password"
+            autoComplete="new-password"
+            required
+            hint={AUTH_LABELS.passwordHint}
+            errorMessage={fieldError(state, "password")}
+            leftIcon={<LockIcon />}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="update-confirm" required>
+            {AUTH_LABELS.confirmPassword}
+          </Label>
+          <PasswordInput
+            id="update-confirm"
+            name="confirmPassword"
+            autoComplete="new-password"
+            required
+            errorMessage={fieldError(state, "confirmPassword")}
+            leftIcon={<LockIcon />}
+          />
+        </div>
+        {generalError ? (
+          <AuthFeedback tone="error">{generalError}</AuthFeedback>
+        ) : null}
+        {succeeded ? (
+          <AuthFeedback tone="success">
+            {AUTH_SUCCESS_MESSAGES.passwordUpdated}
+          </AuthFeedback>
+        ) : null}
+        <SubmitButton />
+      </MotionStack>
     </form>
   );
 }

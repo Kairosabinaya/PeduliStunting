@@ -8,6 +8,8 @@ import {
   type AuthActionResult,
 } from "@/app/(auth)/actions";
 import { AuthFeedback } from "@/app/(auth)/_components/auth-feedback";
+import { MailIcon } from "@/app/(auth)/_components/field-icons";
+import { MotionStack } from "@/app/(auth)/_components/motion-stack";
 import { Button } from "@/components/primitives/button";
 import { Input } from "@/components/primitives/input";
 import { Label } from "@/components/primitives/label";
@@ -39,31 +41,34 @@ export function ResetPasswordForm() {
     state && !state.ok && !state.fieldErrors ? state.message : null;
 
   return (
-    <form action={action} className="space-y-4" noValidate>
-      <div className="space-y-2">
-        <Label htmlFor="reset-email" required>
-          {AUTH_LABELS.email}
-        </Label>
-        <Input
-          id="reset-email"
-          name="email"
-          type="email"
-          inputMode="email"
-          autoComplete="email"
-          required
-          placeholder={AUTH_LABELS.emailPlaceholder}
-          errorMessage={fieldError(state, "email")}
-        />
-      </div>
-      {generalError ? (
-        <AuthFeedback tone="error">{generalError}</AuthFeedback>
-      ) : null}
-      {succeeded ? (
-        <AuthFeedback tone="success">
-          {AUTH_SUCCESS_MESSAGES.resetLinkSent}
-        </AuthFeedback>
-      ) : null}
-      <SubmitButton />
+    <form action={action} noValidate>
+      <MotionStack stagger={0.05} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="reset-email" required>
+            {AUTH_LABELS.email}
+          </Label>
+          <Input
+            id="reset-email"
+            name="email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            required
+            placeholder={AUTH_LABELS.emailPlaceholder}
+            errorMessage={fieldError(state, "email")}
+            leftIcon={<MailIcon />}
+          />
+        </div>
+        {generalError ? (
+          <AuthFeedback tone="error">{generalError}</AuthFeedback>
+        ) : null}
+        {succeeded ? (
+          <AuthFeedback tone="success">
+            {AUTH_SUCCESS_MESSAGES.resetLinkSent}
+          </AuthFeedback>
+        ) : null}
+        <SubmitButton />
+      </MotionStack>
     </form>
   );
 }

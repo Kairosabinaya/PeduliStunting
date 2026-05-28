@@ -17,11 +17,14 @@ export interface AuthFooterLink {
 
 export interface AuthPageCopy {
   readonly metaTitle: string;
+  readonly eyebrow: string;
   readonly title: string;
   readonly description: string;
   readonly footerPrompt: string;
   readonly footerLink: AuthFooterLink;
 }
+
+export const AUTH_EYEBROW = "Peduli Stunting" as const;
 
 export interface AuthBrandPanel {
   readonly logo: {
@@ -50,22 +53,25 @@ export const AUTH_BRAND_PANEL: AuthBrandPanel = {
 
 export const SIGN_IN_COPY: AuthPageCopy = {
   metaTitle: "Masuk",
+  eyebrow: "Selamat datang kembali",
   title: "Masuk ke akun Anda",
-  description: `Selamat datang kembali di ${APP_NAME}.`,
+  description: `Lanjutkan memantau pertumbuhan anak dan data stunting nasional bersama ${APP_NAME}.`,
   footerPrompt: "Belum memiliki akun?",
   footerLink: { href: "/auth/sign-up", label: "Daftar gratis" },
 };
 
 export const SIGN_UP_COPY: AuthPageCopy = {
   metaTitle: "Daftar",
-  title: "Buat akun baru",
-  description: `Bergabung dengan ${APP_NAME} dalam satu menit.`,
+  eyebrow: "Buat akun baru",
+  title: "Mulai dengan satu langkah",
+  description: `Bergabung gratis dengan ${APP_NAME}. Data Anda terenkripsi dan hanya bisa diakses oleh akun keluarga.`,
   footerPrompt: "Sudah memiliki akun?",
   footerLink: { href: "/auth/sign-in", label: "Masuk" },
 };
 
 export const RESET_PASSWORD_COPY: AuthPageCopy = {
   metaTitle: "Atur ulang kata sandi",
+  eyebrow: "Lupa kata sandi",
   title: "Atur ulang kata sandi",
   description:
     "Masukkan email yang terdaftar. Kami akan mengirim tautan untuk membuat kata sandi baru.",
@@ -75,12 +81,57 @@ export const RESET_PASSWORD_COPY: AuthPageCopy = {
 
 export const UPDATE_PASSWORD_COPY: AuthPageCopy = {
   metaTitle: "Kata sandi baru",
+  eyebrow: "Konfirmasi pemulihan",
   title: "Buat kata sandi baru",
   description:
     "Tautan reset memverifikasi identitas Anda. Pilih kata sandi yang kuat dan mudah diingat.",
   footerPrompt: "",
   footerLink: { href: "/auth/sign-in", label: "Batal, kembali ke masuk" },
 };
+
+/* ─────────────────────────── Brand panel data ─────────────────────────── */
+
+export interface AuthStat {
+  readonly value: string;
+  readonly label: string;
+  readonly hint?: string;
+}
+
+/**
+ * Three social-proof stats rendered in the auth brand panel. Values are
+ * static so the public auth route does not touch the database (project guidelines
+ * §7). Update the numbers in lockstep with the underlying schema
+ * (regions table count, indicator_dictionary catalog, supported years).
+ */
+export const AUTH_STATS: readonly [AuthStat, AuthStat, AuthStat] = [
+  {
+    value: "540",
+    label: "Kabupaten/Kota terpantau",
+    hint: "Seluruh wilayah administratif di Indonesia",
+  },
+  {
+    value: "4",
+    label: "Tahun data, 2021–2024",
+    hint: "Sumber: BPS, Susenas, Kemenkes RI",
+  },
+  {
+    value: "20",
+    label: "Prediktor stunting",
+    hint: "X1–X20 berdasarkan literatur Buku KIA",
+  },
+] as const;
+
+export interface AuthMapPreviewCopy {
+  readonly title: string;
+  readonly caption: string;
+  readonly alt: string;
+}
+
+export const AUTH_MAP_PREVIEW_COPY: AuthMapPreviewCopy = {
+  title: "Prevalensi nasional",
+  caption: "Klasifikasi stunting per kabupaten/kota, 2021–2024.",
+  alt: "Pratinjau peta prevalensi stunting Indonesia dengan beberapa wilayah disorot warna brand.",
+} as const;
 
 export const AUTH_LABELS = {
   signInSubmit: "Masuk",

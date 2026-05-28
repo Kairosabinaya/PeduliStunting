@@ -4,11 +4,13 @@ test.describe("auth flows (anonymous)", () => {
   test("sign-in renders branded layout, email + password fields, OAuth, and reset link", async ({
     page,
   }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/auth/sign-in");
 
     await expect(
       page.getByRole("heading", { name: /masuk ke akun anda/i, level: 1 }),
     ).toBeVisible();
+    await expect(page.getByText(/selamat datang kembali/i)).toBeVisible();
     await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
     await expect(page.getByLabel("Kata sandi", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: /^masuk$/i })).toBeVisible();
@@ -17,6 +19,16 @@ test.describe("auth flows (anonymous)", () => {
     ).toBeVisible();
     await expect(
       page.getByRole("link", { name: /lupa kata sandi/i }),
+    ).toBeVisible();
+    // Brand panel only rendered at lg+ (desktop viewport).
+    await expect(
+      page.getByRole("complementary", { name: /panel sambutan/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("list", { name: /statistik peduli stunting/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("figure", { name: /pratinjau peta prevalensi stunting/i }),
     ).toBeVisible();
   });
 
@@ -57,8 +69,12 @@ test.describe("auth flows (anonymous)", () => {
     await page.goto("/auth/sign-up");
 
     await expect(
-      page.getByRole("heading", { name: /buat akun baru/i, level: 1 }),
+      page.getByRole("heading", {
+        name: /mulai dengan satu langkah/i,
+        level: 1,
+      }),
     ).toBeVisible();
+    await expect(page.getByText(/buat akun baru/i).first()).toBeVisible();
     await expect(
       page.getByRole("navigation", { name: /tahap pendaftaran/i }),
     ).toBeVisible();
