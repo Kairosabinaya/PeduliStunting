@@ -89,6 +89,32 @@ export const UPDATE_PASSWORD_COPY: AuthPageCopy = {
   footerLink: { href: "/auth/sign-in", label: "Batal, kembali ke masuk" },
 };
 
+export const CHECK_EMAIL_COPY: AuthPageCopy = {
+  metaTitle: "Verifikasi email",
+  eyebrow: "Tinggal satu langkah",
+  title: "Cek email Anda",
+  description:
+    "Kami sudah mengirim tautan verifikasi. Klik tautan tersebut untuk menyelesaikan pendaftaran.",
+  footerPrompt: "Salah email?",
+  footerLink: {
+    href: "/auth/sign-up",
+    label: "Daftar ulang dengan email lain",
+  },
+};
+
+export const CHECK_EMAIL_LABELS = {
+  resend: "Kirim ulang email verifikasi",
+  resending: "Mengirim ulang...",
+  resentSuccess:
+    "Email verifikasi sudah dikirim ulang. Periksa kotak masuk dan folder spam.",
+  cooldown: (seconds: number) =>
+    `Tunggu ${String(seconds)} detik sebelum mengirim ulang.`,
+  hint: "Tidak menemukan emailnya? Cek folder spam atau promosi.",
+  emailSentTo: "Tautan terkirim ke",
+  expiresHint:
+    "Tautan berlaku selama 24 jam. Jika kadaluarsa, gunakan tombol kirim ulang.",
+} as const;
+
 export const AUTH_LABELS = {
   signInSubmit: "Masuk",
   signUpSubmit: "Daftar",

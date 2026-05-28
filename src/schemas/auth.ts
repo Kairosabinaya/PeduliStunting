@@ -69,6 +69,11 @@ export const RequestPasswordResetSchema = z.object({
   email: emailSchema,
 });
 
+export const ResendVerificationSchema = z.object({
+  email: emailSchema,
+  redirectTo: redirectToSchema,
+});
+
 export const UpdatePasswordSchema = z
   .object({
     password: passwordSchema,
@@ -84,4 +89,5 @@ export type SignUpInput = z.infer<typeof SignUpSchema>;
 export type RequestPasswordResetInput = z.infer<
   typeof RequestPasswordResetSchema
 >;
+export type ResendVerificationInput = z.infer<typeof ResendVerificationSchema>;
 export type UpdatePasswordInput = z.infer<typeof UpdatePasswordSchema>;

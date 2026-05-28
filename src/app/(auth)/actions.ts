@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { APP_URL } from "@/config/app";
 import {
+  CHECK_EMAIL_ROUTE,
   DEFAULT_AUTHENTICATED_ROUTE,
   SIGN_IN_ROUTE,
   UPDATE_PASSWORD_ROUTE,
@@ -15,6 +16,7 @@ import { createSupabaseServerClient } from "@/infrastructure/supabase/server-cli
 import { mapSupabaseAuthError } from "@/lib/supabase-auth-error";
 import {
   RequestPasswordResetSchema,
+  ResendVerificationSchema,
   SignInSchema,
   SignUpSchema,
   UpdatePasswordSchema,
@@ -142,7 +144,14 @@ export async function signUpWithPassword(
     return toActionResult(err(mapSupabaseAuthError(error)));
   }
   if (!data.session) {
-    return toActionResult(ok({}));
+    // Email verification required — send the user to a dedicated wait
+    // page so they understand the next step (and can resend the email).
+    const next = new URL(CHECK_EMAIL_ROUTE, APP_URL);
+    next.searchParams.set("email", parsed.data.email);
+    if (parsed.data.redirectTo) {
+      next.searchParams.set("redirect", parsed.data.redirectTo);
+    }
+    redirect(`${next.pathname}${next.search}`);
   }
   redirect(target);
 }
@@ -164,6 +173,39 @@ export async function signInWithGoogle(): Promise<void> {
     redirect(`${SIGN_IN_ROUTE}?error=google`);
   }
   redirect(data.url);
+}
+
+/**
+ * Resend the email-verification link for a freshly created account.
+ * Used by `/auth/check-email` when the user did not receive the original
+ * email or let it expire. Errors are surfaced verbatim because the user
+ * already entered their email on this device — there is no enumeration
+ * risk beyond what sign-up itself exposes.
+ */
+export async function resendVerificationEmail(
+  _previous: AuthActionResult | null,
+  formData: FormData,
+): Promise<AuthActionResult> {
+  const parsed = ResendVerificationSchema.safeParse({
+    email: formData.get("email"),
+    redirectTo: formData.get("redirectTo") ?? undefined,
+  });
+  if (!parsed.success) {
+    return validationFromFlatten(parsed.error.flatten().fieldErrors);
+  }
+  const supabase = await createSupabaseServerClient();
+  const target = safeRedirect(parsed.data.redirectTo);
+  const callback = new URL("/auth/callback", APP_URL);
+  callback.searchParams.set("next", target);
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: parsed.data.email,
+    options: { emailRedirectTo: callback.toString() },
+  });
+  if (error) {
+    return toActionResult(err(mapSupabaseAuthError(error)));
+  }
+  return toActionResult(ok({}));
 }
 
 /**

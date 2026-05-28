@@ -13,6 +13,13 @@ export const UPDATE_PASSWORD_ROUTE = "/auth/update-password";
 export const RESET_PASSWORD_ROUTE = "/auth/reset-password";
 
 /**
+ * Landing after a successful email/password sign-up when the project
+ * requires email confirmation. The page tells the user to check their
+ * inbox and provides a "resend verification" affordance.
+ */
+export const CHECK_EMAIL_ROUTE = "/auth/check-email";
+
+/**
  * Auth routes that an authenticated session is allowed to visit. The
  * update-password page must remain reachable for users coming back from the
  * reset-link email: the callback exchanges the recovery token for a session
@@ -31,7 +38,10 @@ export { DEFAULT_AUTHENTICATED_ROUTE };
  * and any nested path under `/auth/`.
  */
 export function isPublicRoute(pathname: string): boolean {
-  if (pathname.startsWith(`${AUTH_ROUTE_PREFIX}/`) || pathname === AUTH_ROUTE_PREFIX) {
+  if (
+    pathname.startsWith(`${AUTH_ROUTE_PREFIX}/`) ||
+    pathname === AUTH_ROUTE_PREFIX
+  ) {
     return true;
   }
   return PUBLIC_ROUTES.includes(pathname);
@@ -40,7 +50,8 @@ export function isPublicRoute(pathname: string): boolean {
 /** Returns true when `pathname` belongs to the auth flow (sign-in, sign-up, …). */
 export function isAuthRoute(pathname: string): boolean {
   return (
-    pathname === AUTH_ROUTE_PREFIX || pathname.startsWith(`${AUTH_ROUTE_PREFIX}/`)
+    pathname === AUTH_ROUTE_PREFIX ||
+    pathname.startsWith(`${AUTH_ROUTE_PREFIX}/`)
   );
 }
 
