@@ -23,7 +23,7 @@ export const PRIMARY_NAV: readonly PrimaryNavItem[] = [
   {
     href: "/edukasi",
     label: "Edukasi",
-    description: "Artikel dan ringkasan Buku KIA",
+    description: "1.000 Hari yang Mengubah Segalanya",
   },
   {
     href: "/tracker",

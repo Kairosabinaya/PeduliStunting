@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { signOut } from "@/app/(auth)/actions";
 import { PRIMARY_NAV } from "@/config/navigation";
@@ -41,14 +41,76 @@ function initialsOf(name?: string | null, email?: string | null): string {
 }
 
 /**
+ * SSR-safe subscription to `prefers-reduced-motion`. `useSyncExternalStore`
+ * does the subscribe/snapshot dance without a setState-in-effect dance
+ * that the React lint flags.
+ */
+function useReducedMotionPreference(): boolean {
+  return useSyncExternalStore(
+    (callback) => {
+      if (typeof window === "undefined") return () => {};
+      const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+      mq.addEventListener("change", callback);
+      return () => mq.removeEventListener("change", callback);
+    },
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    () => false,
+  );
+}
+
+/**
+ * Hide the header when the user scrolls down (`delta > 8px`) past the
+ * 100px mark, reveal it on any scroll-up. Returning to the very top
+ * always reveals. When `reducedMotion` is true the listener stays
+ * off and the header remains visible — derived in the return value
+ * to keep the effect body free of synchronous setState.
+ */
+function useAutoHideOnScroll(reducedMotion: boolean): boolean {
+  const [visible, setVisible] = useState(true);
+  const lastYRef = useRef(0);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (reducedMotion) return;
+    lastYRef.current = window.scrollY;
+    const onScroll = () => {
+      const currentY = window.scrollY;
+      const delta = currentY - lastYRef.current;
+      if (currentY <= 100) {
+        setVisible(true);
+      } else if (delta > 8) {
+        setVisible(false);
+      } else if (delta < -4) {
+        setVisible(true);
+      }
+      lastYRef.current = currentY;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [reducedMotion]);
+
+  return reducedMotion ? true : visible;
+}
+
+/**
  * App shell header. Pinned at the top with a glassy backdrop so it floats
  * above content on every breakpoint. Desktop shows the full nav inline;
  * narrow viewports collapse it into a slide-down panel triggered by the
  * menu button. Only mounted inside the protected `(app)` route group.
+ *
+ * Auto-hide: header slides out of view when the user scrolls down past
+ * 100px and reveals as soon as they scroll up. This stops the pill from
+ * overlapping section headings on long-scroll pages like /edukasi.
+ * Reduced-motion users keep the header permanently visible (sliding the
+ * header without easing would be jarring for that audience).
  */
 export function FloatingHeader({ displayName, email }: FloatingHeaderProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const reducedMotion = useReducedMotionPreference();
+  const visible = useAutoHideOnScroll(reducedMotion);
 
   // `/map` owns its own header (`<MapHeader>`) so the global pill would
   // just double up at the top of the viewport. Bail out before any render
@@ -57,8 +119,17 @@ export function FloatingHeader({ displayName, email }: FloatingHeaderProps) {
     return null;
   }
 
+  // Mobile menu open should pin the header visible; otherwise honour the
+  // scroll-driven `visible` state.
+  const isHidden = !mobileOpen && !visible;
+
   return (
-    <header className="pt-safe-3 safe-x pointer-events-none fixed inset-x-0 top-0 z-header flex justify-center px-3 md:px-6">
+    <header
+      className={cn(
+        "pt-safe-3 safe-x pointer-events-none fixed inset-x-0 top-0 z-header flex justify-center px-3 transition-transform duration-300 ease-emphasized md:px-6",
+        isHidden && "-translate-y-full",
+      )}
+    >
       <div className="glass-panel pointer-events-auto flex w-fit max-w-full items-center gap-3 rounded-2xl px-3 py-2 md:px-4 md:py-2">
         <Link
           href="/map"
@@ -77,6 +148,11 @@ export function FloatingHeader({ displayName, email }: FloatingHeaderProps) {
             width={160}
             height={40}
             priority
+            // `height: auto` keeps Next/Image's intrinsic-size warning
+            // quiet when the responsive Tailwind class controls only the
+            // height. Width comes from `w-auto` so aspect ratio stays
+            // intact.
+            style={{ height: "auto" }}
             className="block h-8 w-auto dark:hidden sm:h-9 md:h-10"
           />
           <Image
@@ -85,6 +161,7 @@ export function FloatingHeader({ displayName, email }: FloatingHeaderProps) {
             width={160}
             height={40}
             priority
+            style={{ height: "auto" }}
             className="hidden h-8 w-auto dark:block sm:h-9 md:h-10"
           />
         </Link>

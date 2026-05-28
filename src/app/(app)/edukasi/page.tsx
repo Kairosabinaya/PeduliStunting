@@ -1,118 +1,49 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
-import { buttonVariants } from "@/components/primitives/button";
-import { EmptyState } from "@/components/primitives/empty-state";
-import { ErrorState } from "@/components/primitives/error-state";
-import { PageHeader } from "@/components/primitives/page-header";
-import {
-  EDUCATION_COPY,
-  EDUCATION_PAGE_SIZE,
-} from "@/config/education";
-import { fetchEducationArticles } from "@/lib/education-cache";
+import { EDUKASI_METADATA } from "@/config/edukasi";
+import { FootnoteList } from "@/components/features/edukasi/primitives";
+import { HeroSection } from "@/components/features/edukasi/act-01-hero/hero-section";
+import { StakesSection } from "@/components/features/edukasi/act-02-stakes/stakes-section";
+import { HistorySection } from "@/components/features/edukasi/act-03-history/history-section";
+import { DeterminantSection } from "@/components/features/edukasi/act-04-determinant/determinant-section";
+import { TimelineSection } from "@/components/features/edukasi/act-05-timeline/timeline-section";
+import { GuideSection } from "@/components/features/edukasi/act-06-guide/guide-section";
+import { MythsSection } from "@/components/features/edukasi/act-07-myths/myths-section";
+import { PosyanduSection } from "@/components/features/edukasi/act-08-posyandu/posyandu-section";
+import { QuizSection } from "@/components/features/edukasi/act-09-quiz/quiz-section";
+import { MapBridgeSection } from "@/components/features/edukasi/act-10-map-bridge/map-bridge-section";
+import { ClosingSection } from "@/components/features/edukasi/act-11-closing/closing-section";
 
-import { ArticleCard } from "./_components/article-card";
-import { EdukasiFilters } from "./_components/edukasi-filters";
-import { EdukasiPagination } from "./_components/edukasi-pagination";
-import { EdukasiSearch } from "./_components/edukasi-search";
-import {
-  buildEdukasiHref,
-  hasActiveEdukasiFilters,
-  parseEdukasiFilters,
-  toArticleListFilter,
-  type EdukasiSearchParams,
-} from "./_lib/filters";
+export const metadata: Metadata = EDUKASI_METADATA;
 
-export const metadata: Metadata = {
-  title: EDUCATION_COPY.title,
-  description: EDUCATION_COPY.description,
-};
-
-export const revalidate = 1800;
-
-interface EdukasiPageProps {
-  readonly searchParams: Promise<EdukasiSearchParams>;
-}
-
-export default async function EdukasiPage({ searchParams }: EdukasiPageProps) {
-  const filters = parseEdukasiFilters(await searchParams);
-  const result = await fetchEducationArticles(toArticleListFilter(filters));
-
-  const clearFiltersHref = buildEdukasiHref(filters, {
-    topic: "all",
-    agePresetKey: "all",
-    search: null,
-  });
-  const hasFilters = hasActiveEdukasiFilters(filters);
-
+// Phase 2 of the scrollytelling rewrite. Lihat docs/adr/0007. Sebelas
+// ACT mengikuti arc STAKES → BLUEPRINT → ACTION sesuai spec v2:
+//   ACT 1  Hero            — cold open + per-word reveal
+//   ACT 2  Stakes          — pinned 3-frame synapse + brain dev cards
+//   ACT 3  History         — line chart 2013–2024 + target 2029/2045
+//   ACT 4  Determinant     — 5 concentric rings + quintile chart
+//   ACT 5  Timeline (HPK)  — pinned 6-frame morph + day counter
+//   ACT 6  Guide           — tabs panduan per usia
+//   ACT 7  Myths           — 10 flip card mitos vs fakta
+//   ACT 8  Posyandu        — 4 layanan + imunisasi modal
+//   ACT 9  Quiz            — state machine 10 soal + tier
+//   ACT 10 Map bridge      — provinsi highlight + CTA ke /map
+//   ACT 11 Closing         — penutup + footnotes
+export default function EdukasiPage() {
   return (
-    <div className="space-y-6 md:space-y-8">
-      <PageHeader
-        eyebrow={EDUCATION_COPY.eyebrow}
-        title={EDUCATION_COPY.title}
-        description={EDUCATION_COPY.description}
-      />
-
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,2fr)] lg:items-start">
-        <EdukasiSearch filters={filters} />
-        <EdukasiFilters filters={filters} />
-      </div>
-
-      {!result.ok ? (
-        <ErrorState
-          title={EDUCATION_COPY.errorTitle}
-          description={EDUCATION_COPY.errorDescription}
-          action={
-            <Link
-              href="/edukasi"
-              prefetch={false}
-              className={buttonVariants({ variant: "primary" })}
-            >
-              {EDUCATION_COPY.errorAction}
-            </Link>
-          }
-        />
-      ) : result.value.items.length === 0 ? (
-        <EmptyState
-          title={EDUCATION_COPY.emptyTitle}
-          description={EDUCATION_COPY.emptyDescription}
-          action={
-            hasFilters ? (
-              <Link
-                href={clearFiltersHref}
-                prefetch={false}
-                className={buttonVariants({ variant: "outline" })}
-              >
-                {EDUCATION_COPY.emptyAction}
-              </Link>
-            ) : null
-          }
-        />
-      ) : (
-        <>
-          <p
-            className="text-sm text-muted-foreground"
-            role="status"
-            aria-live="polite"
-          >
-            {EDUCATION_COPY.resultsSummary(result.value.total)}
-          </p>
-          <ul role="list" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {result.value.items.map((article) => (
-              <li key={article.id} className="h-full">
-                <ArticleCard article={article} />
-              </li>
-            ))}
-          </ul>
-          <EdukasiPagination
-            filters={filters}
-            totalPages={Math.max(
-              1,
-              Math.ceil(result.value.total / EDUCATION_PAGE_SIZE),
-            )}
-          />
-        </>
-      )}
-    </div>
+    <>
+      <HeroSection />
+      <StakesSection />
+      <HistorySection />
+      <DeterminantSection />
+      <TimelineSection />
+      <GuideSection />
+      <MythsSection />
+      <PosyanduSection />
+      <QuizSection />
+      <MapBridgeSection />
+      <ClosingSection />
+      <FootnoteList />
+    </>
   );
 }

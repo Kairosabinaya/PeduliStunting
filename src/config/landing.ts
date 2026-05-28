@@ -80,7 +80,9 @@ export interface LandingFooter {
  * the file can swap variants without an additional fetch when the user toggles
  * the theme — the inactive variant is collapsed via Tailwind `dark:` utilities.
  */
-export const LANDING_LOGO: Readonly<Record<"light" | "dark", LandingBrandLogo>> = {
+export const LANDING_LOGO: Readonly<
+  Record<"light" | "dark", LandingBrandLogo>
+> = {
   light: {
     src: "/brand/logo-horizontal-color.png",
     width: 480,
@@ -142,13 +144,13 @@ export const LANDING_PILLARS: readonly LandingPillar[] = [
   },
   {
     key: "edukasi",
-    title: "Edukasi Buku KIA",
+    title: "1.000 Hari yang Mengubah Segalanya",
     description:
-      "Ringkasan modul resmi Buku Kesehatan Ibu dan Anak 2024 dikelompokkan per topik dan rentang usia anak.",
+      "Longform interaktif tentang pencegahan stunting berdasarkan Buku KIA 2024, SSGI 2024, dan kerangka WHO — dengan data terbaru dan kuis singkat.",
     bullets: [
-      "Topik gizi, imunisasi, perkembangan, kehamilan",
-      "Bahasa lugas, nyaman dibaca di ponsel",
-      "Setiap artikel mencantumkan halaman sumber",
+      "Sebelas babak naratif dari konsepsi hingga 2 tahun",
+      "Mitos vs fakta dengan sumber halaman KIA",
+      "Setiap angka punya footnote dan tautan sumber",
     ],
     tone: "accent",
   },

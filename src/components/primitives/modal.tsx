@@ -83,8 +83,13 @@ export function Modal({
       aria-describedby={description ? "modal-description" : undefined}
       onClick={handleBackdropClick}
       onCancel={handleCancel}
+      // `z-modal` (1100) sits above the global `z-header` (900) so a
+      // fixed-position navbar doesn't peek through the scrim. Native
+      // `<dialog>.showModal()` also promotes the element to the top
+      // browser layer, but explicit z-index helps for browsers that
+      // render dialog as a normal stacking context.
       className={cn(
-        "border border-border bg-surface p-0 text-foreground shadow-xl backdrop:bg-black/50",
+        "z-modal border border-border bg-surface p-0 text-foreground shadow-xl backdrop:bg-black/50",
         layout,
         className,
       )}
@@ -96,7 +101,10 @@ export function Modal({
               {title}
             </h2>
             {description ? (
-              <p id="modal-description" className="text-sm text-muted-foreground">
+              <p
+                id="modal-description"
+                className="text-sm text-muted-foreground"
+              >
                 {description}
               </p>
             ) : null}

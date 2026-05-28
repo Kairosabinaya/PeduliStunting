@@ -82,6 +82,19 @@ const config: Config = {
         danger: "rgb(var(--color-danger) / <alpha-value>)",
         info: "rgb(var(--color-info) / <alpha-value>)",
         focus: "rgb(var(--color-focus) / <alpha-value>)",
+        // Edukasi scrollytelling palette. Only the tokens that have no
+        // equivalent in the project palette live here; the page reuses
+        // `primary`, `primary-soft`, and `accent` for the core blues and
+        // green so the scrollytelling stays visually anchored to the rest
+        // of the app.
+        edu: {
+          warm: "rgb(var(--edu-hl-warm) / <alpha-value>)",
+          flag: "rgb(var(--edu-hl-danger) / <alpha-value>)",
+          "tint-warm": "rgb(var(--edu-tint-warm) / <alpha-value>)",
+          "tint-cream": "rgb(var(--edu-tint-cream) / <alpha-value>)",
+          night: "rgb(var(--edu-tint-night) / <alpha-value>)",
+          footnote: "rgb(var(--edu-fn-color) / <alpha-value>)",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
@@ -125,10 +138,16 @@ const config: Config = {
         fast: "120ms",
         DEFAULT: "180ms",
         slow: "260ms",
+        // Longer durations used by the /edukasi scrollytelling reveals and
+        // cinematic sequences. Avoid these on default UI transitions where
+        // the existing `fast`/`slow` already feel snappy.
+        emphatic: "600ms",
+        cinematic: "1200ms",
       },
       transitionTimingFunction: {
         standard: "cubic-bezier(0.2, 0, 0, 1)",
         emphasized: "cubic-bezier(0.3, 0, 0, 1)",
+        anticipate: "cubic-bezier(0.65, 0, 0.35, 1)",
       },
       zIndex: {
         base: "0",
@@ -156,10 +175,19 @@ const config: Config = {
           from: { opacity: "0", transform: "translateY(8px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        // Subtle vertical bounce used by the /edukasi scroll prompt. The
+        // amplitude is intentionally small (4px) so the cue is felt without
+        // becoming distracting.
+        "edu-bounce": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(4px)" },
+        },
       },
       animation: {
         "fade-in": "fade-in 180ms cubic-bezier(0.2, 0, 0, 1) both",
         "slide-in-up": "slide-in-up 220ms cubic-bezier(0.2, 0, 0, 1) both",
+        "edu-bounce":
+          "edu-bounce 1800ms cubic-bezier(0.65, 0, 0.35, 1) infinite",
       },
     },
   },

@@ -1,35 +1,32 @@
-import { PageHeader } from "@/components/primitives/page-header";
 import { Skeleton } from "@/components/primitives/skeleton";
-import {
-  EDUCATION_COPY,
-  EDUCATION_PAGE_SIZE,
-} from "@/config/education";
 
 /**
- * Route-level fallback. Mirrors the production layout (header + filters +
- * grid) so the swap to the real content does not shift the page. Pure server
- * markup — zero client JS.
+ * Skeleton for the /edukasi route. Matches the hero shape so the layout
+ * does not jump while the static page is being streamed. Below-the-fold
+ * ACTs render their own skeletons via their dynamic-import loading state.
  */
-export default function EdukasiLoading() {
+export default function Loading() {
   return (
     <div
-      className="space-y-6 md:space-y-8"
+      className="flex min-h-[88svh] flex-col justify-center bg-edu-tint-warm pb-16 pt-28 sm:pt-32"
       aria-busy="true"
       aria-live="polite"
     >
-      <PageHeader
-        eyebrow={EDUCATION_COPY.eyebrow}
-        title={EDUCATION_COPY.title}
-        description={EDUCATION_COPY.description}
-      />
-      <Skeleton className="h-12 w-full max-w-xl" />
-      <Skeleton className="h-40 w-full" />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: EDUCATION_PAGE_SIZE }).map((_, index) => (
-          <Skeleton key={index} className="h-56 w-full rounded-xl" />
-        ))}
+      <div className="container mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="grid items-center gap-12 lg:grid-cols-[3fr_2fr]">
+          <div>
+            <Skeleton className="h-3 w-48" />
+            <Skeleton className="mt-6 h-16 w-3/4" />
+            <Skeleton className="mt-4 h-16 w-2/3" />
+            <Skeleton className="mt-4 h-16 w-1/2" />
+            <Skeleton className="mt-10 h-5 w-80" />
+            <Skeleton className="mt-3 h-5 w-72" />
+          </div>
+          <div>
+            <Skeleton className="aspect-square w-full max-w-sm" />
+          </div>
+        </div>
       </div>
-      <span className="sr-only">{EDUCATION_COPY.loadingLabel}</span>
     </div>
   );
 }

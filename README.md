@@ -12,8 +12,12 @@ dari ponsel Android mid-range di jaringan lambat sampai desktop layar besar.
 1. **Map (`/map`)** — choropleth 514 kabupaten/kota × 4 tahun (2021–2024).
    MapLibre vector tile, palette hijau/kuning/merah. Bottom-sheet pattern di
    mobile, side panel di desktop. Search wilayah fuzzy dengan tap-to-zoom.
-2. **Edukasi (`/edukasi`)** — artikel Buku KIA 2024 dikelompokkan per topik
-   dan rentang usia, filter URL-driven.
+2. **Edukasi (`/edukasi`)** — scrollytelling longform 11 ACT
+   ("1.000 Hari yang Mengubah Segalanya") berbasis Buku KIA 2024 +
+   SSGI 2024. Hero per-word reveal, pinned 3-frame stakes, line chart
+   historis, concentric ring determinant, pinned 6-frame timeline,
+   tabbed panduan per usia, 10 flip card mitos, 10-soal kuis dengan
+   share, bridge ke peta nasional, footnote ber-sumber.
 3. **Tracker (`/tracker`)** — pemantauan pertumbuhan anak (BB, TB/PB, LK,
    LiLA), z-score otomatis vs LMS WHO, ceklis imunisasi dan milestone
    perkembangan.
@@ -189,10 +193,14 @@ a11y scan.
 
 ## 11. Performance & a11y baselines
 
-- Lighthouse Performance (mobile) ≥ 90
+- Lighthouse Performance (mobile) ≥ 90 — `/edukasi` punya target ≥ 85
+  per ADR-0007 (trade-off UI/UX vs bundle untuk scrollytelling)
 - Lighthouse Accessibility ≥ 95
 - LCP < 2.5s di Slow 3G, INP < 200ms, CLS < 0.1
-- Initial JS per route < 200 KB transferred
+- Initial JS per route < 200 KB transferred — `/edukasi` ~220-260 KB
+  diterima eksplisit via ADR-0007
 - Touch target minimum 44 × 44 px, no hover-only interactions
 - Tested di 360 / 768 / 1440 px sebelum PR
 - Color contrast 4.5:1 body, 3:1 large/UI (WCAG 2.1 AA)
+- `prefers-reduced-motion` respected pada animasi scrollytelling
+  (synapse canvas, pinned scroll morph, per-word reveal, flip cards)

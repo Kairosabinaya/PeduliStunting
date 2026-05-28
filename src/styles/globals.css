@@ -84,6 +84,19 @@
     --glass-highlight: 255 255 255;
     --glass-highlight-opacity: 0.55;
     --shadow-glass: 0 12px 32px -12px rgb(0 0 0 / 0.18);
+
+    /* Edukasi scrollytelling tokens. The primary blue / soft-blue / accent
+       green palette reuses existing brand tokens above (the canonical
+       project palette already covers the spec colours). The handful of
+       --edu-* tokens below add the warm yellow + danger red + night/cream
+       tints + footnote grey that the scrollytelling visual language needs
+       and that have no equivalent elsewhere in the design system. */
+    --edu-hl-warm: 234 192 109;
+    --edu-hl-danger: 218 88 79;
+    --edu-tint-warm: 254 250 245;
+    --edu-tint-cream: 250 246 240;
+    --edu-tint-night: 15 23 42;
+    --edu-fn-color: 122 128 138;
   }
 
   [data-theme="dark"] {
@@ -132,6 +145,16 @@
     --glass-highlight: 255 255 255;
     --glass-highlight-opacity: 0.06;
     --shadow-glass: 0 16px 40px -16px rgb(0 0 0 / 0.55);
+
+    /* Dark theme edukasi token overrides. The warm yellow stays vivid; the
+       danger red is nudged lighter so it sits readably on the near-black
+       background. Tints flip so cards remain darker than the canvas. */
+    --edu-hl-warm: 247 208 132;
+    --edu-hl-danger: 233 108 100;
+    --edu-tint-warm: 32 27 22;
+    --edu-tint-cream: 30 26 22;
+    --edu-tint-night: 235 240 248;
+    --edu-fn-color: 158 164 172;
   }
 
   html {
@@ -230,6 +253,105 @@
       background-color: rgb(var(--color-surface));
     }
   }
+
+  /* ─────────────────────── Edukasi scrollytelling type ──────────────────── */
+  /* Typography utilities scoped to the /edukasi scrollytelling page. The
+     scrollytelling visual language calls for display-size numerals and
+     refined eyebrow labels that the rest of the app does not use, so they
+     live here as named utilities instead of being inlined as Tailwind
+     arbitrary values (project guidelines §10). Values use clamp() so they breathe
+     between mobile and desktop without media queries. */
+
+  .display-stat {
+    font-weight: 800;
+    font-size: clamp(4rem, 14vw, 11rem);
+    line-height: 0.9;
+    letter-spacing: -0.06em;
+    font-feature-settings: "tnum" 1;
+    font-variant-numeric: tabular-nums;
+    color: rgb(var(--color-primary));
+  }
+
+  .display-stat-inline {
+    font-weight: 800;
+    font-size: 1em;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-feature-settings: "tnum" 1;
+    font-variant-numeric: tabular-nums;
+    color: rgb(var(--color-primary));
+  }
+
+  .display-headline {
+    font-weight: 800;
+    font-size: clamp(2.5rem, 7vw, 5.5rem);
+    line-height: 1;
+    letter-spacing: -0.035em;
+  }
+
+  .section-headline {
+    font-weight: 700;
+    font-size: clamp(1.875rem, 4vw, 3.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+  }
+
+  .lead-paragraph {
+    font-size: clamp(1.125rem, 1.5vw, 1.375rem);
+    line-height: 1.55;
+    font-weight: 400;
+    color: rgb(var(--color-muted-foreground));
+    max-width: 38ch;
+  }
+
+  .eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    /* `--color-primary` over the default background hits a ~6.3:1 contrast
+       ratio — passes WCAG AA for normal text (12px). The earlier choice of
+       `--color-primary-soft` (sky-400) only reached 2.53:1 which is a fail.
+       Eyebrow stays distinct from body text via uppercase + tracking. */
+    color: rgb(var(--color-primary));
+  }
+
+  .fn-ref {
+    font-size: 0.65em;
+    vertical-align: super;
+    line-height: 0;
+    color: rgb(var(--color-primary));
+    text-decoration: none;
+    margin-left: 0.125em;
+    font-feature-settings: "tnum" 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .fn-ref:hover,
+  .fn-ref:focus-visible {
+    text-decoration: underline;
+  }
+
+  /* Highlight the footnote that the user just jumped to via a `<sup>` link
+     so they can see which entry was the destination after the scroll
+     settles. Fade duration is long enough to register but short enough
+     not to be a permanent visual change. */
+  .footnotes li:target {
+    background-color: rgb(var(--color-primary) / 0.08);
+    border-left: 2px solid rgb(var(--color-primary));
+    padding-left: 0.75rem;
+    transition: background-color 600ms ease;
+  }
+
+  /* Native `<dialog>` opened via `showModal()` renders a `::backdrop`
+     pseudo-element in the top layer. Tailwind's `backdrop:bg-black/50`
+     utility *should* style this, but the variant was unreliable in
+     practice (some builds emit the selector before the dialog promotes
+     to the top layer). Explicit CSS guarantees the dim regardless. */
+  dialog::backdrop {
+    background-color: rgb(0 0 0 / 0.5);
+    backdrop-filter: blur(2px);
+  }
 }
 
 @layer utilities {
@@ -286,6 +408,16 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  /* Break out of an ancestor that constrains width via `max-w-*` +
+     horizontal padding. Used by /edukasi ACT sections so dark / cream
+     bands span the full viewport width instead of leaving light strips
+     on the left and right where the (app) layout container ends. */
+  .full-bleed {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
   }
 }
 
