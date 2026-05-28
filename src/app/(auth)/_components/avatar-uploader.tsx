@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  startTransition,
   useActionState,
   useCallback,
   useEffect,
@@ -100,7 +101,9 @@ export function AvatarUploader({ displayName, email }: AvatarUploaderProps) {
 
       const formData = new FormData();
       formData.set("file", file);
-      formAction(formData);
+      // `useActionState` requires the dispatcher to run inside a
+      // transition when called outside of a form `action` prop.
+      startTransition(() => formAction(formData));
     },
     [formAction],
   );

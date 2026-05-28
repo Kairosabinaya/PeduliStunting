@@ -4,6 +4,12 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   typedRoutes: true,
+  experimental: {
+    // Default body limit (1MB) too small for avatar uploads — bucket
+    // file_size_limit is 2 MiB so the Server Action needs headroom for
+    // the multipart boundary on top of the raw bytes.
+    serverActions: { bodySizeLimit: "4mb" },
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
