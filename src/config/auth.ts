@@ -112,7 +112,7 @@ export const CHECK_EMAIL_LABELS = {
   hint: "Tidak menemukan emailnya? Cek folder spam atau promosi.",
   emailSentTo: "Tautan terkirim ke",
   expiresHint:
-    "Tautan berlaku selama 24 jam. Jika kadaluarsa, gunakan tombol kirim ulang.",
+    "Tautan berlaku selama 15 menit. Jika kadaluarsa, daftar ulang dengan email yang sama.",
 } as const;
 
 export const AUTH_LABELS = {
