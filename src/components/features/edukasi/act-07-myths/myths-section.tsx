@@ -34,8 +34,14 @@ export function MythsSection() {
       </FadeInView>
 
       <div className="mt-12 grid auto-rows-fr gap-5 sm:grid-cols-2">
-        {EDUKASI_MYTHS.map((card) => (
-          <FadeInView key={card.id} as="div" offsetPx={12} className="h-full">
+        {EDUKASI_MYTHS.map((card, index) => (
+          <FadeInView
+            key={card.id}
+            as="div"
+            offsetPx={12}
+            delayMs={index * 80}
+            className="h-full"
+          >
             <MythCard card={card} />
           </FadeInView>
         ))}

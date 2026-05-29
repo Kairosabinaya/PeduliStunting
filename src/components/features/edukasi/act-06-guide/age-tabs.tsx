@@ -45,16 +45,27 @@ function GuideTabContent({ tab }: { readonly tab: GuideTab }) {
           ))}
         </div>
       ) : null}
-      <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      {/* Each column wraps as its own card. Previous layout had four bare
+          columns side-by-side at lg+, which under variable content lengths
+          read as a wall of bullets with no visual containment — "berantakan".
+          A 2-column grid with bordered cards gives clean groupings, breath,
+          and consistent rhythm regardless of list length. */}
+      <div className="mt-8 grid gap-4 md:grid-cols-2">
         {tab.columns.map((column) => (
-          <div key={column.heading}>
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-primary">
+          <div
+            key={column.heading}
+            className="rounded-2xl border border-border bg-surface/60 p-5 sm:p-6"
+          >
+            <h4 className="text-sm font-bold tracking-tight text-foreground">
               {column.heading}
             </h4>
-            <ul className="mt-3 space-y-2 text-sm leading-relaxed text-foreground/85">
+            <ul className="mt-4 space-y-2.5 text-sm leading-relaxed text-foreground/85">
               {column.items.map((item) => (
                 <li key={item} className="grid grid-cols-[1rem_1fr] gap-2">
-                  <span aria-hidden="true" className="text-primary">
+                  <span
+                    aria-hidden="true"
+                    className="leading-relaxed text-primary"
+                  >
                     •
                   </span>
                   <span>{item}</span>

@@ -37,8 +37,6 @@ import { CATEGORY_BADGE_TONE, type MapSource } from "@/config/map";
 import { cn } from "@/lib/cn";
 import { useMediaQuery } from "@/lib/use-media-query";
 
-import { useMapState } from "./map-state-context";
-
 const MAP_STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
 
 /**
@@ -108,6 +106,30 @@ export interface MapCanvasProps {
    */
   readonly regions: readonly RegionDto[];
   readonly className?: string;
+  /**
+   * Rendering mode. `"interactive"` (default) wires up the full pan/zoom,
+   * click-to-select, hover popup, one-shot geolocation, snap-back, and
+   * interaction-state callbacks. `"background"` renders the choropleth as a
+   * decorative backdrop only: all user input bindings, programmatic snap-back,
+   * geolocation prompt, and callbacks are disabled. Pick `"background"` for
+   * landing-before-login and auth-page backgrounds so the same MapLibre
+   * pipeline is reused without leaking interactivity into surfaces that
+   * should not respond to clicks or wheel events.
+   */
+  readonly mode?: "interactive" | "background";
+  /**
+   * Selection callback fired on click (region or ocean-deselect) and on the
+   * one-shot geolocation snap-in. Required in `"interactive"` mode; ignored
+   * in `"background"` mode where no callbacks fire.
+   */
+  readonly onSelect?: (kodeBps: string | null) => void;
+  /**
+   * Fires `true` when the user begins a camera gesture (drag, wheel, pinch)
+   * and `false` when the gesture ends. Programmatic camera moves
+   * (`fitBounds`, `easeTo`) do NOT trigger this. Required in `"interactive"`
+   * mode; ignored in `"background"` mode.
+   */
+  readonly onInteractionChange?: (interacting: boolean) => void;
 }
 
 /**
@@ -188,8 +210,11 @@ export function MapCanvas({
   bounds,
   regions,
   className,
+  mode = "interactive",
+  onSelect,
+  onInteractionChange,
 }: MapCanvasProps) {
-  const { setWilayah, setIsInteracting } = useMapState();
+  const isInteractive = mode === "interactive";
   // Bounds are wrapped in a ref so the long-lived event listeners (onIdle,
   // onLoad fitBounds) always read the current value without re-binding on
   // every render — but the bounds change so rarely (only when regions
@@ -383,6 +408,10 @@ export function MapCanvas({
   // portion of the viewport (Google Maps "tap-to-zoom" behaviour).
   const handleClick = useCallback(
     (event: MapLayerMouseEvent) => {
+      // Background mode treats clicks as inert. We still register the
+      // handler so `<Map>` props stay type-stable, but neither selection nor
+      // camera movement should follow from a tap.
+      if (!isInteractive) return;
       // Tiny features (Kepulauan Seribu, Sabang, atolls) are nearly
       // impossible to hit with a point query at low zoom. If the exact
       // cursor pixel missed every polygon, expand the hit-test to a small
@@ -404,7 +433,7 @@ export function MapCanvas({
         // Click landed on ocean / outside any region polygon. Deselect AND
         // ease the camera back to the dataset-derived Indonesia bbox so the
         // user "zooms out" with a single click rather than having to drag.
-        setWilayah(null);
+        onSelect?.(null);
         event.target.fitBounds(boundsRef.current as LngLatBoundsLike, {
           padding: FIT_BOUNDS_PADDING_PX,
           duration: 800,
@@ -417,7 +446,7 @@ export function MapCanvas({
       // handles search-driven selections doesn't fire a second fitBounds
       // for the same target.
       zoomedKodeBpsRef.current = kodeBps;
-      setWilayah(kodeBps);
+      onSelect?.(kodeBps);
       if (feature.geometry) {
         const bbox = computeFeatureBbox(feature.geometry as Geometry);
         if (bbox) {
@@ -431,7 +460,7 @@ export function MapCanvas({
         }
       }
     },
-    [setWilayah],
+    [isInteractive, onSelect],
   );
 
   /**
@@ -535,6 +564,11 @@ export function MapCanvas({
    */
   useEffect(() => {
     if (!mapReady) return;
+    // Background mode renders the choropleth as a decorative backdrop only:
+    // no hover popup, no snap-back, no interaction-state plumbing. Skipping
+    // the entire effect avoids paying for `setFeatureState` writes and
+    // `requestAnimationFrame` loops that nobody will read.
+    if (!isInteractive) return;
     const ref = mapRef.current;
     const map = ref?.getMap();
     if (!map) return;
@@ -680,11 +714,11 @@ export function MapCanvas({
     // programmatic camera moves it is `undefined`, so the listener no-ops.
     const onMoveStart = (event: { originalEvent?: unknown }) => {
       if (!event.originalEvent) return;
-      setIsInteracting(true);
+      onInteractionChange?.(true);
     };
     const onMoveEnd = (event: { originalEvent?: unknown }) => {
       if (!event.originalEvent) return;
-      setIsInteracting(false);
+      onInteractionChange?.(false);
     };
 
     // Hover listeners only matter on devices that can actually hover. On
@@ -710,7 +744,7 @@ export function MapCanvas({
       map.off("movestart", onMoveStart);
       map.off("moveend", onMoveEnd);
     };
-  }, [canHover, mapReady, setIsInteracting]);
+  }, [canHover, isInteractive, mapReady, onInteractionChange]);
 
   /**
    * Re-apply basemap paint properties (sea + land bg) whenever the user
@@ -744,6 +778,10 @@ export function MapCanvas({
   const geolocationAttemptedRef = useRef(false);
   useEffect(() => {
     if (!mapReady) return;
+    // Background mode skips the geolocation prompt entirely. Marketing
+    // surfaces (landing, auth) must not trigger a permission dialog on first
+    // paint — that would be hostile UX before the user has even signed up.
+    if (!isInteractive) return;
     if (geolocationAttemptedRef.current) return;
     geolocationAttemptedRef.current = true;
     if (typeof navigator === "undefined" || !navigator.geolocation) return;
@@ -772,7 +810,7 @@ export function MapCanvas({
       const feature = matches[0];
       const kodeBps = feature?.properties?.kodeBps;
       if (typeof kodeBps !== "string") return true;
-      setWilayah(kodeBps);
+      onSelect?.(kodeBps);
       if (feature?.geometry) {
         const bbox = computeFeatureBbox(feature.geometry as Geometry);
         if (bbox) {
@@ -809,7 +847,7 @@ export function MapCanvas({
       // mobile, short enough that the user doesn't wait forever.
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 5 * 60 * 1000 },
     );
-  }, [mapReady, setWilayah]);
+  }, [isInteractive, mapReady, onSelect]);
 
   return (
     <div className={cn("h-full w-full", className)}>
@@ -825,7 +863,7 @@ export function MapCanvas({
           zoom: 4,
         }}
         mapStyle={MAP_STYLE_URL}
-        interactiveLayerIds={[REGION_FILL_LAYER_ID]}
+        interactiveLayerIds={isInteractive ? [REGION_FILL_LAYER_ID] : []}
         onClick={handleClick}
         onLoad={(event) => {
           // Snap the camera to the dataset-derived tight Indonesia bbox.
@@ -839,11 +877,14 @@ export function MapCanvas({
         }}
         attributionControl={false}
         cooperativeGestures={false}
-        scrollZoom={true}
+        scrollZoom={isInteractive}
+        dragPan={isInteractive}
         dragRotate={false}
         pitchWithRotate={false}
-        touchZoomRotate={true}
+        touchZoomRotate={isInteractive}
         touchPitch={false}
+        doubleClickZoom={isInteractive}
+        keyboard={isInteractive}
         maxZoom={9}
         minZoom={2}
       >
@@ -875,7 +916,7 @@ export function MapCanvas({
           />
         </Source>
 
-        {canHover && hover ? (
+        {isInteractive && canHover && hover ? (
           <Popup
             longitude={hover.lng}
             latitude={hover.lat}

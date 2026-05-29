@@ -29,7 +29,7 @@ import {
   type MapFeatureProperties,
 } from "./map-data";
 import { AccountMenuPanel } from "./account-menu-panel";
-import { MapCanvas } from "./map-canvas";
+import { MapCanvasInteractive } from "./map-canvas-interactive";
 import { MapHeader } from "./map-header";
 import { MapInfoCard } from "./map-info-card";
 import { RegionalSummaryCard } from "./regional-summary-card";
@@ -273,7 +273,7 @@ export function MapShell({
   return (
     <>
       <div className="fixed inset-0 z-0 overflow-hidden">
-        <MapCanvas
+        <MapCanvasInteractive
           featureCollection={featureCollection}
           dataKey={`${tahun}:${defaultModel?.version ?? "none"}`}
           source={effectiveSource}

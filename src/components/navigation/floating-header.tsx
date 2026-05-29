@@ -8,17 +8,27 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { signOut } from "@/app/(auth)/actions";
 import { PRIMARY_NAV } from "@/config/navigation";
 import { APP_NAME } from "@/config/app";
+import { SIGN_IN_ROUTE } from "@/config/routes";
 import { Avatar } from "@/components/primitives/avatar";
-import { Button } from "@/components/primitives/button";
+import { Button, buttonVariants } from "@/components/primitives/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/cn";
 
+/**
+ * Identity bundle for the header. `null` means the visitor is signed out —
+ * the header renders sign-in / sign-up CTAs instead of the avatar dropdown.
+ * Resolving identity in the parent Server Component (and passing it down)
+ * avoids a client-side auth waterfall + flash on every navigation.
+ */
+export interface FloatingHeaderSession {
+  readonly displayName: string | null;
+  readonly email: string | null;
+  readonly avatarUrl: string | null;
+  readonly isAdmin: boolean;
+}
+
 interface FloatingHeaderProps {
-  readonly displayName?: string | null | undefined;
-  readonly email?: string | null | undefined;
-  readonly avatarUrl?: string | null | undefined;
-  /** Reveal the admin link inside the avatar dropdown. */
-  readonly isAdmin?: boolean | undefined;
+  readonly session: FloatingHeaderSession | null;
 }
 
 function isActive(pathname: string | null, href: string): boolean {
@@ -93,21 +103,18 @@ function useAutoHideOnScroll(reducedMotion: boolean): boolean {
  * Reduced-motion users keep the header permanently visible (sliding the
  * header without easing would be jarring for that audience).
  */
-export function FloatingHeader({
-  displayName,
-  email,
-  avatarUrl,
-  isAdmin = false,
-}: FloatingHeaderProps) {
+export function FloatingHeader({ session }: FloatingHeaderProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const reducedMotion = useReducedMotionPreference();
   const visible = useAutoHideOnScroll(reducedMotion);
 
-  // `/map` owns its own header (`<MapHeader>`) so the global pill would
-  // just double up at the top of the viewport. Bail out before any render
-  // work so we don't fight the map header for the fixed-top region.
-  if (pathname?.startsWith("/map")) {
+  // Authenticated `/map` owns its own header (`<MapHeader>`, which packs the
+  // search input + year row that only make sense on the interactive surface)
+  // so we suppress the global pill there to avoid stacking two glass pills
+  // at the top. Unauthenticated `/map` is the landing-before-login surface
+  // and has no MapHeader, so the global pill IS the header and must render.
+  if (session && pathname?.startsWith("/map")) {
     return null;
   }
 
@@ -140,12 +147,13 @@ export function FloatingHeader({
             width={160}
             height={40}
             priority
-            // `height: auto` keeps Next/Image's intrinsic-size warning
-            // quiet when the responsive Tailwind class controls only the
-            // height. Width comes from `w-auto` so aspect ratio stays
-            // intact.
-            style={{ height: "auto" }}
-            className="block h-8 w-auto dark:hidden sm:h-9 md:h-10"
+            // Inline `width: auto` silences the Next/Image intrinsic-size
+            // warning — Tailwind locks the *height* via className so width
+            // must be left to scale from the aspect ratio. The previous
+            // `height: auto` inline was overriding the class entirely and
+            // rendering the wordmark at intrinsic 40 px.
+            style={{ width: "auto" }}
+            className="block h-6 dark:hidden"
           />
           <Image
             src="/brand/logo-horizontal-white.png"
@@ -153,8 +161,8 @@ export function FloatingHeader({
             width={160}
             height={40}
             priority
-            style={{ height: "auto" }}
-            className="hidden h-8 w-auto dark:block sm:h-9 md:h-10"
+            style={{ width: "auto" }}
+            className="hidden h-6 dark:block"
           />
         </Link>
 
@@ -184,12 +192,16 @@ export function FloatingHeader({
 
         <div className="flex items-center gap-1">
           <ThemeToggle />
-          <AvatarMenu
-            displayName={displayName ?? null}
-            email={email ?? null}
-            avatarUrl={avatarUrl ?? null}
-            isAdmin={isAdmin}
-          />
+          {session ? (
+            <AvatarMenu
+              displayName={session.displayName}
+              email={session.email}
+              avatarUrl={session.avatarUrl}
+              isAdmin={session.isAdmin}
+            />
+          ) : (
+            <UnauthenticatedActions />
+          )}
           <Button
             type="button"
             variant="ghost"
@@ -251,6 +263,34 @@ export function FloatingHeader({
         </nav>
       ) : null}
     </header>
+  );
+}
+
+/**
+ * Sign-in / sign-up CTA pair shown in place of the avatar when the visitor
+ * is unauthenticated (landing-before-login at `/map`). Mobile keeps only the
+ * sign-up button visible to preserve pill width; sign-in remains reachable
+ * from the auth flow itself ("Sudah punya akun? Masuk" links).
+ */
+function UnauthenticatedActions() {
+  return (
+    <div className="flex items-center gap-1">
+      <Link
+        href={SIGN_IN_ROUTE}
+        className={cn(
+          buttonVariants({ variant: "ghost", size: "sm" }),
+          "hidden sm:inline-flex",
+        )}
+      >
+        Masuk
+      </Link>
+      <Link
+        href="/auth/sign-up"
+        className={buttonVariants({ variant: "primary", size: "sm" })}
+      >
+        Daftar
+      </Link>
+    </div>
   );
 }
 

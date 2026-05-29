@@ -12,10 +12,7 @@ import {
   asUserId,
   type ImmunizationCode,
 } from "@/domain/shared/ids";
-import {
-  asDateOnly,
-  isDateOnly,
-} from "@/domain/shared/date-only";
+import { asDateOnly, isDateOnly } from "@/domain/shared/date-only";
 import {
   CHILD_IMMUNIZATION_STATUSES,
   ChildImmunization,
@@ -32,10 +29,7 @@ import {
   Milestone,
   type MilestoneDomain,
 } from "@/domain/health-plan/entities/milestone";
-import {
-  childIdSchema,
-  dateOnlySchema,
-} from "./tracking";
+import { childIdSchema, dateOnlySchema } from "./tracking";
 
 /* ─────────────────────────── input parsing ─────────────────────────── */
 
@@ -101,6 +95,7 @@ export function mapImmunizationRow(
       doseNumber: row.dose_number,
       recommendedAgeMonths: row.recommended_age_months,
       notes: row.notes,
+      prevents: row.prevents,
       displayOrder: row.display_order,
     }),
   );
@@ -114,9 +109,7 @@ export function mapChildImmunizationRow(
     return err(AppErrors.validation(`status tidak valid: ${row.status}`));
   }
   if (row.given_at !== null && !isDateOnly(row.given_at)) {
-    return err(
-      AppErrors.validation(`given_at tidak valid: ${row.given_at}`),
-    );
+    return err(AppErrors.validation(`given_at tidak valid: ${row.given_at}`));
   }
   return ok(
     new ChildImmunization({

@@ -28,10 +28,12 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="min-h-dvh bg-background">
       <FloatingHeader
-        displayName={profile.displayName ?? undefined}
-        email={session.email ?? undefined}
-        avatarUrl={profile.avatarUrl ?? undefined}
-        isAdmin
+        session={{
+          displayName: profile.displayName ?? null,
+          email: session.email ?? null,
+          avatarUrl: profile.avatarUrl ?? null,
+          isAdmin: true,
+        }}
       />
       <div className="pb-12 pt-24 md:pt-28">
         <div className="mx-auto w-full max-w-6xl px-4 md:px-6">{children}</div>

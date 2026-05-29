@@ -79,6 +79,11 @@
        --glass-bg-opacity > 0.6 prevents legibility issues over busy maps. */
     --glass-bg: 255 255 255;
     --glass-bg-opacity: 0.72;
+    /* Stronger opacity for surfaces that sit over the bold Google-palette
+       choropleth (auth card, landing chapter cards). The default 0.72 reads
+       fine over a basemap but loses legibility over Sabang-red or Sedang-
+       yellow tiles; 0.85 keeps body text comfortably above WCAG AA. */
+    --glass-bg-opacity-strong: 0.85;
     --glass-border: 18 20 22;
     --glass-border-opacity: 0.06;
     --glass-highlight: 255 255 255;
@@ -97,6 +102,17 @@
     --edu-tint-cream: 250 246 240;
     --edu-tint-night: 15 23 42;
     --edu-fn-color: 122 128 138;
+
+    /* Quintile sequential ramp (ACT 4 disparitas ekonomi). Single-hue
+       brand ladder Q1 (paling rentan) → Q5 (paling sejahtera). Defined
+       as theme-aware variables so the dark theme override (further below)
+       can invert the ladder — brand-700 is too dark for dark-mode bg, so
+       in dark we light it up to brand-300. */
+    --quintile-1: var(--color-brand-700);
+    --quintile-2: var(--color-brand-500);
+    --quintile-3: var(--color-brand-400);
+    --quintile-4: var(--color-brand-300);
+    --quintile-5: var(--color-brand-200);
   }
 
   [data-theme="dark"] {
@@ -140,6 +156,7 @@
 
     --glass-bg: 22 25 29;
     --glass-bg-opacity: 0.58;
+    --glass-bg-opacity-strong: 0.72;
     --glass-border: 255 255 255;
     --glass-border-opacity: 0.08;
     --glass-highlight: 255 255 255;
@@ -155,6 +172,17 @@
     --edu-tint-cream: 30 26 22;
     --edu-tint-night: 235 240 248;
     --edu-fn-color: 158 164 172;
+
+    /* Quintile ramp inverted for dark mode: brand-700 (deep navy) is
+       indistinguishable from the near-black surface, so the ladder is
+       reversed in dark so Q1 still reads as the dominant color but
+       trends LIGHTER as you go down. Maintains the ordinal logic — the
+       active quintile remains the visual focus regardless of theme. */
+    --quintile-1: var(--color-brand-300);
+    --quintile-2: var(--color-brand-400);
+    --quintile-3: var(--color-brand-500);
+    --quintile-4: var(--color-brand-600);
+    --quintile-5: var(--color-brand-700);
   }
 
   html {
@@ -250,6 +278,31 @@
     (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
   ) {
     .glass-panel {
+      background-color: rgb(var(--color-surface));
+    }
+  }
+
+  /**
+   * Stronger variant for content cards that overlay the saturated
+   * choropleth (auth pages, landing chapters). Same Apple "thick" material
+   * tuning, just denser background so paragraph text and form labels stay
+   * comfortably readable over Sabang-red / Sedang-yellow tiles. Slightly
+   * larger blur (28px vs 24px) gives more separation from the busy map.
+   */
+  .glass-panel-strong {
+    background-color: rgb(var(--glass-bg) / var(--glass-bg-opacity-strong));
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgb(var(--glass-border) / var(--glass-border-opacity));
+    box-shadow:
+      inset 0 1px 0 0
+        rgb(var(--glass-highlight) / var(--glass-highlight-opacity)),
+      var(--shadow-glass);
+  }
+  @supports not (
+    (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+  ) {
+    .glass-panel-strong {
       background-color: rgb(var(--color-surface));
     }
   }
@@ -418,6 +471,40 @@
     width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
+  }
+
+  /* Scroll-snap container for the 11-ACT scrollytelling. Applied as a
+     wrapper class on `<EdukasiScrollytelling>` consumers (auth /edukasi
+     and unauth /map landing) so the snap behaviour is scoped — the rest
+     of the app keeps normal scroll.
+
+     `proximity` (not `mandatory`) is the deliberate choice: pinned
+     sections (ACT 2, 5, and Phase 3 ACT 3/4/11) reserve hundreds of
+     viewport heights of scroll for their internal frame progression.
+     A `mandatory` snap would refuse to release the user mid-progression
+     because the closest snap point is still "back to the start of the
+     pinned section". Proximity lets the user scroll through pinned
+     content freely while still snapping at section boundaries when they
+     coast to a stop.
+
+     Per-section `scroll-snap-align: start` is applied via Tailwind on
+     each ACT root. Pinned section outer tracks use `start` only, NOT
+     per-frame, so the snap stops at section boundaries — never traps
+     the user inside a long pinned scroll. */
+  .snap-scrollytelling {
+    scroll-snap-type: y proximity;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    /* Reduced-motion users get unbroken free-scroll — no snap jolts. */
+    .snap-scrollytelling {
+      scroll-snap-type: none;
+    }
+  }
+
+  /* Per-section snap align utility. Applied to each ACT root section. */
+  .snap-act {
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
   }
 
   /* ───────────────────── Auth page typography & overlays ─────────────────

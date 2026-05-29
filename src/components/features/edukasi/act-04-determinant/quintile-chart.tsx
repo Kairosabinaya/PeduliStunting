@@ -1,5 +1,17 @@
 "use client";
 
+/**
+ * Quintile prevalence chart. Brand-ramp palette (Q1 deepest blue ⇢ Q5
+ * lightest) so the ordinal mapping reads at a glance — Q1 is the most
+ * economically vulnerable group, Q5 the most prosperous, and the depth
+ * of color mirrors that vulnerability.
+ *
+ * When `activeIndex` is supplied (driven from the parent's scroll
+ * progress), only that bar paints in full color; the others fade to a
+ * muted state. Pass `null` (or omit the prop) for the static "all bars
+ * visible" rendering used in the reduced-motion fallback.
+ */
+
 import {
   Bar,
   BarChart,
@@ -7,7 +19,6 @@ import {
   Cell,
   ReferenceLine,
   ResponsiveContainer,
-  Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
@@ -26,40 +37,31 @@ interface ChartDatum {
   readonly note: string;
 }
 
-const TONE_COLOR: readonly string[] = [
-  "rgb(var(--edu-hl-danger))",
-  "rgb(var(--color-warning))",
-  "rgb(var(--color-primary))",
-  "rgb(var(--color-primary-soft))",
-  "rgb(var(--color-accent))",
+/**
+ * Single-hue sequential brand ramp from Q1 (most vulnerable) to Q5 (most
+ * prosperous). Pulled from `--quintile-*` CSS variables which are theme-
+ * aware (see `globals.css`): light mode goes brand-700 → brand-200, dark
+ * mode is the inverted ladder so the deepest color still reads against
+ * the near-black background.
+ */
+const QUINTILE_COLORS: readonly string[] = [
+  "rgb(var(--quintile-1))",
+  "rgb(var(--quintile-2))",
+  "rgb(var(--quintile-3))",
+  "rgb(var(--quintile-4))",
+  "rgb(var(--quintile-5))",
 ];
 
-function renderTooltip(rawProps: unknown): React.ReactNode {
-  if (typeof rawProps !== "object" || rawProps === null) return null;
-  const props = rawProps as {
-    readonly active?: boolean;
-    readonly payload?: readonly { readonly payload?: ChartDatum }[];
-  };
-  if (!props.active || !props.payload || props.payload.length === 0)
-    return null;
-  const datum = props.payload[0]?.payload;
-  if (!datum) return null;
-  return (
-    <div className="glass-panel rounded-lg px-3 py-2 text-xs leading-relaxed">
-      <p className="font-semibold text-primary">{datum.label}</p>
-      <p className="mt-1 tabular-nums text-foreground">
-        {datum.value.toLocaleString("id-ID", {
-          minimumFractionDigits: 1,
-          maximumFractionDigits: 1,
-        })}
-        %
-      </p>
-      <p className="mt-1 text-muted-foreground">{datum.note}</p>
-    </div>
-  );
+export interface QuintileChartProps {
+  /**
+   * Index 0..4 of the currently highlighted quintile. When supplied,
+   * non-active bars fade to ~25% opacity so the active quintile reads as
+   * the focal point. `null` (or omit) keeps every bar at full opacity.
+   */
+  readonly activeIndex?: number | null;
 }
 
-export function QuintileChart() {
+export function QuintileChart({ activeIndex = null }: QuintileChartProps) {
   const data: ChartDatum[] = INCOME_QUINTILES.map(
     (q: IncomeQuintilePoint): ChartDatum => ({
       id: q.id,
@@ -98,6 +100,7 @@ export function QuintileChart() {
               tick={{
                 fill: "rgb(var(--color-muted-foreground))",
                 fontSize: 12,
+                fontFamily: "var(--font-sans)",
               }}
               tickLine={false}
               axisLine={{ stroke: "rgb(var(--color-border))" }}
@@ -108,15 +111,12 @@ export function QuintileChart() {
               tick={{
                 fill: "rgb(var(--color-muted-foreground))",
                 fontSize: 12,
+                fontFamily: "var(--font-sans)",
               }}
               tickLine={false}
               axisLine={false}
               width={42}
               domain={[0, 35]}
-            />
-            <Tooltip
-              cursor={{ fill: "rgb(var(--color-primary) / 0.06)" }}
-              content={renderTooltip}
             />
             <ReferenceLine
               y={INCOME_QUINTILE_NATIONAL}
@@ -126,16 +126,21 @@ export function QuintileChart() {
                 value: DETERMINANT_COPY.quintileNationalLabel,
                 position: "insideTopRight",
                 fontSize: 11,
+                fontFamily: "var(--font-sans)",
                 fill: "rgb(var(--color-foreground) / 0.7)",
               }}
             />
             <Bar dataKey="value" radius={[8, 8, 0, 0]}>
               {data.map((entry, index) => {
-                const fill: string =
-                  TONE_COLOR[index] ??
-                  TONE_COLOR[2] ??
-                  "rgb(var(--color-primary))";
-                return <Cell key={entry.id} fill={fill} />;
+                const fill = QUINTILE_COLORS[index] ?? "rgb(var(--quintile-3))";
+                const isActive = activeIndex === null || index === activeIndex;
+                return (
+                  <Cell
+                    key={entry.id}
+                    fill={fill}
+                    fillOpacity={isActive ? 1 : 0.22}
+                  />
+                );
               })}
             </Bar>
           </BarChart>

@@ -11,7 +11,7 @@ import type {
 import { makeUseCases } from "@/composition";
 import { asModelVersion, type ModelVersion } from "@/domain/shared/ids";
 import { asYear } from "@/domain/region/value-objects/year";
-import type { SupportedYear } from "@/config/years";
+import { MAX_YEAR, type SupportedYear } from "@/config/years";
 import { createSupabaseAdminClient } from "@/infrastructure/supabase/server-client";
 
 /**
@@ -192,6 +192,36 @@ export const getCachedDefaultModel = unstable_cache(
   ["map:default-model:v3"],
   { tags: ["model-metadata"], revalidate: 60 * 60 },
 );
+
+/**
+ * Lightweight dataset for the unauthenticated landing-before-login surface
+ * at `/map`. Returns only what is needed to render the choropleth as a
+ * decorative background: regions, boundaries, the tight Indonesia bbox, and
+ * indicators for the latest available year. Predictions and historical years
+ * are intentionally omitted — they belong to the interactive variant.
+ *
+ * Composes the existing cache layer (`getCachedRegions`,
+ * `getCachedBoundaries`, `getCachedRegionsBounds`, `getCachedIndicatorsByYear`)
+ * so warming this entry warms the interactive entry too and vice versa.
+ */
+export async function getCachedLandingMapData(): Promise<{
+  readonly regions: readonly RegionDto[];
+  readonly boundaries: readonly RegionBoundaryDto[];
+  readonly bounds: readonly [
+    readonly [number, number],
+    readonly [number, number],
+  ];
+  readonly indicators: readonly RegionIndicatorsDto[];
+  readonly year: SupportedYear;
+}> {
+  const [regions, boundaries, bounds, indicators] = await Promise.all([
+    getCachedRegions(),
+    getCachedBoundaries(),
+    getCachedRegionsBounds(),
+    getCachedIndicatorsByYear(MAX_YEAR),
+  ]);
+  return { regions, boundaries, bounds, indicators, year: MAX_YEAR };
+}
 
 export const getCachedPredictionsByYear = unstable_cache(
   async (

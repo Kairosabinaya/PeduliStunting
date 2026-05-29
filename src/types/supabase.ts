@@ -270,6 +270,7 @@ export type Database = {
           dose_number: number | null;
           name: string;
           notes: string | null;
+          prevents: string | null;
           recommended_age_months: number | null;
           updated_at: string;
         };
@@ -280,6 +281,7 @@ export type Database = {
           dose_number?: number | null;
           name: string;
           notes?: string | null;
+          prevents?: string | null;
           recommended_age_months?: number | null;
           updated_at?: string;
         };
@@ -290,6 +292,7 @@ export type Database = {
           dose_number?: number | null;
           name?: string;
           notes?: string | null;
+          prevents?: string | null;
           recommended_age_months?: number | null;
           updated_at?: string;
         };

@@ -125,7 +125,8 @@ export const MEASUREMENTS_COPY = {
   submit: "Simpan pengukuran",
   submitting: "Menyimpan...",
   successMessage: "Pengukuran berhasil disimpan.",
-  genericError: "Tidak bisa menyimpan pengukuran. Periksa input lalu coba lagi.",
+  genericError:
+    "Tidak bisa menyimpan pengukuran. Periksa input lalu coba lagi.",
 } as const;
 
 export const IMMUNIZATION_COPY = {
@@ -216,12 +217,14 @@ export const SD_CLASS_DISPLAY: Record<SdClass, SdClassDisplay> = {
   makrosefali: { label: "Makrosefali", tone: "warning" },
 };
 
-export const IMMUNIZATION_STATUS_LABEL: Record<ChildImmunizationStatus, string> =
-  {
-    pending: "Belum diberikan",
-    done: "Sudah diberikan",
-    skipped: "Dilewati",
-  };
+export const IMMUNIZATION_STATUS_LABEL: Record<
+  ChildImmunizationStatus,
+  string
+> = {
+  pending: "Belum diberikan",
+  done: "Sudah diberikan",
+  skipped: "Dilewati",
+};
 
 export const MILESTONE_STATUS_LABEL: Record<ChildMilestoneStatus, string> = {
   not_checked: "Belum dicek",
@@ -235,3 +238,96 @@ export const MILESTONE_DOMAIN_LABEL: Record<MilestoneDomain, string> = {
   language: "Bahasa",
   social: "Sosial & kemandirian",
 };
+
+/* ─────────────────────────── tren pertumbuhan ─────────────────────────── */
+
+export const TREND_COPY = {
+  notEnough: {
+    label: "Belum cukup data",
+    description: "Butuh minimal dua pengukuran dengan indikator yang sama.",
+    tone: "neutral" as const,
+  },
+  improving: {
+    label: "Membaik",
+    description: "Z-score naik dibanding pengukuran sebelumnya.",
+    tone: "success" as const,
+  },
+  stable: {
+    label: "Stabil",
+    description: "Z-score relatif sama dengan pengukuran sebelumnya.",
+    tone: "primary" as const,
+  },
+  monitor: {
+    label: "Perlu pantau",
+    description: "Z-score menurun dibanding pengukuran sebelumnya.",
+    tone: "warning" as const,
+  },
+} as const;
+
+/* ─────────────────────────── fun-size copy ─────────────────────────── */
+
+export const FUN_SIZE_COPY = {
+  title: "Sekilas perbandingan",
+  description:
+    "Sekadar bayangan supaya angka pengukuran lebih mudah dikira-kira di rumah.",
+  weightFormat: (kg: number, label: string) =>
+    `Berat ${kg.toFixed(1)} kg ${label}.`,
+  heightFormat: (cm: number, label: string) =>
+    `Tinggi ${cm.toFixed(1)} cm ${label}.`,
+  emptyState: "Tambah pengukuran untuk melihat perbandingan ini.",
+} as const;
+
+/* ─────────────────────────── detail sheet copy ─────────────────────────── */
+
+export const GROWTH_DETAIL_COPY = {
+  title: "Detail pengukuran",
+  dateLabel: "Tanggal pengukuran",
+  ageLabel: "Usia saat pengukuran",
+  ageUnit: "bulan",
+  indicatorsHeading: "Indikator",
+  weightLabel: "Berat",
+  heightLabel: "Tinggi/Panjang",
+  headCircumferenceLabel: "Lingkar kepala",
+  muacLabel: "LiLA",
+  notesLabel: "Catatan",
+  noNotes: "Tidak ada catatan.",
+  close: "Tutup",
+} as const;
+
+/* ─────────────────────────── module card copy ─────────────────────────── */
+
+/**
+ * Copy untuk Module Card dashboard `/tracker/anak/[childId]`. Setiap modul
+ * adalah pintu masuk ke sub-route detail; status line di kartu adalah
+ * ringkasan satu-baris.
+ */
+export const MODULE_CARD_COPY = {
+  growth: {
+    title: "Pertumbuhan",
+    description: "Status terkini menurut standar WHO.",
+    cta: "Lihat detail pengukuran",
+    emptyStatus: "Belum ada pengukuran.",
+  },
+  immunization: {
+    title: "Imunisasi",
+    description: "Progress vaksinasi sesuai jadwal Buku KIA.",
+    cta: "Buka jadwal imunisasi",
+    emptyStatus: "Belum ada catatan imunisasi.",
+    statusFormat: (done: number, total: number) =>
+      `${done} dari ${total} vaksin tercatat.`,
+  },
+  milestone: {
+    title: "Perkembangan",
+    description: "Tonggak SDIDTK menurut Buku KIA.",
+    cta: "Buka ceklis perkembangan",
+    emptyStatus: "Belum ada ceklis tercatat.",
+    statusFormat: (achieved: number, total: number) =>
+      `${achieved} dari ${total} tonggak tercapai.`,
+  },
+  nutrition: {
+    title: "Gizi",
+    description: "ASI, MPASI, Vitamin A, dan obat cacing.",
+    cta: "Segera hadir",
+    placeholderStatus: "Modul Gizi akan tersedia pada rilis berikutnya.",
+  },
+} as const;

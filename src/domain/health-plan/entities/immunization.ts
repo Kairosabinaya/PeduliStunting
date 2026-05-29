@@ -6,6 +6,7 @@ export class Immunization {
   readonly doseNumber: number | null;
   readonly recommendedAgeMonths: number | null;
   readonly notes: string | null;
+  readonly prevents: string | null;
   readonly displayOrder: number;
 
   constructor(props: {
@@ -14,6 +15,7 @@ export class Immunization {
     doseNumber: number | null;
     recommendedAgeMonths: number | null;
     notes: string | null;
+    prevents: string | null;
     displayOrder: number;
   }) {
     this.code = props.code;
@@ -21,6 +23,7 @@ export class Immunization {
     this.doseNumber = props.doseNumber;
     this.recommendedAgeMonths = props.recommendedAgeMonths;
     this.notes = props.notes;
+    this.prevents = props.prevents;
     this.displayOrder = props.displayOrder;
   }
 }

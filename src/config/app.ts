@@ -15,6 +15,7 @@ export const DEFAULT_AUTHENTICATED_ROUTE = "/map";
 /** Public routes that do not require an authenticated session. */
 export const PUBLIC_ROUTES: readonly string[] = [
   "/",
+  "/map",
   "/auth/sign-in",
   "/auth/sign-up",
   "/auth/callback",

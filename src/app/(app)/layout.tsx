@@ -27,10 +27,12 @@ export default async function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="min-h-dvh bg-background">
       <FloatingHeader
-        displayName={displayName ?? undefined}
-        email={session.email ?? undefined}
-        avatarUrl={avatarUrl ?? undefined}
-        isAdmin={isAdmin}
+        session={{
+          displayName: displayName ?? null,
+          email: session.email ?? null,
+          avatarUrl: avatarUrl ?? null,
+          isAdmin,
+        }}
       />
       <div className="pb-12 pt-24 md:pt-28">
         <div className="mx-auto w-full max-w-6xl px-4 md:px-6">{children}</div>

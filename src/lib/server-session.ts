@@ -28,3 +28,24 @@ export async function requireServerSession(): Promise<ServerSession> {
     email: data.user.email ?? null,
   };
 }
+
+/**
+ * Like {@link requireServerSession} but returns `null` instead of redirecting
+ * when the visitor is unauthenticated. Use this from auth-conditional public
+ * routes (currently only `/map`) where both signed-in and signed-out branches
+ * are first-class. Swallows Supabase configuration errors so a misconfigured
+ * deploy still serves the landing experience instead of a 500.
+ */
+export async function tryServerSession(): Promise<ServerSession | null> {
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) return null;
+    return {
+      userId: asUserId(data.user.id),
+      email: data.user.email ?? null,
+    };
+  } catch {
+    return null;
+  }
+}

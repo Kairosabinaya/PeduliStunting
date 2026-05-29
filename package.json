@@ -26,7 +26,8 @@
     "import:indicators": "tsx --env-file=.env.local scripts/import-indicators.ts",
     "import:model": "tsx --env-file=.env.local scripts/import-model.ts",
     "import:papua": "tsx --env-file=.env.local scripts/backfill-papua-boundaries.ts",
-    "import:all": "pnpm import:regions && pnpm import:boundaries && pnpm import:indicators && pnpm import:papua && pnpm import:model"
+    "import:who-standards": "tsx --env-file=.env.local scripts/import-who-standards.ts",
+    "import:all": "pnpm import:regions && pnpm import:boundaries && pnpm import:indicators && pnpm import:papua && pnpm import:model && pnpm import:who-standards"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

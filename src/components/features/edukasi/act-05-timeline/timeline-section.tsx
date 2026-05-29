@@ -41,7 +41,12 @@ function TimelinePanel({ frame }: { readonly frame: TimelineFrame }) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -8 }}
       transition={{ duration: 0.4, ease: [0.2, 0, 0, 1] }}
-      className="rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-7"
+      // Fixed `min-h` keeps the panel the same height every frame so the
+      // illustration column to the left of it doesn't bounce up and down
+      // during scroll-driven frame swaps. Content shorter than min-h
+      // leaves whitespace at the bottom; longer content overflows
+      // gracefully without forcing a layout shift on neighbouring frames.
+      className="flex min-h-[26rem] flex-col rounded-2xl border border-border bg-surface p-6 shadow-sm sm:min-h-[28rem] sm:p-7"
     >
       <p className="eyebrow">{frame.railLabel}</p>
       <h3 className="mt-2 text-xl font-bold text-foreground sm:text-2xl">

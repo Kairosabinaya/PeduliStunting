@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 import type { ModelPredictionDto } from "@/application/model/dtos";
 import type { RegionIndicatorsDto } from "@/application/region/dtos";
 import { MAP_COPY } from "@/config/map";
@@ -21,17 +23,14 @@ import {
   getCachedRegionsBounds,
 } from "@/lib/cached-map-data";
 import { fetchCurrentProfile } from "@/lib/account-cache";
-import { requireServerSession } from "@/lib/server-session";
+import { tryServerSession } from "@/lib/server-session";
 
 /**
- * Server "shell" for /map. Fetches every dataset up-front (all 4 years of
- * indicators + predictions, plus regions, boundaries, model metadata) and
- * bakes them into the initial HTML. From that point on, the page is fully
- * client-driven via {@link MapStateProvider}: year/source/wilayah changes
- * never hit the server, so interactions feel instant.
+ * `/map` — interactive choropleth. Authenticated visitors only.
  *
- * Selection-specific history (chart + table) is lazy-loaded via the
- * `/api/region/[kodeBps]/history` route on demand.
+ * Unauthenticated visitors are redirected to `/` where the landing-before-
+ * login experience lives. This keeps the marketing surface at the canonical
+ * root URL and reserves `/map` as the authenticated product entry point.
  */
 export const dynamic = "force-dynamic";
 
@@ -40,13 +39,18 @@ interface MapPageProps {
 }
 
 export default async function MapPage({ searchParams }: MapPageProps) {
+  const session = await tryServerSession();
+  if (session === null) {
+    redirect("/");
+  }
+
   const rawSearch = await searchParams;
   const parsed = parseMapSearchParams(rawSearch);
 
-  // Same identity-resolution path the global `(app)/layout.tsx` uses, but
-  // run again here because /map's header lives inside `MapShell` (deeper
-  // than the layout) and needs the resolved display name + email.
-  const session = await requireServerSession();
+  // Profile lookup is duplicated with `(app)/layout.tsx` for the rest of the
+  // app shell. `/map` lives outside that group (so the layout never runs for
+  // it) and `MapShell` still needs the resolved display name + email for the
+  // avatar surface.
   const profileResult = await fetchCurrentProfile(session.userId);
   const displayName =
     profileResult.ok && profileResult.value
@@ -73,9 +77,6 @@ export default async function MapPage({ searchParams }: MapPageProps) {
       getCachedRegionsBounds(),
       ...SUPPORTED_YEARS.flatMap((year) => [
         getCachedIndicatorsByYear(year),
-        // We pass the model version conditionally below. Default to empty
-        // here; we'll re-fetch predictions per year only when the model is
-        // available, to avoid wasting Supabase round-trips on first import.
         Promise.resolve([] as readonly ModelPredictionDto[]),
       ]),
     ]);
@@ -93,15 +94,11 @@ export default async function MapPage({ searchParams }: MapPageProps) {
     >;
     SUPPORTED_YEARS.forEach((year, idx) => {
       const indicators = indicatorPredictionPairs[idx * 2];
-      if (indicators) {
-        indicatorsByYear[year] = indicators as readonly RegionIndicatorsDto[];
-      } else {
-        indicatorsByYear[year] = [];
-      }
+      indicatorsByYear[year] =
+        (indicators as readonly RegionIndicatorsDto[] | undefined) ?? [];
       predictionsByYear[year] = [];
     });
 
-    // If a default model exists, fetch predictions for every year in parallel.
     const model = defaultModel;
     if (model) {
       const predictionResults = await Promise.all(
@@ -125,9 +122,6 @@ export default async function MapPage({ searchParams }: MapPageProps) {
     );
   }
 
-  // Compose feature collections per year so the client can swap source/year
-  // without touching the network. Each FC reuses the same geometry refs;
-  // only category properties change between years.
   const featureCollectionsByYear: Record<
     SupportedYear,
     ReturnType<typeof toFeatureCollection>

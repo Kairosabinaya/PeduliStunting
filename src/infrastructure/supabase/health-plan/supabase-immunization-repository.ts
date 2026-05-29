@@ -11,11 +11,9 @@ import {
 import type { TypedSupabaseClient } from "../server-client";
 
 const SELECT_COLUMNS =
-  "code, name, dose_number, recommended_age_months, notes, display_order, created_at, updated_at";
+  "code, name, dose_number, recommended_age_months, notes, prevents, display_order, created_at, updated_at";
 
-export class SupabaseImmunizationRepository
-  implements ImmunizationRepository
-{
+export class SupabaseImmunizationRepository implements ImmunizationRepository {
   constructor(private readonly client: TypedSupabaseClient) {}
 
   async listSchedule(): Promise<Result<readonly Immunization[], AppError>> {

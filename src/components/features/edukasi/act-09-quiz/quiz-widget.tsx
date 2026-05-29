@@ -31,31 +31,14 @@ const OPTIONS: readonly { readonly key: QuizAnswer; readonly label: string }[] =
 export function QuizWidget() {
   const [state, dispatch] = useReducer(quizReducer, INITIAL_QUIZ_STATE);
   const reduceMotion = useReducedMotion();
-  // Short crossfade (no `mode="wait"`) so question transitions don't show a
-  // ~500ms blank state mid-swap. 180ms is fast enough to feel snappy but long
-  // enough for screen readers to register the re-mount.
+  // `mode="wait"` for the question crossfade ensures the outgoing question
+  // unmounts BEFORE the new one mounts. Without it, mount + unmount happen
+  // simultaneously and the layout briefly stacks both — that was the
+  // "text geser ke bawah" feel when clicking Lanjut. 180ms keeps the gap
+  // imperceptible (just enough for a11y).
   const transitionConfig = reduceMotion
     ? { duration: 0 }
     : { duration: 0.18, ease: [0.2, 0, 0, 1] as const };
-
-  if (state.stage === "intro") {
-    return (
-      <div className="mx-auto max-w-2xl text-center">
-        <p className="mx-auto max-w-xl text-base leading-relaxed text-white/80 sm:text-lg">
-          {QUIZ_COPY.intro}
-        </p>
-        <div className="mt-10">
-          <Button
-            size="lg"
-            variant="secondary"
-            onClick={() => dispatch({ type: "start" })}
-          >
-            {QUIZ_COPY.startCta}
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   if (state.stage === "result") {
     return (
@@ -73,11 +56,13 @@ export function QuizWidget() {
   const currentNumber = state.index + 1;
 
   return (
-    // Reserve a minimum height so the layout doesn't jump between
-    // questions whose feedback box adds 100-200px to the widget. Inner
-    // content is flex-justified so short and long questions both
-    // appear at the top, never drifting down the dark band.
-    <div className="mx-auto flex min-h-[34rem] max-w-2xl flex-col">
+    // Reserve a generous minimum height (`min-h-[38rem]`) so the layout
+    // doesn't jump between questions whose feedback box swells the widget.
+    // `flex flex-col justify-between` pins the "Lanjut" button at the
+    // bottom — questions of any length leave the action in a stable spot,
+    // which is what made the previous build feel like the text "geser ke
+    // bawah" when Lanjut was clicked.
+    <div className="mx-auto flex min-h-[38rem] max-w-2xl flex-col">
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm font-medium uppercase tracking-wider text-white/70">
           {QUIZ_COPY.progressTemplate(currentNumber, QUIZ_TOTAL)}
@@ -89,13 +74,14 @@ export function QuizWidget() {
         />
       </div>
 
-      <AnimatePresence initial={false}>
+      <AnimatePresence initial={false} mode="wait">
         <motion.div
           key={question.id}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -4 }}
           transition={transitionConfig}
+          className="flex flex-1 flex-col justify-between"
         >
           <p className="mt-8 text-balance text-2xl font-semibold leading-snug text-white sm:text-3xl">
             “{question.statement}”
@@ -156,7 +142,7 @@ export function QuizWidget() {
             })}
           </div>
 
-          <div role="status" aria-live="polite" className="mt-6 min-h-[5rem]">
+          <div role="status" aria-live="polite" className="mt-6 min-h-[8rem]">
             {answered ? (
               <div className="rounded-2xl border border-white/15 bg-white/10 p-4 text-sm leading-relaxed text-white">
                 <p className="text-xs font-semibold uppercase tracking-wider">

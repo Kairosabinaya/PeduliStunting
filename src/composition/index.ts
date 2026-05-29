@@ -48,6 +48,7 @@ import { GetChildByIdUseCase } from "@/application/tracking/use-cases/get-child-
 import { CreateChildUseCase } from "@/application/tracking/use-cases/create-child";
 import { ListMeasurementsByChildUseCase } from "@/application/tracking/use-cases/list-measurements-by-child";
 import { AddMeasurementUseCase } from "@/application/tracking/use-cases/add-measurement";
+import { ComputeQuickScreeningUseCase } from "@/application/tracking/use-cases/compute-quick-screening";
 import { ListImmunizationScheduleUseCase } from "@/application/health-plan/use-cases/list-immunization-schedule";
 import { ListChildImmunizationsUseCase } from "@/application/health-plan/use-cases/list-child-immunizations";
 import { UpsertChildImmunizationUseCase } from "@/application/health-plan/use-cases/upsert-child-immunization";
@@ -99,6 +100,7 @@ export interface UseCases {
   readonly createChild: CreateChildUseCase;
   readonly listMeasurementsByChild: ListMeasurementsByChildUseCase;
   readonly addMeasurement: AddMeasurementUseCase;
+  readonly computeQuickScreening: ComputeQuickScreeningUseCase;
   // health-plan
   readonly listImmunizationSchedule: ListImmunizationScheduleUseCase;
   readonly listChildImmunizations: ListChildImmunizationsUseCase;
@@ -190,6 +192,7 @@ export function makeUseCases(client: TypedSupabaseClient): UseCases {
       measurementRepo,
       standardRepo,
     ),
+    computeQuickScreening: new ComputeQuickScreeningUseCase(standardRepo),
     listImmunizationSchedule: new ListImmunizationScheduleUseCase(
       immunizationRepo,
     ),

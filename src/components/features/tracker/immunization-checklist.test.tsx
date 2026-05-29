@@ -39,6 +39,7 @@ const schedule: readonly ImmunizationDto[] = [
     doseNumber: 1,
     recommendedAgeMonths: 0,
     notes: "Diberikan saat lahir.",
+    prevents: null,
     displayOrder: 1,
   },
   {
@@ -47,6 +48,7 @@ const schedule: readonly ImmunizationDto[] = [
     doseNumber: null,
     recommendedAgeMonths: 1,
     notes: null,
+    prevents: null,
     displayOrder: 2,
   },
 ];

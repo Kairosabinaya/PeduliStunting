@@ -3,12 +3,25 @@ import { notFound } from "next/navigation";
 
 import { ChildSummary } from "@/components/features/tracker/child-summary";
 import { GrowthChartCard } from "@/components/features/tracker/growth-chart-card";
+import { ModuleGrid } from "@/components/features/tracker/module-grid";
 import { ErrorState } from "@/components/primitives/error-state";
-import { CHILD_DETAIL_COPY, TRACKER_LIST_COPY } from "@/config/tracker";
+import {
+  CHILD_DETAIL_COPY,
+  TRACKER_LIST_COPY,
+  trackerChildImmunizationsRoute,
+  trackerChildMeasurementsRoute,
+  trackerChildMilestonesRoute,
+} from "@/config/tracker";
+import { monthsBetween } from "@/domain/shared/age-months";
 import { asChildId, isUuid } from "@/domain/shared/ids";
+import { asDateOnly } from "@/domain/shared/date-only";
 import {
   fetchChildById,
+  fetchChildImmunizations,
+  fetchChildMilestones,
+  fetchImmunizationSchedule,
   fetchMeasurementsByChild,
+  fetchMilestoneCatalog,
 } from "@/lib/tracker-cache";
 import { requireServerSession } from "@/lib/server-session";
 
@@ -44,7 +57,8 @@ export default async function ChildOverviewPage({
   }
 
   const session = await requireServerSession();
-  const child = await fetchChildById(session.userId, asChildId(childId));
+  const childResolved = asChildId(childId);
+  const child = await fetchChildById(session.userId, childResolved);
   if (!child.ok) {
     if (child.error.kind === "not_found") notFound();
     return (
@@ -57,30 +71,71 @@ export default async function ChildOverviewPage({
     );
   }
 
-  const measurements = await fetchMeasurementsByChild(
-    session.userId,
-    asChildId(childId),
+  const [
+    measurementsResult,
+    immunizationScheduleResult,
+    childImmunizationsResult,
+    milestoneCatalogResult,
+    childMilestonesResult,
+  ] = await Promise.all([
+    fetchMeasurementsByChild(session.userId, childResolved),
+    fetchImmunizationSchedule(),
+    fetchChildImmunizations(session.userId, childResolved),
+    fetchMilestoneCatalog(),
+    fetchChildMilestones(session.userId, childResolved),
+  ]);
+
+  if (!measurementsResult.ok) {
+    return (
+      <ErrorState
+        title={TRACKER_LIST_COPY.errorTitle}
+        description={
+          measurementsResult.error.message ||
+          TRACKER_LIST_COPY.errorDescriptionFallback
+        }
+      />
+    );
+  }
+
+  const measurements = measurementsResult.value;
+  const childAgeMonths = monthsBetween(
+    asDateOnly(child.value.birthDate),
+    asDateOnly(todayIsoString()),
   );
 
   return (
     <div className="space-y-6">
-      {!measurements.ok ? (
-        <ErrorState
-          title={TRACKER_LIST_COPY.errorTitle}
-          description={
-            measurements.error.message ||
-            TRACKER_LIST_COPY.errorDescriptionFallback
-          }
-        />
-      ) : (
-        <>
-          <ChildSummary measurements={measurements.value} />
-          <GrowthChartCard
-            child={child.value}
-            measurements={measurements.value}
-          />
-        </>
-      )}
+      <ChildSummary measurements={measurements} />
+      <ModuleGrid
+        childAgeMonths={childAgeMonths}
+        childDetailRoutes={{
+          measurements: trackerChildMeasurementsRoute(child.value.id),
+          immunizations: trackerChildImmunizationsRoute(child.value.id),
+          milestones: trackerChildMilestonesRoute(child.value.id),
+        }}
+        measurements={measurements}
+        immunizationSchedule={
+          immunizationScheduleResult.ok ? immunizationScheduleResult.value : []
+        }
+        childImmunizations={
+          childImmunizationsResult.ok ? childImmunizationsResult.value : []
+        }
+        milestoneCatalog={
+          milestoneCatalogResult.ok ? milestoneCatalogResult.value : []
+        }
+        childMilestones={
+          childMilestonesResult.ok ? childMilestonesResult.value : []
+        }
+      />
+      <GrowthChartCard child={child.value} measurements={measurements} />
     </div>
   );
+}
+
+function todayIsoString(): string {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
 }

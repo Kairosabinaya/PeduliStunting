@@ -1,5 +1,16 @@
 "use client";
 
+// ACT 4 — Concentric rings visualisasi WHO determinant framework. Lima
+// lingkaran konsentris L1 (pusat = stunting outcome) hingga L5 (terluar =
+// konteks sosial-ekonomi).
+//
+// Dua mode konsumsi:
+//   - `activeLevel: number | null` — driven dari scroll progress di parent
+//     PinnedSection. Ring level yang sedang aktif dapat fill+stroke penuh;
+//     yang lain redup ke 0.25 opacity.
+//   - `onSelect` + `activeId` (legacy click mode) — masih didukung untuk
+//     reduced-motion fallback di mana scroll-driven tidak relevan.
+
 import { useId } from "react";
 
 import { cn } from "@/lib/cn";
@@ -10,12 +21,24 @@ import {
 import { DETERMINANT_COPY } from "@/config/edukasi";
 
 interface ConcentricRingsProps {
-  readonly activeId: string | null;
-  readonly onSelect: (id: string) => void;
+  /**
+   * Click-mode active id. Used by the legacy / reduced-motion fallback.
+   * Ignored when `activeLevel` is supplied.
+   */
+  readonly activeId?: string | null;
+  /** Click handler used by the legacy / reduced-motion fallback. */
+  readonly onSelect?: (id: string) => void;
+  /**
+   * Scroll-mode active level (1..5). When supplied, this overrides the
+   * click-mode active state — the ring whose `level` matches is rendered
+   * as "active", the rest as muted. `null` means no scroll-driven focus
+   * yet (initial state).
+   */
+  readonly activeLevel?: number | null;
 }
 
-// Inner-to-outer ring radii. Centred on (200, 200) inside a 400×400 viewBox
-// so the layer 1 disc reads as the "stunting" outcome at the bullseye.
+// Inner-to-outer ring radii. Centred on (240, 240) inside a 480×480
+// viewBox so L1 disc reads as the "stunting" outcome at the bullseye.
 const RING_RADII = [70, 110, 150, 190, 230] as const;
 
 const TONE_TO_FILL: Record<DeterminantLayer["tone"], string> = {
@@ -34,13 +57,23 @@ const TONE_TO_ACTIVE: Record<DeterminantLayer["tone"], string> = {
   danger: "fill-edu-flag/30 stroke-edu-flag",
 };
 
-export function ConcentricRings({ activeId, onSelect }: ConcentricRingsProps) {
+export function ConcentricRings({
+  activeId = null,
+  onSelect,
+  activeLevel = null,
+}: ConcentricRingsProps) {
   const titleId = useId();
-  // Layer 1 is the innermost circle; render from outermost to innermost so
-  // smaller rings cover larger ones, keeping click targets sane.
+  // Render outermost first so smaller rings overlap larger ones — click
+  // targets stay sane in legacy mode.
   const orderedForRender = [...DETERMINANT_LAYERS].sort(
     (a, b) => b.level - a.level,
   );
+
+  const resolveActive = (layer: DeterminantLayer): boolean => {
+    if (activeLevel !== null) return layer.level === activeLevel;
+    return activeId === layer.id;
+  };
+
   return (
     <svg
       viewBox="0 0 480 480"
@@ -57,19 +90,29 @@ export function ConcentricRings({ activeId, onSelect }: ConcentricRingsProps) {
         {orderedForRender.map((layer) => {
           const radius = RING_RADII[layer.level - 1];
           if (!radius) return null;
-          const active = activeId === layer.id;
+          const active = resolveActive(layer);
+          // In scroll-driven mode, non-active rings drop to a clearly
+          // subordinate opacity so the active layer reads as the focus —
+          // matches the user spec "tampilan lingkarannya dibuat lebih
+          // menarik" with a clear spotlight rather than uniform display.
+          const muted = activeLevel !== null && !active;
           const className = active
             ? TONE_TO_ACTIVE[layer.tone]
             : TONE_TO_FILL[layer.tone];
+          const interactive = onSelect !== undefined;
           return (
             <g
               key={layer.id}
-              className="cursor-pointer transition-[transform,opacity] duration-slow ease-standard"
+              className={cn(
+                interactive && "cursor-pointer",
+                "transition-[transform,opacity] duration-slow ease-standard",
+              )}
               style={{
                 transformOrigin: "0 0",
                 transform: active ? "scale(1.04)" : "scale(1)",
+                opacity: muted ? 0.32 : 1,
               }}
-              onClick={() => onSelect(layer.id)}
+              {...(onSelect ? { onClick: () => onSelect(layer.id) } : {})}
             >
               <circle
                 r={radius}

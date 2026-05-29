@@ -9,6 +9,7 @@ export interface ImmunizationDto {
   readonly doseNumber: number | null;
   readonly recommendedAgeMonths: number | null;
   readonly notes: string | null;
+  readonly prevents: string | null;
   readonly displayOrder: number;
 }
 
@@ -50,6 +51,7 @@ export function toImmunizationDto(item: Immunization): ImmunizationDto {
     doseNumber: item.doseNumber,
     recommendedAgeMonths: item.recommendedAgeMonths,
     notes: item.notes,
+    prevents: item.prevents,
     displayOrder: item.displayOrder,
   };
 }

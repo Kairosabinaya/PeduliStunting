@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useMemo, useState } from "react";
 
 import type {
   ChildDto,
@@ -15,6 +16,17 @@ import {
 } from "@/components/primitives/card";
 import { Skeleton } from "@/components/primitives/skeleton";
 import { CHILD_DETAIL_COPY } from "@/config/tracker";
+import { asDateOnly } from "@/domain/shared/date-only";
+import { monthsBetween } from "@/domain/shared/age-months";
+import { computeGrowthTrend } from "@/domain/tracking/services/growth-trend";
+import type { GrowthIndicator } from "@/domain/tracking/value-objects/growth-indicator";
+import { GROWTH_INDICATORS } from "@/domain/tracking/value-objects/growth-indicator";
+import type { SdClass } from "@/domain/tracking/value-objects/sd-classification";
+
+import { FunSizeCard } from "./fun-size-card";
+import { GrowthDetailSheet } from "./growth-detail-sheet";
+import { GrowthTrendChip } from "./growth-trend-chip";
+import { IndicatorTabs } from "./indicator-tabs";
 
 const GrowthChart = dynamic(
   () => import("./growth-chart").then((m) => m.GrowthChart),
@@ -30,11 +42,59 @@ export interface GrowthChartCardProps {
 }
 
 /**
- * Card wrapper that lazily loads the Recharts bundle only when the detail
- * page actually mounts. Keeps the initial JS payload of routes that do not
- * render a chart under the per-route budget (project guidelines §7).
+ * Phase 2 dashboard surface untuk modul Pertumbuhan. Mengomposisikan:
+ *   - Header card (judul + deskripsi)
+ *   - Trend chip (klasifikasi delta z dua pengukuran terbaru)
+ *   - Indicator tabs (pengganti Select)
+ *   - Kurva pertumbuhan dengan zona gradient + click-to-detail
+ *   - Fun-size comparison card di sisi
+ *   - Bottom sheet detail saat user mengetuk dot
+ *
+ * Recharts tetap dynamic-imported (ssr:false) untuk menjaga bundle initial
+ * tetap di bawah budget (project guidelines §7).
  */
 export function GrowthChartCard({ child, measurements }: GrowthChartCardProps) {
+  const [indicator, setIndicator] = useState<GrowthIndicator>("TB_U");
+  const [selectedMeasurement, setSelectedMeasurement] =
+    useState<GrowthMeasurementDto | null>(null);
+
+  const sortedByDate = useMemo(() => {
+    return measurements
+      .slice()
+      .sort((a, b) => (a.measuredAt < b.measuredAt ? 1 : -1));
+  }, [measurements]);
+
+  const latest = sortedByDate[0] ?? null;
+
+  const latestSdClass = useMemo<
+    Partial<Record<GrowthIndicator, SdClass>>
+  >(() => {
+    const map: Partial<Record<GrowthIndicator, SdClass>> = {};
+    for (const code of GROWTH_INDICATORS) {
+      for (const m of sortedByDate) {
+        const sd = m.sdClass[code] as SdClass | undefined;
+        if (sd) {
+          map[code] = sd;
+          break;
+        }
+      }
+    }
+    return map;
+  }, [sortedByDate]);
+
+  const trend = useMemo(
+    () => computeGrowthTrend(sortedByDate, indicator),
+    [sortedByDate, indicator],
+  );
+
+  const selectedAgeMonths = useMemo(() => {
+    if (!selectedMeasurement) return null;
+    return monthsBetween(
+      asDateOnly(child.birthDate),
+      asDateOnly(selectedMeasurement.measuredAt),
+    );
+  }, [child.birthDate, selectedMeasurement]);
+
   return (
     <Card>
       <CardHeader>
@@ -43,9 +103,28 @@ export function GrowthChartCard({ child, measurements }: GrowthChartCardProps) {
           {CHILD_DETAIL_COPY.chartCardDescription}
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <GrowthChart child={child} measurements={measurements} />
+      <CardContent className="space-y-4">
+        <IndicatorTabs
+          value={indicator}
+          onChange={setIndicator}
+          latestSdClass={latestSdClass}
+        />
+        <GrowthTrendChip result={trend} />
+        <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+          <GrowthChart
+            child={child}
+            measurements={sortedByDate}
+            indicator={indicator}
+            onSelectMeasurement={setSelectedMeasurement}
+          />
+          <FunSizeCard latest={latest} />
+        </div>
       </CardContent>
+      <GrowthDetailSheet
+        measurement={selectedMeasurement}
+        ageMonths={selectedAgeMonths}
+        onClose={() => setSelectedMeasurement(null)}
+      />
     </Card>
   );
 }

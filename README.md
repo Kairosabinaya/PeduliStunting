@@ -100,6 +100,7 @@ pnpm import:all
 | `pnpm import:indicators` | Import indikator + dictionary |
 | `pnpm import:papua` | Backfill geometri pemekaran Papua |
 | `pnpm import:model` | Import model GTWENOLR + prediksi (butuh R) |
+| `pnpm import:who-standards` | Import WHO Child Growth Standards LMS ke `growth_standards` (lihat `docs/source/who-standards/README.md`) |
 | `pnpm import:all` | Chain semua impor di atas |
 
 ---

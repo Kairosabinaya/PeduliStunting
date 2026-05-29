@@ -1,11 +1,9 @@
 /**
- * Minimal loading state for `/map`. The previous skeleton mirrored the legacy
- * 2-column grid which now leaks visually behind the fullscreen MapLibre
- * canvas during route transitions (per Claude-in-Chrome review).
- *
- * Replace with: a fullscreen background + a thin progress bar at the top
- * (Apple-style indeterminate). The map content fades in as soon as data is
- * ready.
+ * Fullscreen indeterminate loading state for `/map`. The map page itself
+ * owns every `position: fixed` overlay, so during route transitions this
+ * file paints a thin top progress bar against a neutral background — Apple-
+ * style "something is happening" feedback that disappears the moment the
+ * real surface paints in.
  */
 export default function MapLoading() {
   return (
