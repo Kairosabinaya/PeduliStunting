@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { ImmunizationChecklist } from "@/components/features/tracker/immunization-checklist";
+import { ImmunizationEducationCard } from "@/components/features/tracker/immunization-education-card";
+import { ImmunizationProgress } from "@/components/features/tracker/immunization-progress";
+import { ImmunizationTimeline } from "@/components/features/tracker/immunization-timeline";
 import {
   Card,
   CardContent,
@@ -10,9 +12,16 @@ import {
   CardTitle,
 } from "@/components/primitives/card";
 import { ErrorState } from "@/components/primitives/error-state";
-import { IMMUNIZATION_COPY } from "@/config/tracker";
-import { asChildId, isUuid } from "@/domain/shared/ids";
 import {
+  IMMUNIZATION_COPY,
+  IMMUNIZATION_TIMELINE_COPY,
+} from "@/config/tracker";
+import { monthsBetween } from "@/domain/shared/age-months";
+import { asDateOnly } from "@/domain/shared/date-only";
+import { asChildId, isUuid } from "@/domain/shared/ids";
+import { computeImmunizationProgress } from "@/domain/health-plan/services/immunization-status";
+import {
+  fetchChildById,
   fetchChildImmunizations,
   fetchImmunizationSchedule,
 } from "@/lib/tracker-cache";
@@ -37,36 +46,85 @@ export default async function ImmunizationsPage({
   }
 
   const session = await requireServerSession();
-  const [schedule, records] = await Promise.all([
+  const childResolved = asChildId(childId);
+  const [childResult, scheduleResult, recordsResult] = await Promise.all([
+    fetchChildById(session.userId, childResolved),
     fetchImmunizationSchedule(),
-    fetchChildImmunizations(session.userId, asChildId(childId)),
+    fetchChildImmunizations(session.userId, childResolved),
   ]);
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{IMMUNIZATION_COPY.cardTitle}</CardTitle>
-        <CardDescription>{IMMUNIZATION_COPY.cardDescription}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {!schedule.ok ? (
-          <ErrorState
-            title={IMMUNIZATION_COPY.errorTitle}
-            description={schedule.error.message}
-          />
-        ) : !records.ok ? (
-          <ErrorState
-            title={IMMUNIZATION_COPY.errorTitle}
-            description={records.error.message}
-          />
-        ) : (
-          <ImmunizationChecklist
-            childId={childId}
-            schedule={schedule.value}
-            records={records.value}
-          />
-        )}
-      </CardContent>
-    </Card>
+  if (!childResult.ok) {
+    if (childResult.error.kind === "not_found") notFound();
+    return (
+      <ErrorState
+        title={IMMUNIZATION_COPY.errorTitle}
+        description={childResult.error.message}
+      />
+    );
+  }
+  if (!scheduleResult.ok) {
+    return (
+      <ErrorState
+        title={IMMUNIZATION_COPY.errorTitle}
+        description={scheduleResult.error.message}
+      />
+    );
+  }
+  if (!recordsResult.ok) {
+    return (
+      <ErrorState
+        title={IMMUNIZATION_COPY.errorTitle}
+        description={recordsResult.error.message}
+      />
+    );
+  }
+
+  const schedule = scheduleResult.value;
+  const records = recordsResult.value;
+  const child = childResult.value;
+  const childAgeMonths = monthsBetween(
+    asDateOnly(child.birthDate),
+    asDateOnly(todayIso()),
   );
+  const recordByCode = new Map(
+    records.map((record) => [record.immunizationCode, record]),
+  );
+  const progress = computeImmunizationProgress(
+    schedule.map((item) => ({
+      recommendedAgeMonths: item.recommendedAgeMonths,
+      recordStatus: recordByCode.get(item.code)?.status ?? null,
+    })),
+    childAgeMonths,
+  );
+
+  return (
+    <div className="space-y-4">
+      <ImmunizationProgress done={progress.done} due={progress.due} />
+      <ImmunizationEducationCard />
+      <Card>
+        <CardHeader>
+          <CardTitle>{IMMUNIZATION_TIMELINE_COPY.title}</CardTitle>
+          <CardDescription>
+            {IMMUNIZATION_TIMELINE_COPY.description}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ImmunizationTimeline
+            childId={childId}
+            childAgeMonths={childAgeMonths}
+            schedule={schedule}
+            records={records}
+          />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function todayIso(): string {
+  const now = new Date();
+  const yyyy = now.getFullYear();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const dd = String(now.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
 }

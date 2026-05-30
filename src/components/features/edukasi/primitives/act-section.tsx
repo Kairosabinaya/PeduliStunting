@@ -16,6 +16,22 @@ export interface ActSectionProps extends Omit<
   readonly cream?: boolean;
   /** Container max width override. */
   readonly maxWidth?: "narrow" | "default" | "wide";
+  /**
+   * Render the top gradient bridge (dark/cream variants only). Default true.
+   * Set to false when the previous section already ends with the same tone
+   * so the auto-bridge would create a visible hard band (e.g. dark → dark
+   * across a vignetted section).
+   */
+  readonly bridgeTop?: boolean;
+  /**
+   * Render the bottom gradient bridge (dark/cream variants only). Default
+   * true. Set to false when the next section starts with the same tone so
+   * the auto-bridge would create a visible hard band — e.g. ACT 9 (dark)
+   * → ACT 10 (vignette starting at edu-night) → ACT 11 (dark). Without
+   * this opt-out ACT 9's bottom fades to light, then ACT 10 jumps back to
+   * dark via vignette, producing the "patah" band the user reported.
+   */
+  readonly bridgeBottom?: boolean;
 }
 
 const MAX_WIDTH_CLASS = {
@@ -53,6 +69,8 @@ export const ActSection = forwardRef<HTMLElement, ActSectionProps>(
       dark = false,
       cream = false,
       maxWidth = "default",
+      bridgeTop = true,
+      bridgeBottom = true,
       className,
       children,
       ...rest
@@ -94,29 +112,43 @@ export const ActSection = forwardRef<HTMLElement, ActSectionProps>(
               at the boundary. The strip is overlaid on the section's
               solid dark bg, so `from-background` (light) at the leading
               edge actually shows light, then transitions to solid dark
-              over 80px. Mirrored at the bottom for the exit. */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-background to-edu-night"
-            />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-edu-night to-background"
-            />
+              over 80px. Mirrored at the bottom for the exit.
+
+              Each bridge is gated by a prop so sections whose neighbour
+              already ends/starts in the same tone can opt out — the
+              auto-bridge would otherwise create a hard "patah" band
+              (visible in ACT 9 → ACT 10 vignette → ACT 11 where every
+              section is dark-ish). */}
+            {bridgeTop ? (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-background to-edu-night"
+              />
+            ) : null}
+            {bridgeBottom ? (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-edu-night to-background"
+              />
+            ) : null}
           </>
         ) : null}
         {cream ? (
           <>
             {/* Cream section bridge — same pattern as dark, but fading
               between the body background and the cream tint. */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-background to-edu-tint-cream"
-            />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-edu-tint-cream to-background"
-            />
+            {bridgeTop ? (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-background to-edu-tint-cream"
+              />
+            ) : null}
+            {bridgeBottom ? (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-b from-edu-tint-cream to-background"
+              />
+            ) : null}
           </>
         ) : null}
         <div

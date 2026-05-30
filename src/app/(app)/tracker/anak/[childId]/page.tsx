@@ -11,6 +11,7 @@ import {
   trackerChildImmunizationsRoute,
   trackerChildMeasurementsRoute,
   trackerChildMilestonesRoute,
+  trackerChildNutritionRoute,
 } from "@/config/tracker";
 import { monthsBetween } from "@/domain/shared/age-months";
 import { asChildId, isUuid } from "@/domain/shared/ids";
@@ -112,6 +113,7 @@ export default async function ChildOverviewPage({
           measurements: trackerChildMeasurementsRoute(child.value.id),
           immunizations: trackerChildImmunizationsRoute(child.value.id),
           milestones: trackerChildMilestonesRoute(child.value.id),
+          nutrition: trackerChildNutritionRoute(child.value.id),
         }}
         measurements={measurements}
         immunizationSchedule={

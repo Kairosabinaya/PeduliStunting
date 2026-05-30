@@ -21,27 +21,31 @@
  * fights the foreground for attention.
  */
 
-/** Blur radius (px) applied to the map wrapper at each scroll keypoint. */
+/** Blur radius (px) applied to the map wrapper at each scroll keypoint.
+ *  Lighter than the original tuning so the map reads as a clear-but-soft
+ *  texture instead of a dense fog. */
 export const LANDING_MAP_BLUR_KEYPOINTS = {
-  hero: 28,
-  mid: 22,
-  cta: 14,
+  hero: 16,
+  mid: 10,
+  cta: 3,
 } as const;
 
 /** Saturation multiplier at each scroll keypoint. Lower at top = subtle,
  *  higher at bottom = vivid reveal. */
 export const LANDING_MAP_SATURATE_KEYPOINTS = {
-  hero: 1.0,
-  mid: 1.15,
-  cta: 1.35,
+  hero: 1.1,
+  mid: 1.25,
+  cta: 1.45,
 } as const;
 
-/** Wrapper opacity. Lower across the board so the map is a hint, not a
- *  feature. Even at the final CTA it stays partially translucent. */
+/** Wrapper opacity. Higher than the previous tuning so the map peeks
+ *  through more clearly — "blurnya lebih transparent dikit" per user
+ *  feedback. Still capped well below 1.0 at the hero so the foreground
+ *  hero card remains the visual lead. */
 export const LANDING_MAP_OPACITY_KEYPOINTS = {
-  hero: 0.25,
-  mid: 0.35,
-  cta: 0.5,
+  hero: 0.45,
+  mid: 0.6,
+  cta: 0.75,
 } as const;
 
 /**
@@ -50,7 +54,7 @@ export const LANDING_MAP_OPACITY_KEYPOINTS = {
  * scroll position.
  */
 export const LANDING_REDUCED_MOTION_FALLBACK = {
-  blur: 22,
-  saturate: 1.15,
-  opacity: 0.35,
+  blur: 10,
+  saturate: 1.25,
+  opacity: 0.6,
 } as const;

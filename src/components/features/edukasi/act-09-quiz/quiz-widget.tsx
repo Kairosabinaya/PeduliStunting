@@ -6,7 +6,7 @@
 
 import { useReducer } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Check, X } from "lucide-react";
+import { ArrowRight, Check, X } from "lucide-react";
 
 import { QUIZ_COPY } from "@/config/edukasi";
 import { Button } from "@/components/primitives/button";
@@ -20,6 +20,7 @@ import {
   countCorrect,
   currentQuestion,
   quizReducer,
+  type QuizState,
 } from "./quiz-state";
 
 const OPTIONS: readonly { readonly key: QuizAnswer; readonly label: string }[] =
@@ -31,24 +32,107 @@ const OPTIONS: readonly { readonly key: QuizAnswer; readonly label: string }[] =
 export function QuizWidget() {
   const [state, dispatch] = useReducer(quizReducer, INITIAL_QUIZ_STATE);
   const reduceMotion = useReducedMotion();
-  // `mode="wait"` for the question crossfade ensures the outgoing question
-  // unmounts BEFORE the new one mounts. Without it, mount + unmount happen
-  // simultaneously and the layout briefly stacks both — that was the
-  // "text geser ke bawah" feel when clicking Lanjut. 180ms keeps the gap
-  // imperceptible (just enough for a11y).
+  // 360ms transition gives the question card a clear "rise + overlap"
+  // feel against the heading while staying responsive. Reduced-motion
+  // users skip the choreography entirely (duration 0).
   const transitionConfig = reduceMotion
     ? { duration: 0 }
-    : { duration: 0.18, ease: [0.2, 0, 0, 1] as const };
+    : { duration: 0.36, ease: [0.2, 0, 0, 1] as const };
 
-  if (state.stage === "result") {
-    return (
-      <QuizResult
-        correct={countCorrect(state.answers)}
-        onReset={() => dispatch({ type: "reset" })}
-      />
-    );
-  }
+  return (
+    <div className="relative w-full">
+      <AnimatePresence mode="wait" initial={false}>
+        {state.stage === "intro" ? (
+          <motion.div
+            key="intro"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96 }}
+            transition={transitionConfig}
+          >
+            <IntroPanel onStart={() => dispatch({ type: "start" })} />
+          </motion.div>
+        ) : null}
 
+        {state.stage === "question" ? (
+          <motion.div
+            key="question"
+            // Rises from below (y=80) up to y=-80 — the negative end-state
+            // pulls the card's top edge over the section's heading text,
+            // delivering the "overlap teks utama" the user asked for.
+            // Reduced-motion fallback: y=0 (no overlap, no animation).
+            initial={{ opacity: 0, y: reduceMotion ? 0 : 80 }}
+            animate={{ opacity: 1, y: reduceMotion ? 0 : -80 }}
+            transition={transitionConfig}
+            className="relative z-10"
+          >
+            <QuestionCard
+              state={state}
+              dispatch={dispatch}
+              reduceMotion={reduceMotion}
+            />
+          </motion.div>
+        ) : null}
+
+        {state.stage === "result" ? (
+          <motion.div
+            key="result"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={transitionConfig}
+          >
+            <QuizResult
+              correct={countCorrect(state.answers)}
+              onReset={() => dispatch({ type: "reset" })}
+            />
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/**
+ * Intro panel — short hook copy + a deliberately prominent CTA button.
+ * The CTA wears a soft primary glow (blurred clone behind it) so it reads
+ * as "the thing to press" without resorting to gimmicky animation.
+ */
+function IntroPanel({ onStart }: { readonly onStart: () => void }) {
+  return (
+    <div className="mx-auto flex max-w-xl flex-col items-center gap-8 text-center">
+      <p className="text-base leading-relaxed text-white/85 sm:text-lg">
+        {QUIZ_COPY.intro}
+      </p>
+      <button
+        type="button"
+        onClick={onStart}
+        className="group relative inline-flex items-center gap-3 rounded-full bg-primary px-8 py-4 text-base font-bold text-primary-foreground shadow-2xl shadow-primary/40 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-4 focus-visible:ring-offset-edu-night active:translate-y-0 sm:text-lg"
+      >
+        {/* Glow halo behind the button — clipped behind via -z-10 so it
+            only paints around the pill, never over the label. */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-primary opacity-60 blur-2xl transition-opacity duration-300 group-hover:opacity-90"
+        />
+        <span>{QUIZ_COPY.startCta}</span>
+        <ArrowRight
+          className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
+          aria-hidden="true"
+        />
+      </button>
+    </div>
+  );
+}
+
+interface QuestionCardProps {
+  readonly state: QuizState;
+  readonly dispatch: (
+    action: { type: "answer"; choice: QuizAnswer } | { type: "next" },
+  ) => void;
+  readonly reduceMotion: boolean | null;
+}
+
+function QuestionCard({ state, dispatch, reduceMotion }: QuestionCardProps) {
   const question = currentQuestion(state);
   if (!question) return null;
   const choice = state.currentChoice;
@@ -56,13 +140,11 @@ export function QuizWidget() {
   const currentNumber = state.index + 1;
 
   return (
-    // Reserve a generous minimum height (`min-h-[38rem]`) so the layout
-    // doesn't jump between questions whose feedback box swells the widget.
-    // `flex flex-col justify-between` pins the "Lanjut" button at the
-    // bottom — questions of any length leave the action in a stable spot,
-    // which is what made the previous build feel like the text "geser ke
-    // bawah" when Lanjut was clicked.
-    <div className="mx-auto flex min-h-[38rem] max-w-2xl flex-col">
+    // Card surface: dense bluish-black with a soft inner ring + backdrop
+    // blur so heading text peeks through behind the rounded edge. The
+    // shadow + ring give the card depth so the overlap reads as a
+    // physical pane resting over the heading, not a flat swap.
+    <div className="relative mx-auto flex min-h-[38rem] max-w-2xl flex-col rounded-3xl border border-white/15 bg-edu-night/85 p-6 shadow-2xl shadow-black/40 backdrop-blur-xl sm:p-8">
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm font-medium uppercase tracking-wider text-white/70">
           {QUIZ_COPY.progressTemplate(currentNumber, QUIZ_TOTAL)}
@@ -80,7 +162,11 @@ export function QuizWidget() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -4 }}
-          transition={transitionConfig}
+          transition={
+            reduceMotion
+              ? { duration: 0 }
+              : { duration: 0.18, ease: [0.2, 0, 0, 1] }
+          }
           className="flex flex-1 flex-col justify-between"
         >
           <p className="mt-8 text-balance text-2xl font-semibold leading-snug text-white sm:text-3xl">
@@ -91,10 +177,6 @@ export function QuizWidget() {
               const isPicked = answered && choice.choice === option.key;
               const isCorrect = question.correctAnswer === option.key;
               const showResult = answered;
-              // Color states after answer:
-              //   - correct answer (whether or not picked) → green ring + check
-              //   - picked + wrong → red ring + cross
-              //   - other untouched options → ghost
               const tone = (() => {
                 if (!showResult) return "interactive";
                 if (isCorrect) return "correct";
@@ -111,11 +193,6 @@ export function QuizWidget() {
                   }
                   disabled={answered}
                   aria-pressed={isPicked}
-                  // The dark-band background makes transparent feedback
-                  // tints unreadable, so each answered state uses a SOLID
-                  // background + high-contrast text. Default (interactive)
-                  // keeps the original white pill so the click target is
-                  // visible against the navy.
                   className={cn(
                     "border-2 transition-colors disabled:opacity-100",
                     tone === "interactive" &&

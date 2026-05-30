@@ -1,41 +1,41 @@
 "use client";
 
-import { useActionState, useId, useMemo } from "react";
-import { useFormStatus } from "react-dom";
-
-import { upsertChildMilestone } from "@/app/(app)/tracker/anak/[childId]/perkembangan/actions";
+import { useMemo, useState } from "react";
 import {
-  INITIAL_UPSERT_MILESTONE_STATE,
-  type UpsertMilestoneFormState,
-} from "@/app/(app)/tracker/anak/[childId]/perkembangan/_lib/upsert-milestone-state";
+  Brush,
+  HeartHandshake,
+  MessageCircle,
+  PersonStanding,
+} from "lucide-react";
 
 import type {
   ChildMilestoneDto,
   MilestoneDto,
 } from "@/application/health-plan/dtos";
-import { Badge } from "@/components/primitives/badge";
-import { Button } from "@/components/primitives/button";
 import { EmptyState } from "@/components/primitives/empty-state";
-import { Input } from "@/components/primitives/input";
-import { Label } from "@/components/primitives/label";
-import { Select } from "@/components/primitives/select";
-import { Textarea } from "@/components/primitives/textarea";
-import {
-  MILESTONE_COPY,
-  MILESTONE_DOMAIN_LABEL,
-  MILESTONE_STATUS_LABEL,
-} from "@/config/tracker";
-import {
-  CHILD_MILESTONE_STATUSES,
-  type ChildMilestoneStatus,
-} from "@/domain/health-plan/entities/child-milestone";
+import { MILESTONE_COPY, MILESTONE_DOMAIN_LABEL } from "@/config/tracker";
 import {
   MILESTONE_DOMAINS,
   type MilestoneDomain,
 } from "@/domain/health-plan/entities/milestone";
+import { filterMilestonesByMode } from "@/domain/health-plan/services/milestone-status";
+
+import { MilestoneCard } from "./milestone-card";
+import {
+  MilestoneRangeFilter,
+  type MilestoneRangeMode,
+} from "./milestone-range-filter";
+
+const DOMAIN_ICON_MAP: Record<MilestoneDomain, typeof PersonStanding> = {
+  gross_motor: PersonStanding,
+  fine_motor: Brush,
+  language: MessageCircle,
+  social: HeartHandshake,
+};
 
 export interface MilestoneChecklistProps {
   readonly childId: string;
+  readonly childAgeMonths: number;
   readonly catalog: readonly MilestoneDto[];
   readonly records: readonly ChildMilestoneDto[];
 }
@@ -73,151 +73,29 @@ function groupByDomain(
   return groups;
 }
 
-function fieldError(
-  state: UpsertMilestoneFormState | null,
-  field: string,
-): string | undefined {
-  return state?.fieldErrors?.[field]?.[0];
-}
-
-function statusBadgeTone(
-  status: ChildMilestoneStatus,
-): "neutral" | "success" | "warning" {
-  if (status === "achieved") return "success";
-  if (status === "delayed") return "warning";
-  return "neutral";
-}
-
-function RowSubmit() {
-  const status = useFormStatus();
-  return (
-    <Button
-      type="submit"
-      variant="secondary"
-      size="sm"
-      loading={status.pending}
-      disabled={status.pending}
-    >
-      {status.pending ? MILESTONE_COPY.saving : "Simpan"}
-    </Button>
-  );
-}
-
-function MilestoneRow({
-  childId,
-  item,
-  record,
-}: {
-  readonly childId: string;
-  readonly item: MilestoneDto;
-  readonly record: ChildMilestoneDto | undefined;
-}) {
-  const boundAction = upsertChildMilestone.bind(null, childId, item.id);
-  const [state, action] = useActionState<
-    UpsertMilestoneFormState | null,
-    FormData
-  >(boundAction, INITIAL_UPSERT_MILESTONE_STATE);
-
-  const statusId = useId();
-  const checkedAtId = useId();
-  const noteId = useId();
-
-  const currentStatus =
-    state?.record?.status ?? record?.status ?? "not_checked";
-  const currentCheckedAt = state?.record?.checkedAt ?? record?.checkedAt ?? "";
-  const currentNote = state?.record?.note ?? record?.note ?? "";
-
-  const generalError =
-    state && !state.ok ? (state.message ?? MILESTONE_COPY.errorSave) : null;
-
-  const ageRangeLabel = `${item.minAgeMonths}–${item.maxAgeMonths} ${MILESTONE_COPY.ageRangeUnit}`;
-
-  return (
-    <li className="space-y-3 rounded-xl border border-border bg-surface p-4 md:p-5">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-foreground">
-            {item.description}
-          </p>
-          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <Badge tone="neutral">{ageRangeLabel}</Badge>
-            <Badge tone={statusBadgeTone(currentStatus)}>
-              {MILESTONE_STATUS_LABEL[currentStatus]}
-            </Badge>
-            {item.sourceLabel ? <span>{item.sourceLabel}</span> : null}
-          </div>
-        </div>
-      </div>
-
-      <form action={action} className="space-y-3">
-        <div className="grid gap-3 md:grid-cols-3">
-          <div className="space-y-1.5">
-            <Label htmlFor={statusId}>{MILESTONE_COPY.statusLabel}</Label>
-            <Select
-              id={statusId}
-              name="status"
-              defaultValue={currentStatus}
-              errorMessage={fieldError(state, "status")}
-            >
-              {CHILD_MILESTONE_STATUSES.map((value) => (
-                <option key={value} value={value}>
-                  {MILESTONE_STATUS_LABEL[value]}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor={checkedAtId}>{MILESTONE_COPY.checkedAtLabel}</Label>
-            <Input
-              id={checkedAtId}
-              name="checkedAt"
-              type="date"
-              defaultValue={currentCheckedAt}
-              errorMessage={fieldError(state, "checkedAt")}
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor={noteId}>{MILESTONE_COPY.noteLabel}</Label>
-            <Textarea
-              id={noteId}
-              name="note"
-              rows={2}
-              maxLength={500}
-              defaultValue={currentNote}
-              errorMessage={fieldError(state, "note")}
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          {generalError ? (
-            <p className="mr-auto text-xs text-danger">{generalError}</p>
-          ) : state?.ok ? (
-            <p className="mr-auto text-xs text-success">
-              {MILESTONE_COPY.saved}
-            </p>
-          ) : null}
-          <RowSubmit />
-        </div>
-      </form>
-    </li>
-  );
-}
-
 /**
- * Renders the SDIDTK milestone catalog grouped by development domain. Each
- * row mounts its own `useActionState` so a save in one row doesn't reset
- * inputs in another. Per-row action is bound with `childId` and `milestoneId`.
+ * Render katalog SDIDTK sebagai grid `MilestoneCard` yang dikelompokkan per
+ * domain perkembangan. Pengguna dapat memfilter mode "rentang anak saat ini"
+ * (default) atau "semua rentang".
+ *
+ * Tiap card mengelola `useActionState`-nya sendiri agar simpan satu kartu
+ * tidak mereset card lain (lihat `MilestoneCard`).
  */
 export function MilestoneChecklist({
   childId,
+  childAgeMonths,
   catalog,
   records,
 }: MilestoneChecklistProps) {
+  const [mode, setMode] = useState<MilestoneRangeMode>("current");
+
+  const filtered = useMemo(
+    () => filterMilestonesByMode(catalog, childAgeMonths, mode),
+    [catalog, childAgeMonths, mode],
+  );
+
   const byMilestoneId = useMemo(() => indexByMilestoneId(records), [records]);
-  const groups = useMemo(() => groupByDomain(catalog), [catalog]);
+  const groups = useMemo(() => groupByDomain(filtered), [filtered]);
 
   if (catalog.length === 0) {
     return (
@@ -229,25 +107,32 @@ export function MilestoneChecklist({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <MilestoneRangeFilter
+        value={mode}
+        onChange={setMode}
+        childAgeMonths={childAgeMonths}
+      />
       {MILESTONE_DOMAINS.map((domain) => {
         const items = groups.get(domain) ?? [];
         if (items.length === 0) return null;
+        const Icon = DOMAIN_ICON_MAP[domain];
         return (
           <section key={domain} className="space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">
+            <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Icon size={16} aria-hidden className="text-primary" />
               {MILESTONE_DOMAIN_LABEL[domain]}
             </h3>
-            <ol className="space-y-3">
+            <div className="grid gap-3 md:grid-cols-2">
               {items.map((item) => (
-                <MilestoneRow
+                <MilestoneCard
                   key={item.id}
                   childId={childId}
-                  item={item}
+                  milestone={item}
                   record={byMilestoneId.get(item.id)}
                 />
               ))}
-            </ol>
+            </div>
           </section>
         );
       })}

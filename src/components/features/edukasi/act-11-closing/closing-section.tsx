@@ -150,10 +150,10 @@ function ReducedMotionClosing() {
         aria-labelledby="act-11-eyebrow"
         className="full-bleed relative isolate overflow-hidden bg-edu-night text-white"
       >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-background to-edu-night"
-        />
+        {/* No top gradient bridge — ACT 10's bottom vignette ends in
+            `edu-night` so ACT 11 starts solid dark for a seamless join.
+            Bottom keeps fading to background because the FootnoteList that
+            follows (in reduced-motion fallback) is light. */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-edu-night to-background"

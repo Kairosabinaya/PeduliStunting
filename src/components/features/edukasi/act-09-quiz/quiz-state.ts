@@ -4,12 +4,13 @@
  * (project guidelines §22 file-length anti-pattern).
  *
  * Stages:
+ *  - `intro`    — landing screen with the prominent "Mulai Kuis" CTA.
  *  - `question` — showing question N; either unanswered or answered.
  *  - `result`   — all questions consumed, computing the tier.
  *
- * The previous `intro` stage + "Mulai kuis" CTA was removed: user feedback
- * was that the gate added friction without educational value. The widget
- * now starts directly on question 1; `reset` returns to question 1.
+ * The intro stage is back per user feedback: a prominent start gate
+ * frames the quiz as a deliberate moment, and the question card animates
+ * in to overlap the section heading once the user opts in.
  *
  * Answers are stored as an array of correctness booleans (length =
  * question count) so we can compute the result purely from state.
@@ -21,7 +22,7 @@ import {
   type QuizQuestion,
 } from "@/data/edukasi/quiz-questions";
 
-export type QuizStage = "question" | "result";
+export type QuizStage = "intro" | "question" | "result";
 
 export interface QuizAnsweredEntry {
   readonly questionId: number;
@@ -39,13 +40,14 @@ export interface QuizState {
 }
 
 export const INITIAL_QUIZ_STATE: QuizState = {
-  stage: "question",
+  stage: "intro",
   index: 0,
   answers: [],
   currentChoice: null,
 };
 
 export type QuizAction =
+  | { type: "start" }
   | { type: "answer"; choice: QuizAnswer }
   | { type: "next" }
   | { type: "reset" };
@@ -56,6 +58,11 @@ export type QuizAction =
  */
 export function quizReducer(state: QuizState, action: QuizAction): QuizState {
   switch (action.type) {
+    case "start":
+      // `start` is only meaningful from intro. From other stages it is a
+      // no-op so the reducer remains idempotent under accidental dispatch.
+      if (state.stage !== "intro") return state;
+      return { ...state, stage: "question" };
     case "answer": {
       if (state.stage !== "question") return state;
       if (state.currentChoice !== null) return state;

@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type {
@@ -8,7 +9,7 @@ import type {
 import {
   MILESTONE_COPY,
   MILESTONE_DOMAIN_LABEL,
-  MILESTONE_STATUS_LABEL,
+  MILESTONE_RANGE_FILTER_COPY,
 } from "@/config/tracker";
 
 import type { UpsertMilestoneFormState } from "@/app/(app)/tracker/anak/[childId]/perkembangan/_lib/upsert-milestone-state";
@@ -57,6 +58,16 @@ const catalog: readonly MilestoneDto[] = [
     sourceLabel: null,
     displayOrder: 1,
   },
+  {
+    id: "ms-3",
+    code: "GM-002",
+    domain: "gross_motor",
+    minAgeMonths: 12,
+    maxAgeMonths: 18,
+    description: "Berdiri sendiri tanpa berpegangan",
+    sourceLabel: "Buku KIA",
+    displayOrder: 1,
+  },
 ];
 
 const records: readonly ChildMilestoneDto[] = [
@@ -81,107 +92,72 @@ describe("MilestoneChecklist", () => {
   });
 
   it("renders the empty state when the catalog is empty", () => {
-    render(<MilestoneChecklist childId={childId} catalog={[]} records={[]} />);
+    render(
+      <MilestoneChecklist
+        childId={childId}
+        childAgeMonths={2}
+        catalog={[]}
+        records={[]}
+      />,
+    );
     expect(screen.getByText(MILESTONE_COPY.emptyTitle)).toBeInTheDocument();
+  });
+
+  it("filters by current age range by default", () => {
+    render(
+      <MilestoneChecklist
+        childId={childId}
+        childAgeMonths={2}
+        catalog={catalog}
+        records={records}
+      />,
+    );
+    expect(
+      screen.getByText("Mengangkat kepala saat tengkurap"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Berdiri sendiri tanpa berpegangan"),
+    ).not.toBeInTheDocument();
   });
 
   it("groups milestones by their development domain", () => {
     render(
       <MilestoneChecklist
         childId={childId}
+        childAgeMonths={2}
         catalog={catalog}
         records={records}
       />,
     );
     expect(
       screen.getByRole("heading", {
-        name: MILESTONE_DOMAIN_LABEL.gross_motor,
+        name: new RegExp(MILESTONE_DOMAIN_LABEL.gross_motor),
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: MILESTONE_DOMAIN_LABEL.language,
+        name: new RegExp(MILESTONE_DOMAIN_LABEL.language),
       }),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("heading", {
-        name: MILESTONE_DOMAIN_LABEL.fine_motor,
+  });
+
+  it("shows all ranges when the user toggles to 'Semua rentang'", async () => {
+    const user = userEvent.setup();
+    render(
+      <MilestoneChecklist
+        childId={childId}
+        childAgeMonths={2}
+        catalog={catalog}
+        records={records}
+      />,
+    );
+    await user.click(
+      screen.getByRole("radio", {
+        name: MILESTONE_RANGE_FILTER_COPY.optionAll,
       }),
-    ).not.toBeInTheDocument();
-  });
-
-  it("pre-fills row inputs from an existing record", () => {
-    render(
-      <MilestoneChecklist
-        childId={childId}
-        catalog={catalog}
-        records={records}
-      />,
     );
-    const statusSelects = screen.getAllByLabelText(
-      MILESTONE_COPY.statusLabel,
-    ) as HTMLSelectElement[];
-    expect(statusSelects[0]?.value).toBe("achieved");
-    expect(statusSelects[1]?.value).toBe("not_checked");
-
-    const dates = screen.getAllByLabelText(
-      MILESTONE_COPY.checkedAtLabel,
-    ) as HTMLInputElement[];
-    expect(dates[0]?.value).toBe("2024-04-01");
-  });
-
-  it("submits the per-row action bound with milestoneId", async () => {
-    upsertMock.mockResolvedValueOnce({
-      ok: true,
-      record: {
-        id: "rec-2",
-        userId: "user-1",
-        childId,
-        milestoneId: "ms-2",
-        status: "achieved",
-        checkedAt: "2024-04-10",
-        note: null,
-      },
-    });
-
-    render(
-      <MilestoneChecklist
-        childId={childId}
-        catalog={catalog}
-        records={records}
-      />,
-    );
-
-    const statusSelects = screen.getAllByLabelText(MILESTONE_COPY.statusLabel);
-    const secondStatus = statusSelects[1];
-    if (!secondStatus) throw new Error("expected second row status select");
-    fireEvent.change(secondStatus, { target: { value: "achieved" } });
-
-    const saveButtons = screen.getAllByRole("button", { name: /simpan/i });
-    const secondSave = saveButtons[1];
-    if (!secondSave) throw new Error("expected second row save button");
-    fireEvent.click(secondSave);
-
-    await waitFor(() => {
-      expect(upsertMock).toHaveBeenCalledTimes(1);
-    });
-    const call = upsertMock.mock.calls[0];
-    expect(call?.[0]).toBe(childId);
-    expect(call?.[1]).toBe("ms-2");
-    expect(call?.[3].get("status")).toBe("achieved");
-  });
-
-  it("renders all three status options per row", () => {
-    render(
-      <MilestoneChecklist childId={childId} catalog={catalog} records={[]} />,
-    );
-    const firstSelect = screen.getAllByLabelText(
-      MILESTONE_COPY.statusLabel,
-    )[0] as HTMLSelectElement;
-    const values = Array.from(firstSelect.options).map((o) => o.value);
-    expect(values).toEqual(["not_checked", "achieved", "delayed"]);
     expect(
-      screen.getAllByText(MILESTONE_STATUS_LABEL.delayed).length,
-    ).toBeGreaterThan(0);
+      screen.getByText("Berdiri sendiri tanpa berpegangan"),
+    ).toBeInTheDocument();
   });
 });

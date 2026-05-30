@@ -14,6 +14,8 @@ const TRACKER_ROUTES = [
   "/tracker/anak/11111111-1111-1111-1111-111111111111/pengukuran",
   "/tracker/anak/11111111-1111-1111-1111-111111111111/imunisasi",
   "/tracker/anak/11111111-1111-1111-1111-111111111111/perkembangan",
+  "/tracker/anak/11111111-1111-1111-1111-111111111111/gizi",
+  "/tracker/kehamilan",
 ] as const;
 
 test.describe("/tracker (anonymous)", () => {

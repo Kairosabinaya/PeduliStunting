@@ -2,14 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ChildCard } from "@/components/features/tracker/child-card";
+import { PregnancyBanner } from "@/components/features/tracker/pregnancy-banner";
 import { buttonVariants } from "@/components/primitives/button";
 import { EmptyState } from "@/components/primitives/empty-state";
 import { ErrorState } from "@/components/primitives/error-state";
 import { PageHeader } from "@/components/primitives/page-header";
-import {
-  TRACKER_LIST_COPY,
-  TRACKER_NEW_CHILD_ROUTE,
-} from "@/config/tracker";
+import { TRACKER_LIST_COPY, TRACKER_NEW_CHILD_ROUTE } from "@/config/tracker";
 import { fetchChildrenByOwner } from "@/lib/tracker-cache";
 import { requireServerSession } from "@/lib/server-session";
 
@@ -38,6 +36,8 @@ export default async function TrackerPage() {
           </Link>
         }
       />
+
+      <PregnancyBanner />
 
       {!result.ok ? (
         <ErrorState

@@ -5,10 +5,11 @@ import { usePathname } from "next/navigation";
 
 import {
   CHILD_DETAIL_COPY,
-  trackerChildRoute,
-  trackerChildMeasurementsRoute,
   trackerChildImmunizationsRoute,
+  trackerChildMeasurementsRoute,
   trackerChildMilestonesRoute,
+  trackerChildNutritionRoute,
+  trackerChildRoute,
 } from "@/config/tracker";
 import { cn } from "@/lib/cn";
 
@@ -42,6 +43,11 @@ function buildItems(childId: string): readonly NavItem[] {
     {
       href: trackerChildMilestonesRoute(childId),
       label: CHILD_DETAIL_COPY.navMilestones,
+      exact: false,
+    },
+    {
+      href: trackerChildNutritionRoute(childId),
+      label: CHILD_DETAIL_COPY.navNutrition,
       exact: false,
     },
   ];

@@ -15,6 +15,9 @@ export type ArticleId = Brand<string, "ArticleId">;
 export type MilestoneId = Brand<string, "MilestoneId">;
 export type ChildImmunizationId = Brand<string, "ChildImmunizationId">;
 export type ChildMilestoneId = Brand<string, "ChildMilestoneId">;
+export type NutritionEventId = Brand<string, "NutritionEventId">;
+export type PregnancyId = Brand<string, "PregnancyId">;
+export type PregnancyEventId = Brand<string, "PregnancyEventId">;
 export type ModelVersion = Brand<string, "ModelVersion">;
 export type ImmunizationCode = Brand<string, "ImmunizationCode">;
 export type IndicatorCode = Brand<string, "IndicatorCode">;
@@ -47,6 +50,15 @@ export function asChildImmunizationId(value: string): ChildImmunizationId {
 }
 export function asChildMilestoneId(value: string): ChildMilestoneId {
   return value as ChildMilestoneId;
+}
+export function asNutritionEventId(value: string): NutritionEventId {
+  return value as NutritionEventId;
+}
+export function asPregnancyId(value: string): PregnancyId {
+  return value as PregnancyId;
+}
+export function asPregnancyEventId(value: string): PregnancyEventId {
+  return value as PregnancyEventId;
 }
 export function asModelVersion(value: string): ModelVersion {
   return value as ModelVersion;

@@ -15,6 +15,7 @@ export interface ModuleGridProps {
     readonly measurements: string;
     readonly immunizations: string;
     readonly milestones: string;
+    readonly nutrition: string;
   };
   readonly measurements: readonly GrowthMeasurementDto[];
   readonly immunizationSchedule: readonly ImmunizationDto[];
@@ -85,10 +86,12 @@ export function ModuleGrid({
       <ModuleCard
         title={MODULE_CARD_COPY.nutrition.title}
         description={MODULE_CARD_COPY.nutrition.description}
-        statusLine={MODULE_CARD_COPY.nutrition.placeholderStatus}
-        tone="muted"
-        disabled
-        cta={{ label: MODULE_CARD_COPY.nutrition.cta, href: "#" }}
+        statusLine="ASI, MPASI, Vitamin A, dan obat cacing."
+        tone="nutrition"
+        cta={{
+          label: MODULE_CARD_COPY.nutrition.cta,
+          href: childDetailRoutes.nutrition,
+        }}
       />
     </div>
   );

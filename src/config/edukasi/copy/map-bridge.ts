@@ -6,7 +6,7 @@
 export const MAP_BRIDGE_COPY = {
   eyebrow: "Eksplorasi data",
   headlineLead: "Bagaimana kondisi di",
-  headlineHighlight: { value: "kabupaten Anda", variant: "primary" as const },
+  headlineHighlight: { value: "wilayah Anda", variant: "primary" as const },
   headlineTail: "?",
   body: "Peta prevalensi stunting menampilkan data 514 kabupaten/kota dari 2021–2024. Cari daerah Anda, bandingkan dengan rata-rata nasional, dan lihat lintasan multi-tahun.",
   topPerformersTitle: "Pencapaian provinsi terbaik",

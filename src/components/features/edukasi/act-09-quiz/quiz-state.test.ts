@@ -11,18 +11,35 @@ import {
 
 describe("quizReducer", () => {
   describe("initial state", () => {
-    it("starts directly on the first question (no intro gate)", () => {
-      expect(INITIAL_QUIZ_STATE.stage).toBe("question");
+    it("starts on the intro stage with no answers committed", () => {
+      expect(INITIAL_QUIZ_STATE.stage).toBe("intro");
       expect(INITIAL_QUIZ_STATE.index).toBe(0);
       expect(INITIAL_QUIZ_STATE.answers).toHaveLength(0);
       expect(INITIAL_QUIZ_STATE.currentChoice).toBeNull();
     });
   });
 
+  describe("start action", () => {
+    it("transitions from intro to question at index 0", () => {
+      const next = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
+      expect(next.stage).toBe("question");
+      expect(next.index).toBe(0);
+      expect(next.answers).toHaveLength(0);
+      expect(next.currentChoice).toBeNull();
+    });
+
+    it("is a no-op when dispatched from a non-intro stage", () => {
+      const started = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
+      const reStarted = quizReducer(started, { type: "start" });
+      expect(reStarted).toBe(started);
+    });
+  });
+
   describe("answer action", () => {
     it("captures the user's choice without advancing the index", () => {
+      const started = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
       const expectedCorrectness = QUIZ_QUESTIONS[0]?.correctAnswer === "mitos";
-      const answered = quizReducer(INITIAL_QUIZ_STATE, {
+      const answered = quizReducer(started, {
         type: "answer",
         choice: "mitos",
       });
@@ -35,7 +52,8 @@ describe("quizReducer", () => {
     });
 
     it("ignores subsequent answer actions for the same question", () => {
-      const answered = quizReducer(INITIAL_QUIZ_STATE, {
+      const started = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
+      const answered = quizReducer(started, {
         type: "answer",
         choice: "mitos",
       });
@@ -49,7 +67,8 @@ describe("quizReducer", () => {
 
   describe("next action", () => {
     it("advances to the next question and accumulates the committed answer", () => {
-      const answered = quizReducer(INITIAL_QUIZ_STATE, {
+      const started = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
+      const answered = quizReducer(started, {
         type: "answer",
         choice: "mitos",
       });
@@ -61,7 +80,7 @@ describe("quizReducer", () => {
     });
 
     it("transitions to the result stage after the last question", () => {
-      let state = INITIAL_QUIZ_STATE;
+      let state = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
       for (let i = 0; i < QUIZ_QUESTIONS.length; i += 1) {
         state = quizReducer(state, { type: "answer", choice: "fakta" });
         state = quizReducer(state, { type: "next" });
@@ -71,14 +90,16 @@ describe("quizReducer", () => {
     });
 
     it("is a no-op if next is dispatched before an answer", () => {
-      const pretended = quizReducer(INITIAL_QUIZ_STATE, { type: "next" });
-      expect(pretended).toBe(INITIAL_QUIZ_STATE);
+      const started = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
+      const pretended = quizReducer(started, { type: "next" });
+      expect(pretended).toBe(started);
     });
   });
 
   describe("reset action", () => {
-    it("brings any stage back to the initial state", () => {
-      const answered = quizReducer(INITIAL_QUIZ_STATE, {
+    it("brings any stage back to the initial intro state", () => {
+      const started = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
+      const answered = quizReducer(started, {
         type: "answer",
         choice: "mitos",
       });
@@ -90,10 +111,12 @@ describe("quizReducer", () => {
 
 describe("currentQuestion", () => {
   it("returns the question at the active index in the question stage", () => {
-    expect(currentQuestion(INITIAL_QUIZ_STATE)?.id).toBe(QUIZ_QUESTIONS[0]?.id);
+    const started = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
+    expect(currentQuestion(started)?.id).toBe(QUIZ_QUESTIONS[0]?.id);
   });
 
   it("returns null outside the question stage", () => {
+    expect(currentQuestion(INITIAL_QUIZ_STATE)).toBeNull();
     const result = { ...INITIAL_QUIZ_STATE, stage: "result" as const };
     expect(currentQuestion(result)).toBeNull();
   });
