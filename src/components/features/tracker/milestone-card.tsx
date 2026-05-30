@@ -41,6 +41,7 @@ import type { ChildMilestoneStatus } from "@/domain/health-plan/entities/child-m
 import type { MilestoneDomain } from "@/domain/health-plan/entities/milestone";
 
 import { MilestoneStimulationPanel } from "./milestone-stimulation-panel";
+import { todayIso } from "@/lib/today";
 
 const DOMAIN_ICON_MAP: Record<MilestoneDomain, typeof PersonStanding> = {
   gross_motor: PersonStanding,
@@ -275,12 +276,4 @@ function FeedbackArea({
     );
   }
   return null;
-}
-
-function todayIso(): string {
-  const now = new Date();
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
 }

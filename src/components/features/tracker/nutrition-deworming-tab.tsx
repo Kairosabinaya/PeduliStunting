@@ -20,6 +20,7 @@ import {
 } from "@/config/nutrition";
 import { NUTRITION_DEWORMING_COPY } from "@/config/tracker";
 import { readDewormingHistory } from "@/domain/health-plan/services/nutrition-status";
+import { todayIso } from "@/lib/today";
 
 export interface NutritionDewormingTabProps {
   readonly childId: string;
@@ -173,9 +174,4 @@ export function NutritionDewormingTab({
       </section>
     </div>
   );
-}
-
-function todayIso(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }

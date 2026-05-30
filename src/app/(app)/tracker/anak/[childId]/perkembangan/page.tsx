@@ -22,6 +22,7 @@ import {
   fetchMilestoneCatalog,
 } from "@/lib/tracker-cache";
 import { requireServerSession } from "@/lib/server-session";
+import { todayIso } from "@/lib/today";
 
 interface MilestonesPageProps {
   readonly params: Promise<{ readonly childId: string }>;
@@ -115,12 +116,4 @@ export default async function MilestonesPage({ params }: MilestonesPageProps) {
       </Card>
     </div>
   );
-}
-
-function todayIso(): string {
-  const now = new Date();
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
 }

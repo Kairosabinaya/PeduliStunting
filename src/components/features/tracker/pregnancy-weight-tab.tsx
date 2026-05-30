@@ -17,6 +17,7 @@ import { Input } from "@/components/primitives/input";
 import { Label } from "@/components/primitives/label";
 import { PREGNANCY_WEIGHT_COPY } from "@/config/tracker";
 import { buildWeightSummary } from "@/domain/pregnancy/services/pregnancy-status";
+import { todayIso } from "@/lib/today";
 
 export interface PregnancyWeightTabProps {
   readonly pregnancyId: string;
@@ -179,9 +180,4 @@ export function PregnancyWeightTab({
       </section>
     </div>
   );
-}
-
-function todayIso(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }

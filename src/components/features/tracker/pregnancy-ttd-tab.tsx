@@ -15,6 +15,7 @@ import { Badge } from "@/components/primitives/badge";
 import { Button } from "@/components/primitives/button";
 import { PREGNANCY_TTD_COPY } from "@/config/tracker";
 import { buildTtdSummary } from "@/domain/pregnancy/services/pregnancy-status";
+import { todayIso } from "@/lib/today";
 
 export interface PregnancyTtdTabProps {
   readonly pregnancyId: string;
@@ -133,9 +134,4 @@ export function PregnancyTtdTab({ pregnancyId, events }: PregnancyTtdTabProps) {
       </section>
     </div>
   );
-}
-
-function todayIso(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }

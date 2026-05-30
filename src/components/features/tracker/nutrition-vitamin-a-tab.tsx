@@ -16,6 +16,7 @@ import { Button } from "@/components/primitives/button";
 import { VIT_A_KAPSUL_SPECS, type VitAKapsulSpec } from "@/config/nutrition";
 import { NUTRITION_VITAMIN_A_COPY } from "@/config/tracker";
 import { latestEventOfKind } from "@/domain/health-plan/services/nutrition-status";
+import { todayIso } from "@/lib/today";
 
 export interface NutritionVitaminATabProps {
   readonly childId: string;
@@ -162,9 +163,4 @@ function KapsulCard({
       </div>
     </li>
   );
-}
-
-function todayIso(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }

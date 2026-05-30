@@ -20,6 +20,7 @@ import {
   fetchPregnancyEvents,
 } from "@/lib/tracker-cache";
 import { requireServerSession } from "@/lib/server-session";
+import { todayIso } from "@/lib/today";
 
 export const metadata: Metadata = {
   title: PREGNANCY_PAGE_COPY.metaTitle,
@@ -119,9 +120,4 @@ export default async function PregnancyPage() {
       </Card>
     </div>
   );
-}
-
-function todayIso(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }

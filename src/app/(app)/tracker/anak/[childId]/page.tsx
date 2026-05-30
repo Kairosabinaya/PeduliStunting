@@ -26,6 +26,7 @@ import {
   fetchNutritionEventsByChild,
 } from "@/lib/tracker-cache";
 import { requireServerSession } from "@/lib/server-session";
+import { todayIso } from "@/lib/today";
 
 interface ChildOverviewPageProps {
   readonly params: Promise<{ readonly childId: string }>;
@@ -104,7 +105,7 @@ export default async function ChildOverviewPage({
   const measurements = measurementsResult.value;
   const childAgeMonths = monthsBetween(
     asDateOnly(child.value.birthDate),
-    asDateOnly(todayIsoString()),
+    asDateOnly(todayIso()),
   );
 
   return (
@@ -138,12 +139,4 @@ export default async function ChildOverviewPage({
       <GrowthChartCard child={child.value} measurements={measurements} />
     </div>
   );
-}
-
-function todayIsoString(): string {
-  const now = new Date();
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
 }

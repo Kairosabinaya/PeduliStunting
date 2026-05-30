@@ -12,6 +12,7 @@ import { Badge } from "@/components/primitives/badge";
 import { Button } from "@/components/primitives/button";
 import { NUTRITION_ASI_COPY } from "@/config/tracker";
 import { readAsiExclusiveStatus } from "@/domain/health-plan/services/nutrition-status";
+import { todayIso } from "@/lib/today";
 
 export interface NutritionAsiTabProps {
   readonly childId: string;
@@ -144,9 +145,4 @@ function StatusLine({
       </span>
     </div>
   );
-}
-
-function todayIso(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }

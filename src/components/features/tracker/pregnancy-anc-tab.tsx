@@ -16,6 +16,7 @@ import { Button } from "@/components/primitives/button";
 import { ANC_TARGET_SLOTS } from "@/config/pregnancy";
 import { PREGNANCY_ANC_COPY } from "@/config/tracker";
 import { buildAncSummary } from "@/domain/pregnancy/services/pregnancy-status";
+import { todayIso } from "@/lib/today";
 
 export interface PregnancyAncTabProps {
   readonly pregnancyId: string;
@@ -161,9 +162,4 @@ export function PregnancyAncTab({ pregnancyId, events }: PregnancyAncTabProps) {
       </ul>
     </div>
   );
-}
-
-function todayIso(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }

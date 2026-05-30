@@ -15,6 +15,7 @@ import { Label } from "@/components/primitives/label";
 import { MPASI_FOOD_GROUPS, MPASI_TEXTURE_GUIDES } from "@/config/nutrition";
 import { NUTRITION_MPASI_COPY } from "@/config/tracker";
 import { readMpasiStatus } from "@/domain/health-plan/services/nutrition-status";
+import { todayIso } from "@/lib/today";
 
 export interface NutritionMpasiTabProps {
   readonly childId: string;
@@ -175,9 +176,4 @@ export function NutritionMpasiTab({
       </section>
     </div>
   );
-}
-
-function todayIso(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }

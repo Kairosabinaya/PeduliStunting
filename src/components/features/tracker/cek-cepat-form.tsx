@@ -6,6 +6,7 @@ import { Button } from "@/components/primitives/button";
 import { Input } from "@/components/primitives/input";
 import { Label } from "@/components/primitives/label";
 import { CEK_CEPAT_COPY, CEK_CEPAT_MAX_AGE_MONTHS } from "@/config/cek-cepat";
+import { todayIso } from "@/lib/today";
 
 export type CekCepatInputMode = "birth-date" | "age-months";
 
@@ -299,14 +300,6 @@ function ModeOption({
       {label}
     </button>
   );
-}
-
-function todayIso(): string {
-  const now = new Date();
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
 }
 
 function parseIntegerInput(value: string): number | null {

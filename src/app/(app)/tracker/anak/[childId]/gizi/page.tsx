@@ -19,6 +19,7 @@ import {
   fetchNutritionEventsByChild,
 } from "@/lib/tracker-cache";
 import { requireServerSession } from "@/lib/server-session";
+import { todayIso } from "@/lib/today";
 
 interface NutritionPageProps {
   readonly params: Promise<{ readonly childId: string }>;
@@ -83,9 +84,4 @@ export default async function NutritionPage({ params }: NutritionPageProps) {
       </CardContent>
     </Card>
   );
-}
-
-function todayIso(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
