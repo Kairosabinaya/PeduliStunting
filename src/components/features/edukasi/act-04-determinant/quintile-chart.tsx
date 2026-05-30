@@ -1,151 +1,159 @@
-"use client";
-
-/**
- * Quintile prevalence chart. Brand-ramp palette (Q1 deepest blue ⇢ Q5
- * lightest) so the ordinal mapping reads at a glance — Q1 is the most
- * economically vulnerable group, Q5 the most prosperous, and the depth
- * of color mirrors that vulnerability.
- *
- * When `activeIndex` is supplied (driven from the parent's scroll
- * progress), only that bar paints in full color; the others fade to a
- * muted state. Pass `null` (or omit the prop) for the static "all bars
- * visible" rendering used in the reduced-motion fallback.
- */
-
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  ReferenceLine,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from "recharts";
+// Hand-rolled SVG horizontal bar chart for the income-quintile disparity in
+// ACT 4 (replaces the previous Recharts implementation, dropping that ~100 KB
+// dependency entirely). Pure presentation — no hooks, no client APIs — so it
+// renders inside the client `DeterminantSection` without its own "use client".
+//
+// The active bar is full-opacity; the rest dim. When `activeIndex` is null
+// (reduced-motion / static fallback) every bar shows at full opacity. Fills
+// come from the `--quintile-*` ramp so light/dark themes invert correctly and,
+// on the landing, the warm scope re-points them automatically.
 
 import { DETERMINANT_COPY } from "@/config/edukasi";
 import {
   INCOME_QUINTILES,
   INCOME_QUINTILE_NATIONAL,
-  type IncomeQuintilePoint,
 } from "@/data/edukasi/determinants";
-
-interface ChartDatum {
-  readonly id: string;
-  readonly label: string;
-  readonly value: number;
-  readonly note: string;
-}
-
-/**
- * Single-hue sequential brand ramp from Q1 (most vulnerable) to Q5 (most
- * prosperous). Pulled from `--quintile-*` CSS variables which are theme-
- * aware (see `globals.css`): light mode goes brand-700 → brand-200, dark
- * mode is the inverted ladder so the deepest color still reads against
- * the near-black background.
- */
-const QUINTILE_COLORS: readonly string[] = [
-  "rgb(var(--quintile-1))",
-  "rgb(var(--quintile-2))",
-  "rgb(var(--quintile-3))",
-  "rgb(var(--quintile-4))",
-  "rgb(var(--quintile-5))",
-];
+import { cn } from "@/lib/cn";
 
 export interface QuintileChartProps {
   /**
-   * Index 0..4 of the currently highlighted quintile. When supplied,
-   * non-active bars fade to ~25% opacity so the active quintile reads as
-   * the focal point. `null` (or omit) keeps every bar at full opacity.
+   * Index 0–4 of the highlighted quintile. When omitted or `null` every bar
+   * shows at full opacity (static / reduced-motion state).
    */
   readonly activeIndex?: number | null;
 }
 
+const VIEW_WIDTH = 760;
+const ROW_HEIGHT = 56;
+const ROW_GAP = 16;
+const LABEL_WIDTH = 150;
+const VALUE_WIDTH = 64;
+const TOP_PAD = 8;
+const BOTTOM_PAD = 28;
+/** X-axis domain max (%) — a touch above Q1 so the longest bar has headroom. */
+const DOMAIN_MAX = 36;
+
+const PLOT_WIDTH = VIEW_WIDTH - LABEL_WIDTH - VALUE_WIDTH;
+const VIEW_HEIGHT =
+  TOP_PAD +
+  BOTTOM_PAD +
+  INCOME_QUINTILES.length * ROW_HEIGHT +
+  (INCOME_QUINTILES.length - 1) * ROW_GAP;
+
+const percentFormatter = new Intl.NumberFormat("id-ID", {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
+
+/**
+ * Per-quintile fill via Tailwind utilities (not an inline `var()` style):
+ * compiled `fill-brand-*` classes resolve the scoped brand ramp reliably —
+ * the same mechanism the choropleth uses — whereas `var()` inside an SVG
+ * presentation attribute is ignored, and inside an inline `style` it did not
+ * pick up the landing-scoped ramp consistently. Q1 (most vulnerable) = deepest,
+ * Q5 (most prosperous) = lightest.
+ */
+const QUINTILE_FILL_CLASS: readonly string[] = [
+  "fill-brand-700",
+  "fill-brand-500",
+  "fill-brand-400",
+  "fill-brand-300",
+  "fill-brand-200",
+];
+
+function barLength(prevalencePct: number): number {
+  return (prevalencePct / DOMAIN_MAX) * PLOT_WIDTH;
+}
+
+/**
+ * Horizontal bar chart of stunting prevalence by income quintile, with the
+ * national-average reference line. Accessible via `role="img"` + an aria-label
+ * summary and a visually-hidden data list.
+ *
+ * @example
+ * ```tsx
+ * <QuintileChart activeIndex={2} />
+ * ```
+ */
 export function QuintileChart({ activeIndex = null }: QuintileChartProps) {
-  const data: ChartDatum[] = INCOME_QUINTILES.map(
-    (q: IncomeQuintilePoint): ChartDatum => ({
-      id: q.id,
-      label: q.label,
-      value: q.prevalencePct,
-      note: q.note,
-    }),
-  );
+  const nationalX = LABEL_WIDTH + barLength(INCOME_QUINTILE_NATIONAL);
 
   return (
-    <figure
-      className="not-prose rounded-2xl border border-border bg-surface p-4 shadow-sm sm:p-6"
-      aria-label={DETERMINANT_COPY.quintileTitle}
-    >
-      <header className="mb-3">
-        <h3 className="text-lg font-semibold text-foreground">
-          {DETERMINANT_COPY.quintileTitle}
-        </h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {DETERMINANT_COPY.quintileDescription}
-        </p>
-      </header>
-      <div className="h-72 w-full sm:h-80">
-        <ResponsiveContainer width="100%" height="100%" minHeight={288}>
-          <BarChart
-            data={data}
-            margin={{ top: 16, right: 16, bottom: 8, left: 0 }}
-          >
-            <CartesianGrid
-              stroke="rgb(var(--color-border))"
-              strokeDasharray="3 6"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="label"
-              tick={{
-                fill: "rgb(var(--color-muted-foreground))",
-                fontSize: 12,
-                fontFamily: "var(--font-sans)",
-              }}
-              tickLine={false}
-              axisLine={{ stroke: "rgb(var(--color-border))" }}
-              interval={0}
-            />
-            <YAxis
-              tickFormatter={(v: number) => `${v}%`}
-              tick={{
-                fill: "rgb(var(--color-muted-foreground))",
-                fontSize: 12,
-                fontFamily: "var(--font-sans)",
-              }}
-              tickLine={false}
-              axisLine={false}
-              width={42}
-              domain={[0, 35]}
-            />
-            <ReferenceLine
-              y={INCOME_QUINTILE_NATIONAL}
-              stroke="rgb(var(--color-foreground) / 0.5)"
-              strokeDasharray="4 4"
-              label={{
-                value: DETERMINANT_COPY.quintileNationalLabel,
-                position: "insideTopRight",
-                fontSize: 11,
-                fontFamily: "var(--font-sans)",
-                fill: "rgb(var(--color-foreground) / 0.7)",
-              }}
-            />
-            <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-              {data.map((entry, index) => {
-                const fill = QUINTILE_COLORS[index] ?? "rgb(var(--quintile-3))";
-                const isActive = activeIndex === null || index === activeIndex;
-                return (
-                  <Cell
-                    key={entry.id}
-                    fill={fill}
-                    fillOpacity={isActive ? 1 : 0.22}
-                  />
-                );
-              })}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+    <figure className="w-full">
+      <svg
+        viewBox={`0 0 ${VIEW_WIDTH} ${VIEW_HEIGHT}`}
+        className="h-auto w-full"
+        role="img"
+        aria-label={`${DETERMINANT_COPY.quintileTitle}. ${DETERMINANT_COPY.quintileNationalLabel}.`}
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {/* National-average reference line */}
+        <line
+          x1={nationalX}
+          x2={nationalX}
+          y1={TOP_PAD}
+          y2={VIEW_HEIGHT - BOTTOM_PAD}
+          stroke="rgb(var(--color-foreground))"
+          strokeWidth={1}
+          strokeDasharray="4 4"
+          opacity={0.5}
+        />
+        <text
+          x={nationalX}
+          y={VIEW_HEIGHT - 8}
+          textAnchor="middle"
+          className="fill-muted-foreground text-[11px]"
+        >
+          {DETERMINANT_COPY.quintileNationalLabel}
+        </text>
+
+        {INCOME_QUINTILES.map((quintile, index) => {
+          const y = TOP_PAD + index * (ROW_HEIGHT + ROW_GAP);
+          const width = barLength(quintile.prevalencePct);
+          const active = activeIndex === null || activeIndex === index;
+          return (
+            <g
+              key={quintile.id}
+              className={cn(
+                "transition-opacity duration-slow",
+                active ? "opacity-100" : "opacity-35",
+              )}
+            >
+              <text
+                x={0}
+                y={y + ROW_HEIGHT / 2}
+                dominantBaseline="middle"
+                className="fill-muted-foreground text-[13px]"
+              >
+                {quintile.label}
+              </text>
+              <rect
+                x={LABEL_WIDTH}
+                y={y + 8}
+                width={Math.max(width, 2)}
+                height={ROW_HEIGHT - 16}
+                rx={6}
+                className={QUINTILE_FILL_CLASS[index] ?? "fill-brand-500"}
+              />
+              <text
+                x={LABEL_WIDTH + width + 10}
+                y={y + ROW_HEIGHT / 2}
+                dominantBaseline="middle"
+                className="fill-foreground text-[14px] font-semibold"
+              >
+                {`${percentFormatter.format(quintile.prevalencePct)}%`}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <ul className="sr-only">
+        {INCOME_QUINTILES.map((quintile) => (
+          <li key={quintile.id}>
+            {`${quintile.label}: ${percentFormatter.format(quintile.prevalencePct)}% — ${quintile.note}`}
+          </li>
+        ))}
+      </ul>
     </figure>
   );
 }

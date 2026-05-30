@@ -60,11 +60,20 @@ const config: Config = {
           DEFAULT: "rgb(var(--color-primary) / <alpha-value>)",
           foreground: "rgb(var(--color-primary-foreground) / <alpha-value>)",
           soft: "rgb(var(--color-primary-soft) / <alpha-value>)",
+          // Darkened tone for primary-coloured TEXT on a light background
+          // (the raw `primary` only clears WCAG AA at large display sizes).
+          ink: "rgb(var(--color-primary-ink) / <alpha-value>)",
+        },
+        secondary: {
+          DEFAULT: "rgb(var(--color-secondary) / <alpha-value>)",
+          foreground: "rgb(var(--color-secondary-foreground) / <alpha-value>)",
         },
         accent: {
           DEFAULT: "rgb(var(--color-accent) / <alpha-value>)",
           foreground: "rgb(var(--color-accent-foreground) / <alpha-value>)",
           soft: "rgb(var(--color-accent-soft) / <alpha-value>)",
+          // Darkened tone for accent-coloured TEXT on a light background.
+          ink: "rgb(var(--color-sage-ink) / <alpha-value>)",
         },
         ordinal: {
           rendah: "rgb(var(--color-ordinal-rendah) / <alpha-value>)",
@@ -99,6 +108,15 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "ui-monospace", "monospace"],
+        // Editorial display face for the landing headlines/stats. The
+        // `--font-display` variable is only set on the `.theme-landing`
+        // wrapper, so `font-display` falls back to the product sans elsewhere.
+        display: [
+          "var(--font-display)",
+          "var(--font-sans)",
+          "system-ui",
+          "sans-serif",
+        ],
       },
       fontSize: {
         xs: ["0.75rem", { lineHeight: "1.125rem" }],

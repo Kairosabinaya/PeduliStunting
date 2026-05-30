@@ -57,6 +57,15 @@
     --color-info: 9 95 150;
     --color-focus: 74 165 223;
 
+    /* Text-safe + secondary tokens consumed by Tailwind utilities
+       (`text-primary-ink`, `bg-secondary`, `text-accent-ink`). Part of the base
+       blue/green palette — the `-ink` variants are darkened tones used where a
+       brand-coloured colour needs to read as TEXT at body size. */
+    --color-primary-ink: 9 95 150;
+    --color-secondary: 6 68 109;
+    --color-secondary-foreground: 255 255 255;
+    --color-sage-ink: 12 60 36;
+
     --radius-xs: 0.25rem;
     --radius-sm: 0.375rem;
     --radius-md: 0.5rem;
@@ -152,6 +161,11 @@
     --color-info: 74 165 223;
     --color-focus: 122 188 226;
 
+    --color-primary-ink: 122 188 226;
+    --color-secondary: 122 188 226;
+    --color-secondary-foreground: 8 24 38;
+    --color-sage-ink: 111 190 141;
+
     --shadow-focus: 0 0 0 3px rgb(122 188 226 / 0.45);
 
     --glass-bg: 22 25 29;
@@ -185,6 +199,21 @@
     --quintile-5: var(--color-brand-700);
   }
 
+  /* ───────────────────────── Landing warm theme scope ─────────────────────
+     The public landing (`/`) opts into a warm, friendly "editorial" identity
+     that is intentionally distinct from the cool product palette used by the
+     authenticated app. Implemented as a scoped CSS-variable override on a
+     single `.theme-landing` wrapper (see `LandingShell`) so EVERY existing
+     token-driven section (ActSection tints, HighlightWord, Button, Card,
+     charts, the choropleth ordinal ramp) re-colours automatically WITHOUT
+     touching `/edukasi` or the rest of the app, and WITHOUT introducing magic
+     values in components (project guidelines §2, §10).
+
+     Palette (warm refined): terracotta (primary), pine/teal (secondary,
+     "night" bands), warm paper (background), ochre (warning/accent fills),
+     sage (success/positive). Text-on-paper colour tones use the dedicated
+     `-ink` tokens which are darkened to clear WCAG AA 4.5:1 (the raw
+     terracotta/sage/ochre only pass for large display text or as fills). */
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
@@ -355,6 +384,20 @@
     font-weight: 400;
     color: rgb(var(--color-muted-foreground));
     max-width: 38ch;
+  }
+
+  /* Landing-only: the large editorial type (headlines + display stats) adopts
+     the `--font-display` typeface (Bricolage Grotesque) set on the
+     `.theme-landing` wrapper. Body copy intentionally stays Plus Jakarta Sans.
+     Scoped so the authenticated `/edukasi` long-read keeps the product sans. */
+  .theme-landing
+    :is(
+      .display-stat,
+      .display-stat-inline,
+      .display-headline,
+      .section-headline
+    ) {
+    font-family: var(--font-display, var(--font-sans)), system-ui, sans-serif;
   }
 
   .eyebrow {

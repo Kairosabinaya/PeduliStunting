@@ -40,8 +40,21 @@ export default async function PublicMapLayout({
     }
   }
 
+  // The unauthenticated public surfaces are the landing-before-login experience,
+  // which adopts the warm "theme-landing" identity (see globals.css). Scoping it
+  // at the layout root means the shared FloatingHeader (Masuk/Daftar pill,
+  // ThemeToggle, active-nav tint) warms up too, instead of staying product-blue
+  // above a warm page. Authenticated visitors keep the cool product palette.
+  const isPublicLanding = session === null;
+
   return (
-    <div className="min-h-dvh bg-background">
+    <div
+      className={
+        isPublicLanding
+          ? "theme-landing min-h-dvh bg-background"
+          : "min-h-dvh bg-background"
+      }
+    >
       <FloatingHeader
         session={
           session === null
