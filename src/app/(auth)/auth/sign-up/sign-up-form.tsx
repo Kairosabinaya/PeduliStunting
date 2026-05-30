@@ -7,7 +7,7 @@ import {
   signUpWithPassword,
   type AuthActionResult,
 } from "@/app/(auth)/actions";
-import { AuthFeedback } from "@/app/(auth)/_components/auth-feedback";
+import { FeedbackBanner } from "@/components/primitives/feedback-banner";
 import { AuthSeparator } from "@/app/(auth)/_components/auth-separator";
 import { AvatarUploader } from "@/app/(auth)/_components/avatar-uploader";
 import {
@@ -137,12 +137,12 @@ export function SignUpForm({ redirectTo }: SignUpFormProps) {
         </MotionStack>
 
         {generalError ? (
-          <AuthFeedback tone="error">{generalError}</AuthFeedback>
+          <FeedbackBanner tone="error">{generalError}</FeedbackBanner>
         ) : null}
         {succeeded ? (
-          <AuthFeedback tone="success">
+          <FeedbackBanner tone="success">
             {AUTH_SUCCESS_MESSAGES.signUpVerifyEmail}
-          </AuthFeedback>
+          </FeedbackBanner>
         ) : null}
         <SubmitButton />
       </form>

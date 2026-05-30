@@ -7,7 +7,7 @@ import {
   requestPasswordReset,
   type AuthActionResult,
 } from "@/app/(auth)/actions";
-import { AuthFeedback } from "@/app/(auth)/_components/auth-feedback";
+import { FeedbackBanner } from "@/components/primitives/feedback-banner";
 import { MailIcon } from "@/app/(auth)/_components/field-icons";
 import { MotionStack } from "@/app/(auth)/_components/motion-stack";
 import { Button } from "@/components/primitives/button";
@@ -60,12 +60,12 @@ export function ResetPasswordForm() {
           />
         </div>
         {generalError ? (
-          <AuthFeedback tone="error">{generalError}</AuthFeedback>
+          <FeedbackBanner tone="error">{generalError}</FeedbackBanner>
         ) : null}
         {succeeded ? (
-          <AuthFeedback tone="success">
+          <FeedbackBanner tone="success">
             {AUTH_SUCCESS_MESSAGES.resetLinkSent}
-          </AuthFeedback>
+          </FeedbackBanner>
         ) : null}
         <SubmitButton />
       </MotionStack>

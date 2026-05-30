@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { updatePassword, type AuthActionResult } from "@/app/(auth)/actions";
-import { AuthFeedback } from "@/app/(auth)/_components/auth-feedback";
+import { FeedbackBanner } from "@/components/primitives/feedback-banner";
 import { LockIcon } from "@/app/(auth)/_components/field-icons";
 import { MotionStack } from "@/app/(auth)/_components/motion-stack";
 import { PasswordInput } from "@/app/(auth)/_components/password-input";
@@ -68,12 +68,12 @@ export function UpdatePasswordForm() {
           />
         </div>
         {generalError ? (
-          <AuthFeedback tone="error">{generalError}</AuthFeedback>
+          <FeedbackBanner tone="error">{generalError}</FeedbackBanner>
         ) : null}
         {succeeded ? (
-          <AuthFeedback tone="success">
+          <FeedbackBanner tone="success">
             {AUTH_SUCCESS_MESSAGES.passwordUpdated}
-          </AuthFeedback>
+          </FeedbackBanner>
         ) : null}
         <SubmitButton />
       </MotionStack>

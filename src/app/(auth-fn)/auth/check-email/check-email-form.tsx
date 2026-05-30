@@ -7,7 +7,7 @@ import {
   resendVerificationEmail,
   type AuthActionResult,
 } from "@/app/(auth)/actions";
-import { AuthFeedback } from "@/app/(auth)/_components/auth-feedback";
+import { FeedbackBanner } from "@/components/primitives/feedback-banner";
 import { Button } from "@/components/primitives/button";
 import { CHECK_EMAIL_LABELS } from "@/config/auth";
 
@@ -91,12 +91,12 @@ export function CheckEmailForm({ email, redirectTo }: CheckEmailFormProps) {
         <input type="hidden" name="email" value={email} />
         <input type="hidden" name="redirectTo" value={redirectTo} />
         {generalError ? (
-          <AuthFeedback tone="error">{generalError}</AuthFeedback>
+          <FeedbackBanner tone="error">{generalError}</FeedbackBanner>
         ) : null}
         {succeeded ? (
-          <AuthFeedback tone="success">
+          <FeedbackBanner tone="success">
             {CHECK_EMAIL_LABELS.resentSuccess}
-          </AuthFeedback>
+          </FeedbackBanner>
         ) : null}
         {cooldown > 0 ? (
           <p className="text-xs font-medium text-muted-foreground">

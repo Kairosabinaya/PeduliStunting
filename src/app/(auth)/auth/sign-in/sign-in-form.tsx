@@ -8,7 +8,7 @@ import {
   signInWithPassword,
   type AuthActionResult,
 } from "@/app/(auth)/actions";
-import { AuthFeedback } from "@/app/(auth)/_components/auth-feedback";
+import { FeedbackBanner } from "@/components/primitives/feedback-banner";
 import { AuthSeparator } from "@/app/(auth)/_components/auth-separator";
 import { GoogleForm } from "@/app/(auth)/_components/google-form";
 import { MotionStack } from "@/app/(auth)/_components/motion-stack";
@@ -93,7 +93,9 @@ export function SignInForm({ redirectTo, errorCode }: SignInFormProps) {
               leftIcon={<LockIcon />}
             />
           </div>
-          {banner ? <AuthFeedback tone="error">{banner}</AuthFeedback> : null}
+          {banner ? (
+            <FeedbackBanner tone="error">{banner}</FeedbackBanner>
+          ) : null}
           <SubmitButton />
         </MotionStack>
       </form>

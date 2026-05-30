@@ -46,7 +46,7 @@ export function AuthStepper({ currentStep }: AuthStepperProps) {
                 }`}
                 aria-hidden
               >
-                {isComplete ? "\u2713" : step.id}
+                {isComplete ? <CheckIcon /> : step.id}
               </span>
               <span
                 className={`text-sm ${
@@ -68,5 +68,23 @@ export function AuthStepper({ currentStep }: AuthStepperProps) {
         })}
       </ol>
     </nav>
+  );
+}
+
+/** Inline check glyph for a completed step (SVG, not a font-dependent ✓). */
+function CheckIcon() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={3}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-3.5 w-3.5"
+    >
+      <path d="m5 13 4 4L19 7" />
+    </svg>
   );
 }
