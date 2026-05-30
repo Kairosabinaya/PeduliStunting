@@ -106,10 +106,7 @@ function MetricTile({ definition, value }: MetricTileProps) {
   );
 }
 
-function pickNumber(
-  payload: ModelMetricsPayload,
-  key: string,
-): number | null {
+function pickNumber(payload: ModelMetricsPayload, key: string): number | null {
   const value = (payload as Readonly<Record<string, unknown>>)[key];
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }

@@ -59,7 +59,8 @@ export const DASHBOARD_METRIC_TILES: readonly MetricTileDefinition[] = [
   {
     key: "qwk",
     label: "Quadratic Weighted Kappa",
-    description: "Kesepakatan terbobot — menghukum loncatan kategori lebih berat.",
+    description:
+      "Kesepakatan terbobot — menghukum loncatan kategori lebih berat.",
     precision: 3,
     higherIsBetter: true,
   },
