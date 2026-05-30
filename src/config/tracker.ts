@@ -38,6 +38,7 @@ export const TRACKER_LIST_COPY = {
   errorTitle: "Tidak bisa memuat data anak",
   errorDescriptionFallback:
     "Terjadi kesalahan saat mengambil data. Coba muat ulang halaman.",
+  errorRetry: "Coba lagi",
   emptyTitle: "Belum ada anak terdaftar",
   emptyDescription:
     "Tambahkan profil anak untuk mulai memantau berat, tinggi, lingkar kepala, dan imunisasi.",
@@ -93,8 +94,11 @@ export const CHILD_DETAIL_COPY = {
   chartCardDescription:
     "Bandingkan z-score anak Anda dengan rentang acuan WHO ±2 SD dan ±3 SD.",
   chartIndicatorLabel: "Indikator",
+  chartEmptyTitle: "Kurva belum tersedia",
   chartEmpty:
-    "Belum ada pengukuran. Tambahkan setidaknya satu pengukuran untuk melihat kurva.",
+    "Belum ada pengukuran untuk indikator ini. Tambahkan pengukuran untuk melihat kurva.",
+  chartDotAriaLabel: (date: string, z: string) =>
+    `Pengukuran ${date}, z-score ${z}. Aktifkan untuk melihat detail.`,
 } as const;
 
 export const MEASUREMENTS_COPY = {
@@ -535,6 +539,7 @@ export const IMMUNIZATION_DETAIL_COPY = {
   markPendingCta: "Tandai belum",
   markSkippedCta: "Tandai dilewati",
   saving: "Menyimpan...",
+  savedMessage: "Status imunisasi tersimpan.",
   closeLabel: "Tutup detail",
 } as const;
 

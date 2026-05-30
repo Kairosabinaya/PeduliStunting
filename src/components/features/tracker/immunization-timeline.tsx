@@ -92,15 +92,13 @@ export function ImmunizationTimeline({
         className="-mx-1 overflow-x-auto pb-2"
         style={{ scrollSnapType: "x mandatory" }}
       >
-        <ol
-          role="grid"
+        <ul
           aria-label={IMMUNIZATION_TIMELINE_COPY.title}
           className="flex min-w-max gap-3 px-1"
         >
           {columns.map((column) => (
             <li
               key={column.ageMonths}
-              role="row"
               className="flex w-[124px] flex-col gap-2"
               style={{ scrollSnapAlign: "start" }}
             >
@@ -132,7 +130,7 @@ export function ImmunizationTimeline({
               })}
             </li>
           ))}
-        </ol>
+        </ul>
       </div>
       <ImmunizationDetailSheet
         childId={childId}

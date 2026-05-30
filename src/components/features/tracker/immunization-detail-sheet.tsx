@@ -13,6 +13,7 @@ import type {
 } from "@/application/health-plan/dtos";
 import { Badge } from "@/components/primitives/badge";
 import { Button } from "@/components/primitives/button";
+import { FeedbackBanner } from "@/components/primitives/feedback-banner";
 import { Input } from "@/components/primitives/input";
 import { Label } from "@/components/primitives/label";
 import { Modal } from "@/components/primitives/modal";
@@ -23,6 +24,7 @@ import {
   IMMUNIZATION_STATUS_LABEL,
 } from "@/config/tracker";
 import type { ChildImmunizationStatus } from "@/domain/health-plan/entities/child-immunization";
+import { todayIso } from "@/lib/today";
 
 export interface ImmunizationDetailSheetProps {
   readonly childId: string;
@@ -240,22 +242,14 @@ function SheetBody({
         </Button>
       </div>
 
+      {state?.ok && state.record ? (
+        <FeedbackBanner tone="success">
+          {IMMUNIZATION_DETAIL_COPY.savedMessage}
+        </FeedbackBanner>
+      ) : null}
       {state && !state.ok && state.message ? (
-        <p
-          className="rounded-md border border-danger/40 bg-danger/10 p-2 text-xs text-danger"
-          role="alert"
-        >
-          {state.message}
-        </p>
+        <FeedbackBanner tone="error">{state.message}</FeedbackBanner>
       ) : null}
     </div>
   );
-}
-
-function todayIso(): string {
-  const now = new Date();
-  const yyyy = now.getFullYear();
-  const mm = String(now.getMonth() + 1).padStart(2, "0");
-  const dd = String(now.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
 }

@@ -222,6 +222,9 @@ export async function recordPregnancyEvent(
 
   if (result.ok) {
     revalidateTag(pregnancyEventsTag(pregnancyId), "max");
+    // Recording an event (ANC visit, TTD dose, weight) can change the derived
+    // pregnancy overview/status, which is cached under the user-scoped tag.
+    revalidateTag(pregnancyTag(session.userId), "max");
   }
   return toEventFormState(result);
 }
@@ -266,5 +269,6 @@ export async function deletePregnancyEvent(
   }
 
   revalidateTag(pregnancyEventsTag(pregnancyId), "max");
+  revalidateTag(pregnancyTag(session.userId), "max");
   return { ok: true };
 }
