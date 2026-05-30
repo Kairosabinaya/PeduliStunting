@@ -3,11 +3,9 @@ import { z } from "zod";
 import type { Tables } from "@/types/supabase";
 import { AppErrors, type ValidationError } from "@/domain/errors/app-error";
 import { type Result, err, ok } from "@/domain/shared/result";
-import {
-  type ModelVersion,
-  asModelVersion,
-} from "@/domain/shared/ids";
+import { type ModelVersion, asModelVersion } from "@/domain/shared/ids";
 import { LocalCoefficient } from "@/domain/model/entities/local-coefficient";
+import { LocalFit } from "@/domain/model/entities/local-fit";
 import { ModelMetadata } from "@/domain/model/entities/model-metadata";
 import { ModelPrediction } from "@/domain/model/entities/model-prediction";
 import { ClassProbabilities } from "@/domain/model/value-objects/class-probabilities";
@@ -34,6 +32,7 @@ export const predictedCategorySchema = z.enum(STUNTING_CATEGORIES);
 type ModelMetadataRow = Tables<"model_metadata">;
 type ModelPredictionRow = Tables<"model_predictions">;
 type ModelCoefficientRow = Tables<"model_coefficients">;
+type ModelLocalFitRow = Tables<"model_local_fits">;
 
 function toReadonlyRecord(
   value: unknown,
@@ -52,6 +51,7 @@ export function mapModelMetadataRow(
     new ModelMetadata({
       version: asModelVersion(row.version),
       name: row.name,
+      etaSign: row.eta_sign,
       hyperparameters: toReadonlyRecord(row.hyperparameters, {}),
       metrics: toReadonlyRecord(row.metrics, {}),
       moranPerYear: toReadonlyRecord(row.moran_per_year, {}),
@@ -111,6 +111,26 @@ export function mapModelCoefficientRow(
       coefficient: row.coefficient,
       se: row.se,
       isInference: row.is_inference,
+    }),
+  );
+}
+
+export function mapModelLocalFitRow(
+  row: ModelLocalFitRow,
+): Result<LocalFit, ValidationError> {
+  const yearResult = yearSchema.safeParse(row.tahun);
+  if (!yearResult.success) {
+    return err(AppErrors.validation(`tahun tidak valid: ${row.tahun}`));
+  }
+  return ok(
+    new LocalFit({
+      modelVersion: asModelVersion(row.model_version),
+      kodeBps: asKodeBps(row.kode_bps),
+      tahun: yearResult.data,
+      alfa1: row.alfa1,
+      alfa2: row.alfa2,
+      nActive: row.n_active,
+      converged: row.converged,
     }),
   );
 }
@@ -202,8 +222,7 @@ export function parseMoranPerYear(
     }
     const entryResult = moranEntrySchema.safeParse(value);
     if (!entryResult.success) continue;
-    const moran =
-      entryResult.data.moran_i ?? entryResult.data.value ?? null;
+    const moran = entryResult.data.moran_i ?? entryResult.data.value ?? null;
     if (moran === null || !Number.isFinite(moran)) continue;
     out.push({
       year,
@@ -212,4 +231,44 @@ export function parseMoranPerYear(
     });
   }
   return out.sort((a, b) => a.year - b.year);
+}
+
+/* ─────────────────────── baseline-model comparison ─────────────────────── */
+
+const baselineEntrySchema = z
+  .object({
+    acc_out: finiteNumber.optional(),
+    qwk_out: finiteNumber.optional(),
+  })
+  .passthrough();
+
+export interface BaselineEntry {
+  /** Model name as exported (e.g. `OLR`, `GTWENOLR_adaptif`). */
+  readonly name: string;
+  readonly accuracyOut: number | null;
+  readonly qwkOut: number | null;
+}
+
+/**
+ * Parse `model_metadata.metrics.baselines` — a record keyed by model name
+ * (`{ OLR: { acc_out, qwk_out }, ... }`) — into a stable list. Entries with no
+ * numeric score survive with `null`s so the comparison can still list the model
+ * name; the order follows the on-disk key order (least to most sophisticated).
+ */
+export function parseBaselines(
+  metrics: Readonly<Record<string, unknown>>,
+): readonly BaselineEntry[] {
+  const raw = metrics.baselines;
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) return [];
+  const out: BaselineEntry[] = [];
+  for (const [name, value] of Object.entries(raw)) {
+    const parsed = baselineEntrySchema.safeParse(value);
+    if (!parsed.success) continue;
+    out.push({
+      name,
+      accuracyOut: parsed.data.acc_out ?? null,
+      qwkOut: parsed.data.qwk_out ?? null,
+    });
+  }
+  return out;
 }

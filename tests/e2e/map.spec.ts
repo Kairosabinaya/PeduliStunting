@@ -1,23 +1,20 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * The Map page lives behind Supabase auth and reads dynamic search params.
- * Authenticated end-to-end coverage (year slider → URL → re-render, region
- * selection → detail panel, source toggle) requires a seeded user, which is
- * not yet part of the e2e fixture stack. Until then this suite locks in the
- * anonymous-guard contract, the layout invariants, and the URL preservation
- * across the sign-in redirect.
+ * `/map` is public (ADR-0018): anonymous visitors reach the interactive
+ * choropleth without signing in. Authenticated-only flows (year slider → URL →
+ * re-render, region selection → detail panel, source toggle) still need a
+ * seeded user and are covered by component/unit tests. This suite locks in the
+ * public-access contract and the responsive layout invariants.
  */
 test.describe("/map (anonymous)", () => {
-  test("redirects anonymous visitors to sign-in", async ({ page }) => {
+  test("is reachable without signing in", async ({ page }) => {
     await page.goto("/map");
-    await expect(page).toHaveURL(/\/auth\/sign-in/);
-    await expect(
-      page.getByRole("heading", { name: /masuk ke akun anda/i, level: 1 }),
-    ).toBeVisible();
+    await expect(page).toHaveURL(/\/map$/);
+    await expect(page).not.toHaveURL(/\/auth\/sign-in/);
   });
 
-  test("redirect lands on a layout with no horizontal overflow", async ({
+  test("has no horizontal overflow at the reference widths", async ({
     page,
   }) => {
     for (const width of [360, 768, 1440]) {
@@ -30,7 +27,7 @@ test.describe("/map (anonymous)", () => {
       );
       expect(
         overflow,
-        `/map redirect at viewport ${String(width)}px must not overflow horizontally`,
+        `/map at viewport ${String(width)}px must not overflow horizontally`,
       ).toBeLessThanOrEqual(1);
     }
   });

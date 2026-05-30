@@ -345,37 +345,79 @@ export type Database = {
       indicator_dictionary: {
         Row: {
           code: string;
+          cor_prevalence: number | null;
           created_at: string;
           description: string | null;
           dimension: string;
+          display_order: number | null;
           effect_direction: string | null;
+          median_coef: number | null;
+          model_dimension: string | null;
           name: string;
+          orig_max: number | null;
+          orig_min: number | null;
+          orig_p5: number | null;
+          orig_p50: number | null;
+          orig_p95: number | null;
+          pct_active: number | null;
+          pct_positive: number | null;
           source_label: string | null;
           source_url: string | null;
+          std_mean: number | null;
+          std_sd: number | null;
+          transform: string | null;
           unit: string | null;
           updated_at: string;
         };
         Insert: {
           code: string;
+          cor_prevalence?: number | null;
           created_at?: string;
           description?: string | null;
           dimension: string;
+          display_order?: number | null;
           effect_direction?: string | null;
+          median_coef?: number | null;
+          model_dimension?: string | null;
           name: string;
+          orig_max?: number | null;
+          orig_min?: number | null;
+          orig_p5?: number | null;
+          orig_p50?: number | null;
+          orig_p95?: number | null;
+          pct_active?: number | null;
+          pct_positive?: number | null;
           source_label?: string | null;
           source_url?: string | null;
+          std_mean?: number | null;
+          std_sd?: number | null;
+          transform?: string | null;
           unit?: string | null;
           updated_at?: string;
         };
         Update: {
           code?: string;
+          cor_prevalence?: number | null;
           created_at?: string;
           description?: string | null;
           dimension?: string;
+          display_order?: number | null;
           effect_direction?: string | null;
+          median_coef?: number | null;
+          model_dimension?: string | null;
           name?: string;
+          orig_max?: number | null;
+          orig_min?: number | null;
+          orig_p5?: number | null;
+          orig_p50?: number | null;
+          orig_p95?: number | null;
+          pct_active?: number | null;
+          pct_positive?: number | null;
           source_label?: string | null;
           source_url?: string | null;
+          std_mean?: number | null;
+          std_sd?: number | null;
+          transform?: string | null;
           unit?: string | null;
           updated_at?: string;
         };
@@ -481,9 +523,64 @@ export type Database = {
           },
         ];
       };
+      model_local_fits: {
+        Row: {
+          alfa1: number;
+          alfa2: number;
+          converged: boolean;
+          created_at: string;
+          id: string;
+          kode_bps: string;
+          model_version: string;
+          n_active: number | null;
+          tahun: number;
+          updated_at: string;
+        };
+        Insert: {
+          alfa1: number;
+          alfa2: number;
+          converged?: boolean;
+          created_at?: string;
+          id?: string;
+          kode_bps: string;
+          model_version: string;
+          n_active?: number | null;
+          tahun: number;
+          updated_at?: string;
+        };
+        Update: {
+          alfa1?: number;
+          alfa2?: number;
+          converged?: boolean;
+          created_at?: string;
+          id?: string;
+          kode_bps?: string;
+          model_version?: string;
+          n_active?: number | null;
+          tahun?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "model_local_fits_kode_bps_fkey";
+            columns: ["kode_bps"];
+            isOneToOne: false;
+            referencedRelation: "regions";
+            referencedColumns: ["kode_bps"];
+          },
+          {
+            foreignKeyName: "model_local_fits_model_version_fkey";
+            columns: ["model_version"];
+            isOneToOne: false;
+            referencedRelation: "model_metadata";
+            referencedColumns: ["version"];
+          },
+        ];
+      };
       model_metadata: {
         Row: {
           created_at: string;
+          eta_sign: number;
           hyperparameters: Json;
           is_default: boolean;
           metrics: Json;
@@ -495,6 +592,7 @@ export type Database = {
         };
         Insert: {
           created_at?: string;
+          eta_sign?: number;
           hyperparameters?: Json;
           is_default?: boolean;
           metrics?: Json;
@@ -506,6 +604,7 @@ export type Database = {
         };
         Update: {
           created_at?: string;
+          eta_sign?: number;
           hyperparameters?: Json;
           is_default?: boolean;
           metrics?: Json;

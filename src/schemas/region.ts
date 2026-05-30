@@ -3,16 +3,18 @@ import { z } from "zod";
 import type { Tables } from "@/types/supabase";
 import { AppErrors, type ValidationError } from "@/domain/errors/app-error";
 import { type Result, err, ok } from "@/domain/shared/result";
-import {
-  type IndicatorCode,
-  asIndicatorCode,
-} from "@/domain/shared/ids";
+import { type IndicatorCode, asIndicatorCode } from "@/domain/shared/ids";
 import { IndicatorDefinition } from "@/domain/region/entities/indicator-definition";
 import {
   EFFECT_DIRECTIONS,
   INDICATOR_DIMENSIONS,
+  MODEL_DIMENSIONS,
+  PREDICTOR_TRANSFORMS,
   type EffectDirection,
   type IndicatorDimension,
+  type ModelDimension,
+  type PredictorModelMeta,
+  type PredictorTransform,
 } from "@/domain/region/entities/indicator-definition";
 import { Region, type RegionType } from "@/domain/region/entities/region";
 import { RegionBoundary } from "@/domain/region/entities/region-boundary";
@@ -55,6 +57,10 @@ export const indicatorDimensionSchema = z.enum(INDICATOR_DIMENSIONS);
 
 export const effectDirectionSchema = z.enum(EFFECT_DIRECTIONS);
 
+export const modelDimensionSchema = z.enum(MODEL_DIMENSIONS);
+
+export const predictorTransformSchema = z.enum(PREDICTOR_TRANSFORMS);
+
 /* ─────────────────────────── DB row mappers ─────────────────────────── */
 
 type RegionRow = Tables<"regions">;
@@ -93,16 +99,10 @@ const PREDICTOR_COLUMNS = [
 
 type PredictorColumn = (typeof PREDICTOR_COLUMNS)[number];
 
-export function mapRegionRow(
-  row: RegionRow,
-): Result<Region, ValidationError> {
+export function mapRegionRow(row: RegionRow): Result<Region, ValidationError> {
   const tipeResult = regionTypeSchema.safeParse(row.tipe);
   if (!tipeResult.success) {
-    return err(
-      AppErrors.validation(
-        `Region tipe tidak valid: ${row.tipe}`,
-      ),
-    );
+    return err(AppErrors.validation(`Region tipe tidak valid: ${row.tipe}`));
   }
   return ok(
     new Region({
@@ -126,9 +126,7 @@ export function mapRegionIndicatorsRow(
   const categoryResult = stuntingCategorySchema.safeParse(row.y_category);
   if (!categoryResult.success) {
     return err(
-      AppErrors.validation(
-        `y_category tidak valid: ${row.y_category}`,
-      ),
+      AppErrors.validation(`y_category tidak valid: ${row.y_category}`),
     );
   }
 
@@ -167,11 +165,7 @@ export function mapIndicatorDictionaryRow(
 ): Result<IndicatorDefinition, ValidationError> {
   const dimensionResult = indicatorDimensionSchema.safeParse(row.dimension);
   if (!dimensionResult.success) {
-    return err(
-      AppErrors.validation(
-        `dimension tidak valid: ${row.dimension}`,
-      ),
-    );
+    return err(AppErrors.validation(`dimension tidak valid: ${row.dimension}`));
   }
 
   let effectDirection: EffectDirection | null = null;
@@ -187,6 +181,33 @@ export function mapIndicatorDictionaryRow(
     effectDirection = parsed.data as EffectDirection;
   }
 
+  const transform: PredictorTransform | null =
+    row.transform !== null &&
+    predictorTransformSchema.safeParse(row.transform).success
+      ? (row.transform as PredictorTransform)
+      : null;
+  const modelDimension: ModelDimension | null =
+    row.model_dimension !== null &&
+    modelDimensionSchema.safeParse(row.model_dimension).success
+      ? (row.model_dimension as ModelDimension)
+      : null;
+  const model: PredictorModelMeta = {
+    transform,
+    stdMean: row.std_mean,
+    stdSd: row.std_sd,
+    origMin: row.orig_min,
+    origMax: row.orig_max,
+    origP5: row.orig_p5,
+    origP50: row.orig_p50,
+    origP95: row.orig_p95,
+    pctActive: row.pct_active,
+    pctPositive: row.pct_positive,
+    medianCoef: row.median_coef,
+    corPrevalence: row.cor_prevalence,
+    modelDimension,
+    displayOrder: row.display_order,
+  };
+
   return ok(
     new IndicatorDefinition({
       code: asIndicatorCode(row.code),
@@ -197,6 +218,7 @@ export function mapIndicatorDictionaryRow(
       sourceLabel: row.source_label,
       sourceUrl: row.source_url,
       effectDirection,
+      model,
     }),
   );
 }

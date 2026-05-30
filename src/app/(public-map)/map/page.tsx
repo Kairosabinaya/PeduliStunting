@@ -1,5 +1,3 @@
-import { redirect } from "next/navigation";
-
 import type { ModelPredictionDto } from "@/application/model/dtos";
 import type { RegionIndicatorsDto } from "@/application/region/dtos";
 import { MAP_COPY } from "@/config/map";
@@ -26,11 +24,10 @@ import { fetchCurrentProfile } from "@/lib/account-cache";
 import { tryServerSession } from "@/lib/server-session";
 
 /**
- * `/map` — interactive choropleth. Authenticated visitors only.
- *
- * Unauthenticated visitors are redirected to `/` where the landing-before-
- * login experience lives. This keeps the marketing surface at the canonical
- * root URL and reserves `/map` as the authenticated product entry point.
+ * `/map` — interactive choropleth, public. Renders for signed-in and signed-out
+ * visitors alike: the reference tables it reads are anon-readable, so examiners
+ * and the public can explore the map without an account. The shared header
+ * shows Masuk/Daftar CTAs for guests and the avatar menu for members.
  */
 export const dynamic = "force-dynamic";
 
@@ -40,9 +37,6 @@ interface MapPageProps {
 
 export default async function MapPage({ searchParams }: MapPageProps) {
   const session = await tryServerSession();
-  if (session === null) {
-    redirect("/");
-  }
 
   const rawSearch = await searchParams;
   const parsed = parseMapSearchParams(rawSearch);
@@ -50,12 +44,15 @@ export default async function MapPage({ searchParams }: MapPageProps) {
   // Profile lookup is duplicated with `(app)/layout.tsx` for the rest of the
   // app shell. `/map` lives outside that group (so the layout never runs for
   // it) and `MapShell` still needs the resolved display name + email for the
-  // avatar surface.
-  const profileResult = await fetchCurrentProfile(session.userId);
-  const displayName =
-    profileResult.ok && profileResult.value
-      ? profileResult.value.displayName
-      : session.email;
+  // avatar surface. Guests have no profile, so the avatar fields stay null.
+  let displayName: string | null = null;
+  if (session !== null) {
+    const profileResult = await fetchCurrentProfile(session.userId);
+    displayName =
+      profileResult.ok && profileResult.value
+        ? profileResult.value.displayName
+        : session.email;
+  }
 
   let regions: Awaited<ReturnType<typeof getCachedRegions>>;
   let boundaries: Awaited<ReturnType<typeof getCachedBoundaries>>;
@@ -169,8 +166,8 @@ export default async function MapPage({ searchParams }: MapPageProps) {
         defaultModel={defaultModel}
         predictedAvailable={predictedAvailable}
         bounds={bounds}
-        displayName={displayName ?? null}
-        email={session.email ?? null}
+        displayName={displayName}
+        email={session?.email ?? null}
       />
     </MapStateProvider>
   );

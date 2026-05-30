@@ -1,10 +1,38 @@
-import type { LocalCoefficient } from "@/domain/model/entities/local-coefficient";
 import type { ModelMetadata } from "@/domain/model/entities/model-metadata";
 import type { ModelPrediction } from "@/domain/model/entities/model-prediction";
+
+/**
+ * Everything the what-if simulator needs for one region-year: the local
+ * intercepts + slopes, the region's actual predictor values (slider defaults),
+ * its observed class, and the model's stored probabilities. `beta` and
+ * `defaults` are ordered X1..X20 so they zip with the predictor meta the client
+ * already holds. Returned by `GetRegionFitUseCase`; `null` from the use case
+ * means the model did not fit that region-year.
+ */
+export interface RegionFitDto {
+  readonly modelVersion: string;
+  readonly kodeBps: string;
+  readonly kabupatenKota: string;
+  readonly provinsi: string;
+  readonly tahun: number;
+  readonly alfa1: number;
+  readonly alfa2: number;
+  readonly nActive: number | null;
+  readonly converged: boolean;
+  readonly beta: readonly number[];
+  readonly defaults: readonly number[];
+  readonly actualCategory: "Rendah" | "Sedang" | "Tinggi";
+  readonly observed: {
+    readonly rendah: number | null;
+    readonly sedang: number | null;
+    readonly tinggi: number | null;
+  } | null;
+}
 
 export interface ModelMetadataDto {
   readonly version: string;
   readonly name: string;
+  readonly etaSign: number;
   readonly hyperparameters: Readonly<Record<string, unknown>>;
   readonly metrics: Readonly<Record<string, unknown>>;
   readonly moranPerYear: Readonly<Record<string, unknown>>;
@@ -26,6 +54,7 @@ export function toModelMetadataDto(metadata: ModelMetadata): ModelMetadataDto {
   return {
     version: metadata.version,
     name: metadata.name,
+    etaSign: metadata.etaSign,
     hyperparameters: metadata.hyperparameters,
     metrics: metadata.metrics,
     moranPerYear: metadata.moranPerYear,
@@ -46,83 +75,4 @@ export function toModelPredictionDto(
     probSedang: prediction.probabilities.sedang,
     probTinggi: prediction.probabilities.tinggi,
   };
-}
-
-/**
- * Per-predictor aggregate of the local coefficients exported from the R model.
- * The summary is calculated by `GetCoefficientSummaryUseCase` and consumed by
- * the dashboard what-if simulator.
- */
-export interface CoefficientSummaryItemDto {
-  readonly predictorCode: string;
-  readonly meanCoefficient: number;
-  readonly minCoefficient: number;
-  readonly maxCoefficient: number;
-  /** Distinct kabupaten/kota that contributed to the aggregate. */
-  readonly contributingRegions: number;
-  /** Number of coefficient rows aggregated (regions x years). */
-  readonly sampleCount: number;
-  /** True when at least one contributing row is flagged is_inference. */
-  readonly hasInference: boolean;
-}
-
-export interface CoefficientSummaryDto {
-  readonly modelVersion: string;
-  readonly tahun: number | null;
-  readonly items: readonly CoefficientSummaryItemDto[];
-}
-
-export function summariseCoefficients(
-  modelVersion: string,
-  tahun: number | null,
-  rows: readonly LocalCoefficient[],
-): CoefficientSummaryDto {
-  const buckets = new Map<
-    string,
-    {
-      sum: number;
-      min: number;
-      max: number;
-      count: number;
-      regions: Set<string>;
-      hasInference: boolean;
-    }
-  >();
-
-  for (const row of rows) {
-    const bucket = buckets.get(row.predictorCode);
-    if (bucket) {
-      bucket.sum += row.coefficient;
-      bucket.count += 1;
-      bucket.min = Math.min(bucket.min, row.coefficient);
-      bucket.max = Math.max(bucket.max, row.coefficient);
-      bucket.regions.add(row.kodeBps);
-      bucket.hasInference = bucket.hasInference || row.isInference;
-    } else {
-      buckets.set(row.predictorCode, {
-        sum: row.coefficient,
-        min: row.coefficient,
-        max: row.coefficient,
-        count: 1,
-        regions: new Set([row.kodeBps]),
-        hasInference: row.isInference,
-      });
-    }
-  }
-
-  const items: CoefficientSummaryItemDto[] = [];
-  for (const [predictorCode, bucket] of buckets) {
-    items.push({
-      predictorCode,
-      meanCoefficient: bucket.sum / bucket.count,
-      minCoefficient: bucket.min,
-      maxCoefficient: bucket.max,
-      contributingRegions: bucket.regions.size,
-      sampleCount: bucket.count,
-      hasInference: bucket.hasInference,
-    });
-  }
-  items.sort((a, b) => a.predictorCode.localeCompare(b.predictorCode));
-
-  return { modelVersion, tahun, items };
 }

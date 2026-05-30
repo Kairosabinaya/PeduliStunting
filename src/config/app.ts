@@ -19,6 +19,7 @@ export const LANDING_ROUTE = "/";
 export const PUBLIC_ROUTES: readonly string[] = [
   LANDING_ROUTE,
   "/map",
+  "/dashboard",
   "/auth/sign-in",
   "/auth/sign-up",
   "/auth/callback",

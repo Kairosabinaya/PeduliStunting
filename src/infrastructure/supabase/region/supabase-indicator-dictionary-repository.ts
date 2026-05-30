@@ -11,12 +11,13 @@ import {
 } from "../error-mapping";
 import type { TypedSupabaseClient } from "../server-client";
 
-const SELECT_COLUMNS =
-  "code, name, dimension, unit, description, effect_direction, source_label, source_url, created_at, updated_at";
+// The dashboard consumes every dictionary column (definition + standardization
+// recipe + statistics), and this is a 22-row reference table, so a full select
+// is appropriate. `*` also keeps the supabase-js select-string type parser from
+// hitting its recursion limit on a 24-column explicit list.
+const SELECT_COLUMNS = "*";
 
-export class SupabaseIndicatorDictionaryRepository
-  implements IndicatorDictionaryRepository
-{
+export class SupabaseIndicatorDictionaryRepository implements IndicatorDictionaryRepository {
   constructor(private readonly client: TypedSupabaseClient) {}
 
   async list(): Promise<Result<readonly IndicatorDefinition[], AppError>> {
@@ -57,10 +58,7 @@ export class SupabaseIndicatorDictionaryRepository
       return ok(mapped.value);
     } catch (cause) {
       return err(
-        mapUnknownInfrastructureError(
-          cause,
-          "indicator_dictionary.findByCode",
-        ),
+        mapUnknownInfrastructureError(cause, "indicator_dictionary.findByCode"),
       );
     }
   }

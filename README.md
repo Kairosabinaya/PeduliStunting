@@ -100,8 +100,11 @@ pnpm import:all
 | `pnpm import:indicators` | Import indikator + dictionary |
 | `pnpm import:papua` | Backfill geometri pemekaran Papua |
 | `pnpm import:model` | Import model GTWENOLR + prediksi (butuh R) |
+| `pnpm import:dashboard` | Import data dashboard (local fits, koefisien, prediksi, metadata) dari `docs/source/dashboard_data/` |
 | `pnpm import:who-standards` | Import WHO Child Growth Standards LMS ke `growth_standards` (lihat `docs/source/who-standards/README.md`) |
 | `pnpm import:all` | Chain semua impor di atas |
+| `pnpm gen:prediction-fixtures` | Regenerasi fixture verifikasi prediktor (`tests/fixtures/ordinal-prediction-cases.json`) dari CSV riset |
+| `pnpm supabase:gen-types` | Regenerasi `src/types/supabase.ts` dari skema linked (jalankan setelah migrasi) |
 
 ---
 

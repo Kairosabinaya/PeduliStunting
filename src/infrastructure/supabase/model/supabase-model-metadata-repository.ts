@@ -12,11 +12,9 @@ import {
 import type { TypedSupabaseClient } from "../server-client";
 
 const SELECT_COLUMNS =
-  "version, name, hyperparameters, metrics, moran_per_year, notes, is_default, created_at, updated_at";
+  "version, name, eta_sign, hyperparameters, metrics, moran_per_year, notes, is_default, created_at, updated_at";
 
-export class SupabaseModelMetadataRepository
-  implements ModelMetadataRepository
-{
+export class SupabaseModelMetadataRepository implements ModelMetadataRepository {
   constructor(private readonly client: TypedSupabaseClient) {}
 
   async list(): Promise<Result<readonly ModelMetadata[], AppError>> {
@@ -35,9 +33,7 @@ export class SupabaseModelMetadataRepository
       }
       return ok(out);
     } catch (cause) {
-      return err(
-        mapUnknownInfrastructureError(cause, "model_metadata.list"),
-      );
+      return err(mapUnknownInfrastructureError(cause, "model_metadata.list"));
     }
   }
 

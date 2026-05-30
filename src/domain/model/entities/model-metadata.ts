@@ -9,6 +9,12 @@ import type { ModelVersion } from "@/domain/shared/ids";
 export class ModelMetadata {
   readonly version: ModelVersion;
   readonly name: string;
+  /**
+   * Linear-predictor sign convention used by the local predictor
+   * (`eta = etaSign * sum(beta_k * x_std_k)`). `1` for the GTWENOLR adaptive
+   * model. Constrained to `-1 | 1` at the database boundary.
+   */
+  readonly etaSign: number;
   readonly hyperparameters: Readonly<Record<string, unknown>>;
   readonly metrics: Readonly<Record<string, unknown>>;
   readonly moranPerYear: Readonly<Record<string, unknown>>;
@@ -18,6 +24,7 @@ export class ModelMetadata {
   constructor(props: {
     version: ModelVersion;
     name: string;
+    etaSign: number;
     hyperparameters: Readonly<Record<string, unknown>>;
     metrics: Readonly<Record<string, unknown>>;
     moranPerYear: Readonly<Record<string, unknown>>;
@@ -26,6 +33,7 @@ export class ModelMetadata {
   }) {
     this.version = props.version;
     this.name = props.name;
+    this.etaSign = props.etaSign;
     this.hyperparameters = props.hyperparameters;
     this.metrics = props.metrics;
     this.moranPerYear = props.moranPerYear;

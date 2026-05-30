@@ -2,7 +2,10 @@ import type { IndicatorCode } from "@/domain/shared/ids";
 import type { Region } from "@/domain/region/entities/region";
 import type { RegionIndicators } from "@/domain/region/entities/region-indicators";
 import type { RegionBoundary } from "@/domain/region/entities/region-boundary";
-import type { IndicatorDefinition } from "@/domain/region/entities/indicator-definition";
+import type {
+  IndicatorDefinition,
+  PredictorModelMeta,
+} from "@/domain/region/entities/indicator-definition";
 
 export interface RegionDto {
   readonly kodeBps: string;
@@ -37,6 +40,7 @@ export interface IndicatorDefinitionDto {
   readonly sourceLabel: string | null;
   readonly sourceUrl: string | null;
   readonly effectDirection: string | null;
+  readonly model: PredictorModelMeta;
 }
 
 export function toRegionDto(region: Region): RegionDto {
@@ -89,5 +93,6 @@ export function toIndicatorDefinitionDto(
     sourceLabel: def.sourceLabel,
     sourceUrl: def.sourceUrl,
     effectDirection: def.effectDirection,
+    model: def.model,
   };
 }

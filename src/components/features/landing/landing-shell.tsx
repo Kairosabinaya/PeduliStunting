@@ -11,31 +11,17 @@
  * the page within the Slow-3G LCP + initial-JS budgets (project guidelines §7).
  */
 
-import { Bricolage_Grotesque } from "next/font/google";
-
 import { cn } from "@/lib/cn";
+import { displayFont } from "@/lib/fonts";
 
 import { LandingStory } from "./landing-story";
-
-/**
- * Editorial display typeface for the landing headlines + display stats.
- * Variable font, `swap`, exposed as `--font-display`. The variable is applied
- * ONLY on the `.theme-landing` wrapper, so the display typeface stays scoped to
- * the landing while the rest of the app keeps Plus Jakarta Sans (see globals.css
- * `.theme-landing :is(…)`).
- */
-const bricolageGrotesque = Bricolage_Grotesque({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-display",
-});
 
 export function LandingShell() {
   return (
     <div
       className={cn(
         "theme-landing relative isolate min-h-dvh bg-background",
-        bricolageGrotesque.variable,
+        displayFont.variable,
       )}
     >
       <LandingStory />

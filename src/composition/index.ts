@@ -20,6 +20,7 @@ import { SupabaseIndicatorDictionaryRepository } from "@/infrastructure/supabase
 import { SupabaseModelMetadataRepository } from "@/infrastructure/supabase/model/supabase-model-metadata-repository";
 import { SupabaseModelPredictionRepository } from "@/infrastructure/supabase/model/supabase-model-prediction-repository";
 import { SupabaseLocalCoefficientRepository } from "@/infrastructure/supabase/model/supabase-local-coefficient-repository";
+import { SupabaseLocalFitRepository } from "@/infrastructure/supabase/model/supabase-local-fit-repository";
 import { SupabaseChildRepository } from "@/infrastructure/supabase/tracking/supabase-child-repository";
 import { SupabaseGrowthMeasurementRepository } from "@/infrastructure/supabase/tracking/supabase-growth-measurement-repository";
 import { SupabaseGrowthStandardRepository } from "@/infrastructure/supabase/tracking/supabase-growth-standard-repository";
@@ -45,7 +46,9 @@ import { ListModelMetadataUseCase } from "@/application/model/use-cases/list-mod
 import { GetDefaultModelMetadataUseCase } from "@/application/model/use-cases/get-default-model-metadata";
 import { ListPredictionsByYearUseCase } from "@/application/model/use-cases/list-predictions-by-year";
 import { ListPredictionsByRegionUseCase } from "@/application/model/use-cases/list-predictions-by-region";
-import { GetCoefficientSummaryUseCase } from "@/application/model/use-cases/get-coefficient-summary";
+import { GetRegionFitUseCase } from "@/application/model/use-cases/get-region-fit";
+import { ListFittedRegionYearsUseCase } from "@/application/model/use-cases/list-fitted-region-years";
+import { GetDashboardInsightsUseCase } from "@/application/region/use-cases/get-dashboard-insights";
 import { ListChildrenByOwnerUseCase } from "@/application/tracking/use-cases/list-children-by-owner";
 import { GetChildByIdUseCase } from "@/application/tracking/use-cases/get-child-by-id";
 import { CreateChildUseCase } from "@/application/tracking/use-cases/create-child";
@@ -105,7 +108,9 @@ export interface UseCases {
   readonly getDefaultModelMetadata: GetDefaultModelMetadataUseCase;
   readonly listPredictionsByYear: ListPredictionsByYearUseCase;
   readonly listPredictionsByRegion: ListPredictionsByRegionUseCase;
-  readonly getCoefficientSummary: GetCoefficientSummaryUseCase;
+  readonly getRegionFit: GetRegionFitUseCase;
+  readonly listFittedRegionYears: ListFittedRegionYearsUseCase;
+  readonly getDashboardInsights: GetDashboardInsightsUseCase;
   // tracking
   readonly listChildrenByOwner: ListChildrenByOwnerUseCase;
   readonly getChildById: GetChildByIdUseCase;
@@ -166,6 +171,7 @@ export function makeUseCases(client: TypedSupabaseClient): UseCases {
   const modelMetadataRepo = new SupabaseModelMetadataRepository(client);
   const modelPredictionRepo = new SupabaseModelPredictionRepository(client);
   const localCoefficientRepo = new SupabaseLocalCoefficientRepository(client);
+  const localFitRepo = new SupabaseLocalFitRepository(client);
   const childRepo = new SupabaseChildRepository(client);
   const measurementRepo = new SupabaseGrowthMeasurementRepository(client);
   const standardRepo = new SupabaseGrowthStandardRepository(client);
@@ -203,8 +209,17 @@ export function makeUseCases(client: TypedSupabaseClient): UseCases {
     listPredictionsByRegion: new ListPredictionsByRegionUseCase(
       modelPredictionRepo,
     ),
-    getCoefficientSummary: new GetCoefficientSummaryUseCase(
+    getRegionFit: new GetRegionFitUseCase(
+      localFitRepo,
       localCoefficientRepo,
+      regionRepo,
+      regionIndicatorsRepo,
+      modelPredictionRepo,
+    ),
+    listFittedRegionYears: new ListFittedRegionYearsUseCase(localFitRepo),
+    getDashboardInsights: new GetDashboardInsightsUseCase(
+      regionRepo,
+      regionIndicatorsRepo,
     ),
     listChildrenByOwner: new ListChildrenByOwnerUseCase(childRepo),
     getChildById: new GetChildByIdUseCase(childRepo),

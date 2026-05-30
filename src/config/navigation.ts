@@ -1,6 +1,7 @@
 /**
- * Primary navigation for the authenticated app shell. Order in this array
- * is the order shown to users on every breakpoint. Adding or reordering
+ * Primary navigation shown in the shared header. Order in this array is the
+ * order shown to users on every breakpoint. `/map` and `/dashboard` are public
+ * (reachable signed-out); `/tracker` requires a session. Adding or reordering
  * items here is a UX decision — update the corresponding ADR.
  */
 export interface PrimaryNavItem {
