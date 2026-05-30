@@ -21,6 +21,15 @@ export { Input, inputVariants, type InputProps } from "./input";
 export { Label, type LabelProps } from "./label";
 export { Modal, type ModalProps } from "./modal";
 export { PageHeader } from "./page-header";
+export {
+  SegmentedControl,
+  SegmentedNav,
+  segmentedPanelProps,
+  type SegmentedControlProps,
+  type SegmentedControlItem,
+  type SegmentedNavProps,
+  type SegmentedNavItem,
+} from "./segmented-control";
 export { Select, type SelectProps } from "./select";
 export { Skeleton, type SkeletonProps } from "./skeleton";
 export { Slider, type SliderProps } from "./slider";

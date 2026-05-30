@@ -33,13 +33,20 @@ export interface ModuleCardProps {
   readonly disabled?: boolean | undefined;
 }
 
-const TONE_BORDER_CLASS: Readonly<Record<ModuleCardTone, string>> = {
-  default: "border-border",
-  growth: "border-brand-200 dark:border-brand-800",
-  immunization: "border-accent/40",
-  milestone: "border-primary/30",
-  nutrition: "border-warning/40",
-  muted: "border-border opacity-70",
+/**
+ * Per-domain accent dot colour. The card border itself stays uniform
+ * (`border-border`) across every tone — mixing solid and opacity-based
+ * coloured borders read as inconsistent (tracker UI audit). Domain identity is
+ * carried instead by a small colour dot beside the title, which is unambiguous
+ * and keeps every card visually equal-weight.
+ */
+const TONE_DOT_CLASS: Readonly<Record<ModuleCardTone, string>> = {
+  default: "bg-muted-foreground",
+  growth: "bg-primary",
+  immunization: "bg-accent",
+  milestone: "bg-warning",
+  nutrition: "bg-success",
+  muted: "bg-muted-foreground",
 };
 
 /**
@@ -63,14 +70,20 @@ export function ModuleCard({
     <Card
       elevation="sm"
       padding="md"
-      className={cn(
-        "flex h-full flex-col gap-3 border-2",
-        TONE_BORDER_CLASS[tone],
-      )}
+      className={cn("flex h-full flex-col gap-3", disabled && "opacity-70")}
     >
       <CardHeader className="space-y-1">
         <div className="flex items-center justify-between gap-2">
-          <CardTitle className="text-base">{title}</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <span
+              aria-hidden="true"
+              className={cn(
+                "inline-block h-2 w-2 shrink-0 rounded-full",
+                TONE_DOT_CLASS[tone],
+              )}
+            />
+            {title}
+          </CardTitle>
           {statusBadge ?? null}
         </div>
         <CardDescription className="text-xs">{description}</CardDescription>

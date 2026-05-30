@@ -23,6 +23,7 @@ import {
   fetchImmunizationSchedule,
   fetchMeasurementsByChild,
   fetchMilestoneCatalog,
+  fetchNutritionEventsByChild,
 } from "@/lib/tracker-cache";
 import { requireServerSession } from "@/lib/server-session";
 
@@ -78,12 +79,14 @@ export default async function ChildOverviewPage({
     childImmunizationsResult,
     milestoneCatalogResult,
     childMilestonesResult,
+    nutritionEventsResult,
   ] = await Promise.all([
     fetchMeasurementsByChild(session.userId, childResolved),
     fetchImmunizationSchedule(),
     fetchChildImmunizations(session.userId, childResolved),
     fetchMilestoneCatalog(),
     fetchChildMilestones(session.userId, childResolved),
+    fetchNutritionEventsByChild(session.userId, childResolved),
   ]);
 
   if (!measurementsResult.ok) {
@@ -127,6 +130,9 @@ export default async function ChildOverviewPage({
         }
         childMilestones={
           childMilestonesResult.ok ? childMilestonesResult.value : []
+        }
+        nutritionEvents={
+          nutritionEventsResult.ok ? nutritionEventsResult.value : []
         }
       />
       <GrowthChartCard child={child.value} measurements={measurements} />

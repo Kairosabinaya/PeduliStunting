@@ -1,6 +1,8 @@
+import Link from "next/link";
+
 import type { ChildDto } from "@/application/tracking/dtos";
 import { Badge } from "@/components/primitives/badge";
-import { CHILD_DETAIL_COPY, SEX_LABEL } from "@/config/tracker";
+import { CHILD_DETAIL_COPY, SEX_LABEL, TRACKER_ROUTE } from "@/config/tracker";
 import { asDateOnly, dateOnlyFromDate } from "@/domain/shared/date-only";
 import { monthsBetween } from "@/domain/shared/age-months";
 
@@ -22,9 +24,10 @@ function computeAgeMonths(birthDate: string): number {
 }
 
 /**
- * Top-of-page summary for a single child. Renders the child's name, sex,
- * birth date, and current age in completed months — the same denominator the
- * WHO LMS standards use, so the age shown here matches the chart x-axis.
+ * Top-of-page summary for a single child. Renders a "back to list" link plus
+ * the child's name, sex, birth date, and current age in completed months — the
+ * same denominator the WHO LMS standards use, so the age shown here matches the
+ * chart x-axis. The back link gives a clear way out of the nested child route.
  */
 export function ChildDetailHeader({ child }: ChildDetailHeaderProps) {
   const ageMonths = computeAgeMonths(child.birthDate);
@@ -32,6 +35,13 @@ export function ChildDetailHeader({ child }: ChildDetailHeaderProps) {
 
   return (
     <header className="space-y-4 rounded-xl border border-border bg-surface p-5 md:p-6">
+      <Link
+        href={TRACKER_ROUTE}
+        className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      >
+        <span aria-hidden="true">←</span>
+        {CHILD_DETAIL_COPY.backToList}
+      </Link>
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">
           {CHILD_DETAIL_COPY.metaTitleSuffix}

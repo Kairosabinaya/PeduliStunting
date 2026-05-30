@@ -70,6 +70,7 @@ export const ADD_CHILD_COPY = {
 
 export const CHILD_DETAIL_COPY = {
   metaTitleSuffix: "Tracker",
+  backToList: "Semua anak",
   navOverview: "Ringkasan",
   navMeasurements: "Pengukuran",
   navImmunizations: "Imunisasi",
@@ -626,6 +627,7 @@ export const MODULE_CARD_COPY = {
     title: "Gizi",
     description: "ASI, MPASI, Vitamin A, dan obat cacing.",
     cta: "Buka catatan gizi",
-    placeholderStatus: "Modul Gizi akan tersedia pada rilis berikutnya.",
+    emptyStatus: "Belum ada catatan gizi.",
+    statusFormat: (count: number) => `${count} catatan tercatat`,
   },
 } as const;

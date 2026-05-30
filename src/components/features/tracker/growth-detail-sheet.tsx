@@ -103,7 +103,7 @@ function RawMeasurements({
   readonly measurement: GrowthMeasurementDto;
 }) {
   return (
-    <dl className="grid grid-cols-2 gap-3 rounded-md border border-border bg-surface-muted/40 p-3 text-sm">
+    <dl className="grid grid-cols-2 gap-3 rounded-lg border border-border bg-surface-muted/40 p-3 text-sm">
       <RawCell
         label={GROWTH_DETAIL_COPY.weightLabel}
         value={formatNumber(measurement.weightKg, "kg")}
@@ -154,7 +154,7 @@ function IndicatorRow({
       ? `${z >= 0 ? "+" : ""}${z.toFixed(2)} SD`
       : "—";
   return (
-    <li className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-surface px-3 py-2">
+    <li className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-surface px-3 py-2">
       <div className="flex flex-col">
         <span className="text-sm font-medium">
           {GROWTH_INDICATOR_SHORT[indicator]}

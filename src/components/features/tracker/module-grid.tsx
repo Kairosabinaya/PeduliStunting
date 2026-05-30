@@ -4,6 +4,7 @@ import type { ChildImmunizationDto } from "@/application/health-plan/dtos";
 import type { ChildMilestoneDto } from "@/application/health-plan/dtos";
 import type { ImmunizationDto } from "@/application/health-plan/dtos";
 import type { MilestoneDto } from "@/application/health-plan/dtos";
+import type { NutritionEventDto } from "@/application/health-plan/dtos";
 import type { GrowthMeasurementDto } from "@/application/tracking/dtos";
 import type { SdClass } from "@/domain/tracking/value-objects/sd-classification";
 
@@ -22,6 +23,7 @@ export interface ModuleGridProps {
   readonly childImmunizations: readonly ChildImmunizationDto[];
   readonly milestoneCatalog: readonly MilestoneDto[];
   readonly childMilestones: readonly ChildMilestoneDto[];
+  readonly nutritionEvents: readonly NutritionEventDto[];
 }
 
 /**
@@ -37,6 +39,7 @@ export function ModuleGrid({
   childImmunizations,
   milestoneCatalog,
   childMilestones,
+  nutritionEvents,
 }: ModuleGridProps) {
   const growth = resolveGrowth(measurements);
   const immunization = resolveImmunization(
@@ -49,6 +52,10 @@ export function ModuleGrid({
     milestoneCatalog,
     childMilestones,
   );
+  const nutritionStatus =
+    nutritionEvents.length === 0
+      ? MODULE_CARD_COPY.nutrition.emptyStatus
+      : MODULE_CARD_COPY.nutrition.statusFormat(nutritionEvents.length);
 
   return (
     <div className="grid gap-3 sm:grid-cols-2">
@@ -86,7 +93,7 @@ export function ModuleGrid({
       <ModuleCard
         title={MODULE_CARD_COPY.nutrition.title}
         description={MODULE_CARD_COPY.nutrition.description}
-        statusLine="ASI, MPASI, Vitamin A, dan obat cacing."
+        statusLine={nutritionStatus}
         tone="nutrition"
         cta={{
           label: MODULE_CARD_COPY.nutrition.cta,

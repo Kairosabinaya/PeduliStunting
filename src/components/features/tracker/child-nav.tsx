@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
@@ -11,7 +10,7 @@ import {
   trackerChildNutritionRoute,
   trackerChildRoute,
 } from "@/config/tracker";
-import { cn } from "@/lib/cn";
+import { SegmentedNav } from "@/components/primitives/segmented-control";
 
 export interface ChildNavProps {
   readonly childId: string;
@@ -62,35 +61,17 @@ function isActive(pathname: string | null, item: NavItem): boolean {
 /**
  * Segmented sub-navigation rendered inside the child detail layout. Mirrors
  * the multi-route structure documented in STATE.md §5.2: each tab is its own
- * route so server-side caching can be invalidated per resource.
+ * route so server-side caching can be invalidated per resource. Built on the
+ * shared {@link SegmentedNav} primitive so it matches every other segmented
+ * switcher in the app.
  */
 export function ChildNav({ childId }: ChildNavProps) {
   const pathname = usePathname();
-  const items = buildItems(childId);
+  const items = buildItems(childId).map((item) => ({
+    href: item.href,
+    label: item.label,
+    active: isActive(pathname, item),
+  }));
 
-  return (
-    <nav
-      aria-label="Navigasi detail anak"
-      className="-mx-1 flex gap-1 overflow-x-auto rounded-xl border border-border bg-surface p-1"
-    >
-      {items.map((item) => {
-        const active = isActive(pathname, item);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1 focus-visible:ring-offset-background",
-              active
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-surface-muted hover:text-foreground",
-            )}
-          >
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
-  );
+  return <SegmentedNav ariaLabel="Navigasi detail anak" items={items} />;
 }

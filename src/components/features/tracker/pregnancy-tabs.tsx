@@ -1,13 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import type {
   PregnancyDto,
   PregnancyEventDto,
 } from "@/application/pregnancy/dtos";
-import { cn } from "@/lib/cn";
 import { PREGNANCY_PAGE_COPY } from "@/config/tracker";
+import {
+  SegmentedControl,
+  segmentedPanelProps,
+  type SegmentedControlItem,
+} from "@/components/primitives/segmented-control";
 import type { PregnancyOverview } from "@/domain/pregnancy/services/pregnancy-status";
 
 import { PregnancyAncTab } from "./pregnancy-anc-tab";
@@ -32,81 +36,70 @@ export interface PregnancyTabsProps {
   readonly events: readonly PregnancyEventDto[];
 }
 
+/**
+ * Tab navigator untuk modul Kehamilan (Profil, ANC, TTD, Berat, Janin) di atas
+ * primitive {@link SegmentedControl} bersama agar konsisten dengan modul lain.
+ */
 export function PregnancyTabs({
   pregnancy,
   overview,
   events,
 }: PregnancyTabsProps) {
   const [active, setActive] = useState<PregnancyTabKey>("profile");
+  const base = useId();
+
+  const items: readonly SegmentedControlItem<PregnancyTabKey>[] = TAB_ORDER.map(
+    (key) => ({ id: key, label: PREGNANCY_PAGE_COPY.tabs[key] }),
+  );
 
   return (
     <div className="space-y-4">
-      <div
-        role="tablist"
-        aria-label={PREGNANCY_PAGE_COPY.title}
-        className="flex flex-wrap gap-2"
-      >
-        {TAB_ORDER.map((key) => (
-          <TabButton
-            key={key}
-            tabKey={key}
-            label={PREGNANCY_PAGE_COPY.tabs[key]}
-            active={active === key}
-            onSelect={setActive}
-          />
-        ))}
-      </div>
-      <div role="tabpanel" className="space-y-4">
-        {active === "profile" ? (
+      <SegmentedControl
+        ariaLabel={PREGNANCY_PAGE_COPY.title}
+        value={active}
+        onValueChange={setActive}
+        idBase={base}
+        items={items}
+      />
+      {active === "profile" ? (
+        <div
+          {...segmentedPanelProps(base, "profile", true)}
+          className="space-y-4"
+        >
           <PregnancyProfileForm pregnancy={pregnancy} />
-        ) : null}
-        {active === "anc" ? (
+        </div>
+      ) : null}
+      {active === "anc" ? (
+        <div {...segmentedPanelProps(base, "anc", true)} className="space-y-4">
           <PregnancyAncTab pregnancyId={pregnancy.id} events={events} />
-        ) : null}
-        {active === "ttd" ? (
+        </div>
+      ) : null}
+      {active === "ttd" ? (
+        <div {...segmentedPanelProps(base, "ttd", true)} className="space-y-4">
           <PregnancyTtdTab pregnancyId={pregnancy.id} events={events} />
-        ) : null}
-        {active === "weight" ? (
+        </div>
+      ) : null}
+      {active === "weight" ? (
+        <div
+          {...segmentedPanelProps(base, "weight", true)}
+          className="space-y-4"
+        >
           <PregnancyWeightTab
             pregnancyId={pregnancy.id}
             initialWeightKg={pregnancy.initialWeightKg}
             heightCm={pregnancy.heightCm}
             events={events}
           />
-        ) : null}
-        {active === "fetal" ? (
+        </div>
+      ) : null}
+      {active === "fetal" ? (
+        <div
+          {...segmentedPanelProps(base, "fetal", true)}
+          className="space-y-4"
+        >
           <PregnancyFetalTab weeks={overview.gestational.weeks} />
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </div>
-  );
-}
-
-function TabButton({
-  tabKey,
-  label,
-  active,
-  onSelect,
-}: {
-  readonly tabKey: PregnancyTabKey;
-  readonly label: string;
-  readonly active: boolean;
-  readonly onSelect: (key: PregnancyTabKey) => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={active}
-      onClick={() => onSelect(tabKey)}
-      className={cn(
-        "rounded-full px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
-        active
-          ? "bg-primary text-primary-foreground"
-          : "bg-surface-muted text-foreground hover:bg-surface",
-      )}
-    >
-      {label}
-    </button>
   );
 }

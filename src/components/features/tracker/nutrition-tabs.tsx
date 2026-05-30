@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 
-import { cn } from "@/lib/cn";
 import type { NutritionEventDto } from "@/application/health-plan/dtos";
 import { NUTRITION_PAGE_COPY } from "@/config/tracker";
+import {
+  SegmentedControl,
+  segmentedPanelProps,
+  type SegmentedControlItem,
+} from "@/components/primitives/segmented-control";
 
 import { NutritionAsiTab } from "./nutrition-asi-tab";
 import { NutritionDewormingTab } from "./nutrition-deworming-tab";
@@ -29,11 +33,10 @@ export interface NutritionTabsProps {
 /**
  * Tab navigator untuk modul Gizi. Empat tab — ASI, MPASI, Vitamin A, Obat
  * cacing — masing-masing pure Client Component dengan `useActionState`
- * terikat ke `recordNutritionEvent` / `deleteNutritionEvent`.
- *
- * Tab aktif default = `asi` (paling sering disentuh oleh orang tua bayi
- * baru); ditambah sentinel di URL `?tab=` jika di kemudian hari ingin
- * deep-link, tapi untuk Phase 5 cukup local state.
+ * terikat ke `recordNutritionEvent` / `deleteNutritionEvent`. Memakai
+ * primitive {@link SegmentedControl} bersama agar gaya tab konsisten dengan
+ * modul lain. Tab aktif default = `asi` (paling sering disentuh orang tua
+ * bayi baru).
  */
 export function NutritionTabs({
   childId,
@@ -41,83 +44,63 @@ export function NutritionTabs({
   events,
 }: NutritionTabsProps) {
   const [active, setActive] = useState<NutritionTabKey>("asi");
+  const base = useId();
+
+  const items: readonly SegmentedControlItem<NutritionTabKey>[] = TAB_ORDER.map(
+    (key) => ({ id: key, label: NUTRITION_PAGE_COPY.tabs[key] }),
+  );
 
   return (
     <div className="space-y-4">
-      <div
-        role="tablist"
-        aria-label={NUTRITION_PAGE_COPY.title}
-        className="flex flex-wrap gap-2"
-      >
-        {TAB_ORDER.map((key) => (
-          <TabButton
-            key={key}
-            tabKey={key}
-            label={NUTRITION_PAGE_COPY.tabs[key]}
-            active={active === key}
-            onSelect={setActive}
-          />
-        ))}
-      </div>
-      <div role="tabpanel" className="space-y-4">
-        {active === "asi" ? (
+      <SegmentedControl
+        ariaLabel={NUTRITION_PAGE_COPY.title}
+        value={active}
+        onValueChange={setActive}
+        idBase={base}
+        items={items}
+      />
+      {active === "asi" ? (
+        <div {...segmentedPanelProps(base, "asi", true)} className="space-y-4">
           <NutritionAsiTab
             childId={childId}
             childAgeMonths={childAgeMonths}
             events={events}
           />
-        ) : null}
-        {active === "mpasi" ? (
+        </div>
+      ) : null}
+      {active === "mpasi" ? (
+        <div
+          {...segmentedPanelProps(base, "mpasi", true)}
+          className="space-y-4"
+        >
           <NutritionMpasiTab
             childId={childId}
             childAgeMonths={childAgeMonths}
             events={events}
           />
-        ) : null}
-        {active === "vitA" ? (
+        </div>
+      ) : null}
+      {active === "vitA" ? (
+        <div {...segmentedPanelProps(base, "vitA", true)} className="space-y-4">
           <NutritionVitaminATab
             childId={childId}
             childAgeMonths={childAgeMonths}
             events={events}
           />
-        ) : null}
-        {active === "cacing" ? (
+        </div>
+      ) : null}
+      {active === "cacing" ? (
+        <div
+          {...segmentedPanelProps(base, "cacing", true)}
+          className="space-y-4"
+        >
           <NutritionDewormingTab
             childId={childId}
             childAgeMonths={childAgeMonths}
             events={events}
           />
-        ) : null}
-      </div>
+        </div>
+      ) : null}
     </div>
-  );
-}
-
-function TabButton({
-  tabKey,
-  label,
-  active,
-  onSelect,
-}: {
-  readonly tabKey: NutritionTabKey;
-  readonly label: string;
-  readonly active: boolean;
-  readonly onSelect: (key: NutritionTabKey) => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={active}
-      onClick={() => onSelect(tabKey)}
-      className={cn(
-        "rounded-full px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
-        active
-          ? "bg-primary text-primary-foreground"
-          : "bg-surface-muted text-foreground hover:bg-surface",
-      )}
-    >
-      {label}
-    </button>
   );
 }
