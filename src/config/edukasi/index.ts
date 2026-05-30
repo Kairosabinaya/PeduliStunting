@@ -27,5 +27,4 @@ export { GUIDE_COPY } from "./copy/guide";
 export { MYTHS_COPY } from "./copy/myths";
 export { POSYANDU_COPY } from "./copy/posyandu";
 export { QUIZ_COPY } from "./copy/quiz";
-export { MAP_BRIDGE_COPY } from "./copy/map-bridge";
 export { CLOSING_COPY, type ClosingHeadlineWord } from "./copy/closing";

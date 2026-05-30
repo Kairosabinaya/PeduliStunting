@@ -6,6 +6,5 @@ export { ActSection } from "./act-section";
 export { ScrollPrompt } from "./scroll-prompt";
 export { StaggerReveal } from "./stagger-reveal";
 export { FadeInView } from "./fade-in-view";
-export { LenisProvider } from "./lenis-provider";
 export { PinnedSection } from "./pinned-section";
 export { StatTile } from "./stat-tile";

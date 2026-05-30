@@ -20,6 +20,21 @@ vi.mock("@/app/(app)/tracker/actions", () => ({
 
 const { AddChildForm } = await import("./add-child-form");
 
+function fillIdentity() {
+  fireEvent.change(
+    screen.getByLabelText(new RegExp(ADD_CHILD_COPY.fields.nameLabel)),
+    { target: { value: "Aira" } },
+  );
+  fireEvent.change(
+    screen.getByLabelText(new RegExp(ADD_CHILD_COPY.fields.sexLabel)),
+    { target: { value: "P" } },
+  );
+  fireEvent.change(
+    screen.getByLabelText(new RegExp(ADD_CHILD_COPY.fields.birthDateLabel)),
+    { target: { value: "2024-01-15" } },
+  );
+}
+
 describe("AddChildForm", () => {
   beforeEach(() => {
     createChildMock.mockReset();
@@ -54,22 +69,27 @@ describe("AddChildForm", () => {
     ).toBeInTheDocument();
   });
 
-  it("invokes the Server Action with submitted values", async () => {
+  it("hides the gestational-age field until the preterm toggle is selected", () => {
+    render(<AddChildForm />);
+
+    expect(
+      screen.getByLabelText(ADD_CHILD_COPY.fields.gestationalAgeLabel),
+    ).not.toBeVisible();
+
+    fireEvent.click(
+      screen.getByRole("tab", { name: ADD_CHILD_COPY.birthStatus.preterm }),
+    );
+
+    expect(
+      screen.getByLabelText(ADD_CHILD_COPY.fields.gestationalAgeLabel),
+    ).toBeVisible();
+  });
+
+  it("invokes the Server Action with submitted values, defaulting to term", async () => {
     createChildMock.mockResolvedValueOnce({ ok: true });
 
     render(<AddChildForm />);
-    fireEvent.change(
-      screen.getByLabelText(new RegExp(ADD_CHILD_COPY.fields.nameLabel)),
-      { target: { value: "Aira" } },
-    );
-    fireEvent.change(
-      screen.getByLabelText(new RegExp(ADD_CHILD_COPY.fields.sexLabel)),
-      { target: { value: "P" } },
-    );
-    fireEvent.change(
-      screen.getByLabelText(new RegExp(ADD_CHILD_COPY.fields.birthDateLabel)),
-      { target: { value: "2024-01-15" } },
-    );
+    fillIdentity();
 
     fireEvent.click(
       screen.getByRole("button", { name: ADD_CHILD_COPY.submit }),
@@ -82,6 +102,33 @@ describe("AddChildForm", () => {
     expect(formData?.get("name")).toBe("Aira");
     expect(formData?.get("sex")).toBe("P");
     expect(formData?.get("birthDate")).toBe("2024-01-15");
+    expect(formData?.get("birthStatus")).toBe("term");
+  });
+
+  it("submits the preterm status and gestational age when preterm is selected", async () => {
+    createChildMock.mockResolvedValueOnce({ ok: true });
+
+    render(<AddChildForm />);
+    fillIdentity();
+
+    fireEvent.click(
+      screen.getByRole("tab", { name: ADD_CHILD_COPY.birthStatus.preterm }),
+    );
+    fireEvent.change(
+      screen.getByLabelText(ADD_CHILD_COPY.fields.gestationalAgeLabel),
+      { target: { value: "34" } },
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: ADD_CHILD_COPY.submit }),
+    );
+
+    await waitFor(() => {
+      expect(createChildMock).toHaveBeenCalledTimes(1);
+    });
+    const formData = createChildMock.mock.calls[0]?.[1];
+    expect(formData?.get("birthStatus")).toBe("preterm");
+    expect(formData?.get("gestationalAgeWeeks")).toBe("34");
   });
 
   it("renders field-level errors when the action returns them", async () => {
@@ -116,18 +163,7 @@ describe("AddChildForm", () => {
     });
 
     render(<AddChildForm />);
-    fireEvent.change(
-      screen.getByLabelText(new RegExp(ADD_CHILD_COPY.fields.nameLabel)),
-      { target: { value: "Aira" } },
-    );
-    fireEvent.change(
-      screen.getByLabelText(new RegExp(ADD_CHILD_COPY.fields.sexLabel)),
-      { target: { value: "P" } },
-    );
-    fireEvent.change(
-      screen.getByLabelText(new RegExp(ADD_CHILD_COPY.fields.birthDateLabel)),
-      { target: { value: "2024-01-15" } },
-    );
+    fillIdentity();
     fireEvent.click(
       screen.getByRole("button", { name: ADD_CHILD_COPY.submit }),
     );

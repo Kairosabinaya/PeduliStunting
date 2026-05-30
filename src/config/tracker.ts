@@ -5,6 +5,8 @@ import type { ChildImmunizationStatus } from "@/domain/health-plan/entities/chil
 import type { ChildMilestoneStatus } from "@/domain/health-plan/entities/child-milestone";
 import type { MilestoneDomain } from "@/domain/health-plan/entities/milestone";
 
+import { LANDING_ROUTE } from "@/config/app";
+
 /* ─────────────────────────── routes ─────────────────────────── */
 
 export const TRACKER_ROUTE = "/tracker";
@@ -12,6 +14,11 @@ export const TRACKER_NEW_CHILD_ROUTE = "/tracker/anak/baru";
 
 export function trackerChildRoute(childId: string): string {
   return `/tracker/anak/${childId}`;
+}
+
+/** Tracker dashboard URL focused on a specific child via the `?anak=` param. */
+export function trackerSelectChildRoute(childId: string): string {
+  return `${TRACKER_ROUTE}?anak=${childId}`;
 }
 
 export function trackerChildMeasurementsRoute(childId: string): string {
@@ -42,6 +49,7 @@ export const TRACKER_LIST_COPY = {
   emptyTitle: "Belum ada anak terdaftar",
   emptyDescription:
     "Tambahkan profil anak untuk mulai memantau berat, tinggi, lingkar kepala, dan imunisasi.",
+  switcherAriaLabel: "Pilih anak",
 } as const;
 
 export const ADD_CHILD_COPY = {
@@ -52,6 +60,16 @@ export const ADD_CHILD_COPY = {
     "Isi data dasar anak. Anda bisa melengkapi pengukuran dan imunisasi setelah profil dibuat.",
   cancel: "Batal",
   submit: "Simpan profil anak",
+  identitySectionTitle: "Identitas anak",
+  birthSectionTitle: "Kondisi kelahiran",
+  birthSectionHint: "Opsional. Lengkapi bila Anda mengingatnya.",
+  birthStatus: {
+    legend: "Apakah anak lahir prematur?",
+    term: "Cukup bulan",
+    preterm: "Prematur",
+    termNote:
+      "Anak lahir cukup bulan (37 minggu atau lebih). Tidak perlu mengisi usia kehamilan.",
+  },
   fields: {
     nameLabel: "Nama anak",
     namePlaceholder: "mis. Aira",
@@ -61,7 +79,9 @@ export const ADD_CHILD_COPY = {
     birthDateLabel: "Tanggal lahir",
     birthWeightLabel: "Berat lahir (kg)",
     birthLengthLabel: "Panjang lahir (cm)",
-    gestationalAgeLabel: "Usia kehamilan (minggu)",
+    gestationalAgeLabel: "Usia kehamilan saat lahir (minggu)",
+    gestationalAgeHint:
+      "Diisi untuk bayi prematur. Cukup bulan biasanya 37-42 minggu.",
     notesLabel: "Catatan",
     notesHint: "Opsional. Maksimal 500 karakter.",
   },
@@ -458,7 +478,7 @@ export const MILESTONE_ALERT_COPY = {
   bodyFormat: (delayed: number) =>
     `${delayed} tonggak perkembangan ditandai terlambat. Sesuai panduan Buku KIA, konsultasikan ke posyandu atau Puskesmas untuk pemeriksaan SDIDTK lebih lanjut.`,
   ctaLabel: "Pelajari panduan SDIDTK",
-  ctaHref: "/edukasi",
+  ctaHref: LANDING_ROUTE,
 } as const;
 
 export const MILESTONE_RANGE_FILTER_COPY = {
@@ -509,7 +529,7 @@ export const IMMUNIZATION_EDUCATION_COPY = {
   title: "Mengapa imunisasi lengkap penting?",
   body: "Imunisasi tidak lengkap berkaitan dengan risiko stunting yang lebih tinggi karena infeksi berulang dapat mengganggu penyerapan gizi. Tetap ikuti jadwal posyandu — keterlambatan beberapa minggu masih dapat dikejar.",
   ctaLabel: "Pelajari lebih lanjut tentang stunting",
-  ctaHref: "/edukasi",
+  ctaHref: LANDING_ROUTE,
   sourceLabel: "Buku KIA 2024",
 } as const;
 

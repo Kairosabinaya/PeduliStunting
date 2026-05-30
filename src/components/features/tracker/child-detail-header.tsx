@@ -8,6 +8,12 @@ import { monthsBetween } from "@/domain/shared/age-months";
 
 export interface ChildDetailHeaderProps {
   readonly child: ChildDto;
+  /**
+   * Whether to render the "back to all children" link. Shown on the nested
+   * child route (a drill-down) and hidden on the `/tracker` dashboard, which
+   * already lists every child via the switcher.
+   */
+  readonly showBackLink?: boolean;
 }
 
 function formatBirthDate(birthDate: string): string {
@@ -29,24 +35,29 @@ function computeAgeMonths(birthDate: string): number {
  * same denominator the WHO LMS standards use, so the age shown here matches the
  * chart x-axis. The back link gives a clear way out of the nested child route.
  */
-export function ChildDetailHeader({ child }: ChildDetailHeaderProps) {
+export function ChildDetailHeader({
+  child,
+  showBackLink = true,
+}: ChildDetailHeaderProps) {
   const ageMonths = computeAgeMonths(child.birthDate);
   const sexLabel = SEX_LABEL[child.sex];
 
   return (
     <header className="space-y-4 rounded-xl border border-border bg-surface p-5 md:p-6">
-      <Link
-        href={TRACKER_ROUTE}
-        className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-      >
-        <span aria-hidden="true">←</span>
-        {CHILD_DETAIL_COPY.backToList}
-      </Link>
+      {showBackLink ? (
+        <Link
+          href={TRACKER_ROUTE}
+          className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        >
+          <span aria-hidden="true">←</span>
+          {CHILD_DETAIL_COPY.backToList}
+        </Link>
+      ) : null}
       <div className="space-y-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">
           {CHILD_DETAIL_COPY.metaTitleSuffix}
         </p>
-        <h1 className="text-2xl font-semibold text-foreground md:text-3xl">
+        <h1 className="break-words text-2xl font-semibold text-foreground md:text-3xl">
           {child.name}
         </h1>
       </div>

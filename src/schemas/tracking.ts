@@ -64,10 +64,35 @@ export const createChildInputSchema = z
     birthDate: dateOnlySchema,
     birthWeightKg: z.number().positive().max(10).nullable(),
     birthLengthCm: z.number().positive().max(80).nullable(),
+    /**
+     * Whether the child was born preterm (< 37 weeks). Drives whether the
+     * gestational-age-at-birth figure is required: term babies do not carry
+     * one, preterm babies must record it.
+     */
+    isPremature: z.boolean(),
     gestationalAgeWeeks: z.number().int().min(20).max(45).nullable(),
     notes: z.string().max(500).nullable(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    if (!value.isPremature) return;
+    if (value.gestationalAgeWeeks === null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["gestationalAgeWeeks"],
+        message:
+          "Isi usia kehamilan saat lahir untuk anak yang lahir prematur.",
+      });
+      return;
+    }
+    if (value.gestationalAgeWeeks >= 37) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["gestationalAgeWeeks"],
+        message: "Lahir prematur berarti usia kehamilan kurang dari 37 minggu.",
+      });
+    }
+  });
 
 export type CreateChildInput = z.infer<typeof createChildInputSchema>;
 
@@ -99,7 +124,9 @@ export const recordMeasurementInputSchema = z
     },
   );
 
-export type RecordMeasurementInput = z.infer<typeof recordMeasurementInputSchema>;
+export type RecordMeasurementInput = z.infer<
+  typeof recordMeasurementInputSchema
+>;
 
 /* ─────────────────────────── DB row mappers ─────────────────────────── */
 
@@ -107,9 +134,7 @@ type ChildRow = Tables<"children">;
 type GrowthMeasurementRow = Tables<"growth_measurements">;
 type GrowthStandardRow = Tables<"growth_standards">;
 
-export function mapChildRow(
-  row: ChildRow,
-): Result<Child, ValidationError> {
+export function mapChildRow(row: ChildRow): Result<Child, ValidationError> {
   const sexResult = sexSchema.safeParse(row.sex);
   if (!sexResult.success) {
     return err(AppErrors.validation(`sex tidak valid: ${row.sex}`));
@@ -215,9 +240,7 @@ export function parseGrowthStandardRow(
   }
   const indicatorResult = growthIndicatorSchema.safeParse(row.indicator);
   if (!indicatorResult.success) {
-    return err(
-      AppErrors.validation(`indicator tidak valid: ${row.indicator}`),
-    );
+    return err(AppErrors.validation(`indicator tidak valid: ${row.indicator}`));
   }
   return ok({
     indicator: indicatorResult.data as GrowthIndicator,
@@ -237,9 +260,7 @@ export function parseGrowthStandardRow(
  * `growth_measurements.z_scores` column. Keys are the indicator codes;
  * unset indicators are omitted (not stored as `null`).
  */
-export function serialiseZScoreMap(
-  map: ZScoreMap,
-): Record<string, number> {
+export function serialiseZScoreMap(map: ZScoreMap): Record<string, number> {
   const out: Record<string, number> = {};
   for (const indicator of GROWTH_INDICATORS) {
     const value = map[indicator];
@@ -250,9 +271,7 @@ export function serialiseZScoreMap(
   return out;
 }
 
-export function serialiseSdClassMap(
-  map: SdClassMap,
-): Record<string, SdClass> {
+export function serialiseSdClassMap(map: SdClassMap): Record<string, SdClass> {
   const out: Record<string, SdClass> = {};
   for (const indicator of GROWTH_INDICATORS) {
     const value = map[indicator];

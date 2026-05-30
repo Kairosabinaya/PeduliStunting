@@ -1,32 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { ChildSummary } from "@/components/features/tracker/child-summary";
-import { GrowthChartCard } from "@/components/features/tracker/growth-chart-card";
-import { ModuleGrid } from "@/components/features/tracker/module-grid";
+import { ChildDashboard } from "@/components/features/tracker/child-dashboard";
 import { ErrorState } from "@/components/primitives/error-state";
-import {
-  CHILD_DETAIL_COPY,
-  TRACKER_LIST_COPY,
-  trackerChildImmunizationsRoute,
-  trackerChildMeasurementsRoute,
-  trackerChildMilestonesRoute,
-  trackerChildNutritionRoute,
-} from "@/config/tracker";
-import { monthsBetween } from "@/domain/shared/age-months";
+import { CHILD_DETAIL_COPY, TRACKER_LIST_COPY } from "@/config/tracker";
 import { asChildId, isUuid } from "@/domain/shared/ids";
-import { asDateOnly } from "@/domain/shared/date-only";
-import {
-  fetchChildById,
-  fetchChildImmunizations,
-  fetchChildMilestones,
-  fetchImmunizationSchedule,
-  fetchMeasurementsByChild,
-  fetchMilestoneCatalog,
-  fetchNutritionEventsByChild,
-} from "@/lib/tracker-cache";
+import { fetchChildById } from "@/lib/tracker-cache";
+import { loadChildOverview } from "@/lib/child-overview";
 import { requireServerSession } from "@/lib/server-session";
-import { todayIso } from "@/lib/today";
 
 interface ChildOverviewPageProps {
   readonly params: Promise<{ readonly childId: string }>;
@@ -60,83 +41,21 @@ export default async function ChildOverviewPage({
   }
 
   const session = await requireServerSession();
-  const childResolved = asChildId(childId);
-  const child = await fetchChildById(session.userId, childResolved);
-  if (!child.ok) {
-    if (child.error.kind === "not_found") notFound();
+  const overview = await loadChildOverview(session.userId, asChildId(childId));
+
+  if (!overview.ok) {
+    if (overview.error.kind === "not_found") {
+      notFound();
+    }
     return (
       <ErrorState
         title={TRACKER_LIST_COPY.errorTitle}
         description={
-          child.error.message || TRACKER_LIST_COPY.errorDescriptionFallback
+          overview.error.message || TRACKER_LIST_COPY.errorDescriptionFallback
         }
       />
     );
   }
 
-  const [
-    measurementsResult,
-    immunizationScheduleResult,
-    childImmunizationsResult,
-    milestoneCatalogResult,
-    childMilestonesResult,
-    nutritionEventsResult,
-  ] = await Promise.all([
-    fetchMeasurementsByChild(session.userId, childResolved),
-    fetchImmunizationSchedule(),
-    fetchChildImmunizations(session.userId, childResolved),
-    fetchMilestoneCatalog(),
-    fetchChildMilestones(session.userId, childResolved),
-    fetchNutritionEventsByChild(session.userId, childResolved),
-  ]);
-
-  if (!measurementsResult.ok) {
-    return (
-      <ErrorState
-        title={TRACKER_LIST_COPY.errorTitle}
-        description={
-          measurementsResult.error.message ||
-          TRACKER_LIST_COPY.errorDescriptionFallback
-        }
-      />
-    );
-  }
-
-  const measurements = measurementsResult.value;
-  const childAgeMonths = monthsBetween(
-    asDateOnly(child.value.birthDate),
-    asDateOnly(todayIso()),
-  );
-
-  return (
-    <div className="space-y-6">
-      <ChildSummary measurements={measurements} />
-      <ModuleGrid
-        childAgeMonths={childAgeMonths}
-        childDetailRoutes={{
-          measurements: trackerChildMeasurementsRoute(child.value.id),
-          immunizations: trackerChildImmunizationsRoute(child.value.id),
-          milestones: trackerChildMilestonesRoute(child.value.id),
-          nutrition: trackerChildNutritionRoute(child.value.id),
-        }}
-        measurements={measurements}
-        immunizationSchedule={
-          immunizationScheduleResult.ok ? immunizationScheduleResult.value : []
-        }
-        childImmunizations={
-          childImmunizationsResult.ok ? childImmunizationsResult.value : []
-        }
-        milestoneCatalog={
-          milestoneCatalogResult.ok ? milestoneCatalogResult.value : []
-        }
-        childMilestones={
-          childMilestonesResult.ok ? childMilestonesResult.value : []
-        }
-        nutritionEvents={
-          nutritionEventsResult.ok ? nutritionEventsResult.value : []
-        }
-      />
-      <GrowthChartCard child={child.value} measurements={measurements} />
-    </div>
-  );
+  return <ChildDashboard data={overview.value} />;
 }

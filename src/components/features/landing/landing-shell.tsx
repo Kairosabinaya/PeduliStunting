@@ -20,8 +20,9 @@ import { LandingStory } from "./landing-story";
 /**
  * Editorial display typeface for the landing headlines + display stats.
  * Variable font, `swap`, exposed as `--font-display`. The variable is applied
- * ONLY on the `.theme-landing` wrapper, so it is scoped to the landing and
- * `/edukasi` keeps Plus Jakarta Sans (see globals.css `.theme-landing :is(…)`).
+ * ONLY on the `.theme-landing` wrapper, so the display typeface stays scoped to
+ * the landing while the rest of the app keeps Plus Jakarta Sans (see globals.css
+ * `.theme-landing :is(…)`).
  */
 const bricolageGrotesque = Bricolage_Grotesque({
   subsets: ["latin"],

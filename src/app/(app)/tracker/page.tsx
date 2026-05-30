@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { ChildCard } from "@/components/features/tracker/child-card";
+import { EmptyChildDashboard } from "@/components/features/tracker/empty-child-dashboard";
 import { PregnancyBanner } from "@/components/features/tracker/pregnancy-banner";
+import { TrackerChildSection } from "@/components/features/tracker/tracker-child-section";
 import { buttonVariants } from "@/components/primitives/button";
 import { EmptyState } from "@/components/primitives/empty-state";
 import { ErrorState } from "@/components/primitives/error-state";
@@ -17,9 +18,31 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function TrackerPage() {
+interface TrackerPageProps {
+  readonly searchParams: Promise<{ readonly anak?: string }>;
+}
+
+/**
+ * Tracker home — a friendly per-child dashboard rather than a grid of cards.
+ * It opens straight onto one child's full picture (growth summary, the four
+ * domain modules, and the WHO curve) with a switcher when the account has more
+ * than one child. With no children yet, the dashboard frame still shows
+ * (disabled modules) beside a prominent "Tambah anak" call to action so a first
+ * visit communicates what the tracker does.
+ */
+export default async function TrackerPage({ searchParams }: TrackerPageProps) {
   const session = await requireServerSession();
-  const result = await fetchChildrenByOwner(session.userId);
+  const childrenResult = await fetchChildrenByOwner(session.userId);
+  const { anak } = await searchParams;
+
+  const addChildCta = (
+    <Link
+      href={TRACKER_NEW_CHILD_ROUTE}
+      className={buttonVariants({ variant: "primary" })}
+    >
+      {TRACKER_LIST_COPY.addCta}
+    </Link>
+  );
 
   return (
     <div className="space-y-8">
@@ -27,44 +50,34 @@ export default async function TrackerPage() {
         eyebrow={TRACKER_LIST_COPY.eyebrow}
         title={TRACKER_LIST_COPY.title}
         description={TRACKER_LIST_COPY.description}
-        actions={
-          <Link
-            href={TRACKER_NEW_CHILD_ROUTE}
-            className={buttonVariants({ variant: "primary" })}
-          >
-            {TRACKER_LIST_COPY.addCta}
-          </Link>
-        }
+        actions={addChildCta}
       />
 
       <PregnancyBanner />
 
-      {!result.ok ? (
+      {!childrenResult.ok ? (
         <ErrorState
           title={TRACKER_LIST_COPY.errorTitle}
           description={
-            result.error.message || TRACKER_LIST_COPY.errorDescriptionFallback
+            childrenResult.error.message ||
+            TRACKER_LIST_COPY.errorDescriptionFallback
           }
         />
-      ) : result.value.length === 0 ? (
-        <EmptyState
-          title={TRACKER_LIST_COPY.emptyTitle}
-          description={TRACKER_LIST_COPY.emptyDescription}
-          action={
-            <Link
-              href={TRACKER_NEW_CHILD_ROUTE}
-              className={buttonVariants({ variant: "primary" })}
-            >
-              {TRACKER_LIST_COPY.addCta}
-            </Link>
-          }
-        />
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {result.value.map((child) => (
-            <ChildCard key={child.id} child={child} />
-          ))}
+      ) : childrenResult.value.length === 0 ? (
+        <div className="space-y-6">
+          <EmptyState
+            title={TRACKER_LIST_COPY.emptyTitle}
+            description={TRACKER_LIST_COPY.emptyDescription}
+            action={addChildCta}
+          />
+          <EmptyChildDashboard />
         </div>
+      ) : (
+        <TrackerChildSection
+          childProfiles={childrenResult.value}
+          userId={session.userId}
+          requestedChildId={anak}
+        />
       )}
     </div>
   );

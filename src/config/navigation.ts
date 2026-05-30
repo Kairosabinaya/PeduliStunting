@@ -21,11 +21,6 @@ export const PRIMARY_NAV: readonly PrimaryNavItem[] = [
     description: "Prediksi tren dan metadata model",
   },
   {
-    href: "/edukasi",
-    label: "Edukasi",
-    description: "1.000 Hari yang Mengubah Segalanya",
-  },
-  {
     href: "/tracker",
     label: "Tracker",
     description: "Pantau pertumbuhan dan rencana sehat anak",

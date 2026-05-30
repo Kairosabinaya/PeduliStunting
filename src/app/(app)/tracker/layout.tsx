@@ -9,7 +9,7 @@ interface TrackerLayoutProps {
 /**
  * Tracker-scoped layout. Renders the global "Cek Cepat" floating widget
  * alongside the route subtree so it is present on /tracker, /tracker/anak/*,
- * and every nested page without leaking onto /map or /edukasi.
+ * and every nested page without leaking onto the rest of the app (e.g. /map).
  *
  * Auth + chrome (FloatingHeader) are handled by the parent `(app)` layout —
  * this layer is purely the tracker-specific overlay.

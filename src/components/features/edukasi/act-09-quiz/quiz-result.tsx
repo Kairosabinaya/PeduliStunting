@@ -9,6 +9,8 @@ import { Button } from "@/components/primitives/button";
 import { resolveQuizTier, type QuizTier } from "@/data/edukasi/quiz-tiers";
 import { QUIZ_TOTAL } from "@/data/edukasi/quiz-questions";
 
+import { LANDING_ROUTE } from "@/config/app";
+
 export interface QuizResultProps {
   readonly correct: number;
   readonly onReset: () => void;
@@ -29,10 +31,11 @@ export function QuizResult({ correct, onReset }: QuizResultProps) {
 
   const handleShare = async () => {
     const text = `Saya dapat ${correct} dari ${QUIZ_TOTAL} di kuis pencegahan stunting Peduli Stunting — ${tier.title}.`;
+    const sharePath = `${LANDING_ROUTE}#act-9`;
     const url =
       typeof window !== "undefined"
-        ? `${window.location.origin}/edukasi#act-9`
-        : "/edukasi#act-9";
+        ? `${window.location.origin}${sharePath}`
+        : sharePath;
     if (
       typeof navigator !== "undefined" &&
       typeof navigator.share === "function"

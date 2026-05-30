@@ -184,7 +184,12 @@
     --edu-hl-danger: 233 108 100;
     --edu-tint-warm: 32 27 22;
     --edu-tint-cream: 30 26 22;
-    --edu-tint-night: 235 240 248;
+    /* The "night" band is intentionally dark in BOTH themes — its sections
+       render white text directly, so this token must NOT flip light in dark
+       mode (that flip caused invisible white-on-near-white text on the
+       landing's choropleth/quiz/closing bands). Kept a touch lighter than the
+       dark canvas (14 16 19) so the band still separates from the page. */
+    --edu-tint-night: 20 28 44;
     --edu-fn-color: 158 164 172;
 
     /* Quintile ramp inverted for dark mode: brand-700 (deep navy) is
@@ -516,10 +521,9 @@
     margin-right: calc(50% - 50vw);
   }
 
-  /* Scroll-snap container for the 11-ACT scrollytelling. Applied as a
-     wrapper class on `<EdukasiScrollytelling>` consumers (auth /edukasi
-     and unauth /map landing) so the snap behaviour is scoped — the rest
-     of the app keeps normal scroll.
+  /* Scroll-snap container for the multi-ACT scrollytelling. Applied as a
+     wrapper class on the landing story (`LandingStory` on the home page `/`)
+     so the snap behaviour is scoped — the rest of the app keeps normal scroll.
 
      `proximity` (not `mandatory`) is the deliberate choice: pinned
      sections (ACT 2, 5, and Phase 3 ACT 3/4/11) reserve hundreds of

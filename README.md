@@ -194,7 +194,7 @@ a11y scan.
 
 ## 11. Performance & a11y baselines
 
-- Lighthouse Performance (mobile) ≥ 90 — `/edukasi` punya target ≥ 85
+- Lighthouse Performance (mobile) ≥ 90 — beranda `/` (landing) punya target ≥ 85
   per ADR-0007 (trade-off UI/UX vs bundle untuk scrollytelling)
 - Lighthouse Accessibility ≥ 95
 - LCP < 2.5s di Slow 3G, INP < 200ms, CLS < 0.1

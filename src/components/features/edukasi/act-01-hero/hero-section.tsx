@@ -2,11 +2,8 @@
 
 import { useRef } from "react";
 import { motion } from "motion/react";
-import Link from "next/link";
 
 import { HERO_COPY } from "@/config/edukasi";
-import { buttonVariants } from "@/components/primitives/button";
-import { SIGN_IN_ROUTE } from "@/config/routes";
 
 import { LandingOrb } from "../primitives/landing-orb";
 import { ParallaxLayer } from "../primitives/parallax-layer";
@@ -14,17 +11,6 @@ import { ScrollPrompt } from "../primitives/scroll-prompt";
 import { HeroHeadline } from "./hero-headline";
 import { HeroIllustration } from "./hero-illustration";
 import { HeroLead } from "./hero-lead";
-
-interface HeroSectionProps {
-  /**
-   * When true, the hero renders a Masuk / Daftar CTA pair beneath the
-   * lead copy. Pass true from the landing-before-login surface (root `/`)
-   * so unauthenticated readers get a clear conversion path; leave false
-   * from the authenticated `/edukasi` long-read where those CTAs would
-   * be redundant (the user is already signed in).
-   */
-  readonly showAuthCtas?: boolean;
-}
 
 /**
  * ACT 1 — hero cold-open. Composes the client headline (per-word reveal)
@@ -41,7 +27,7 @@ interface HeroSectionProps {
  * `snap-scrollytelling` container so scrolling out of the hero lands
  * cleanly on ACT 2.
  */
-export function HeroSection({ showAuthCtas = false }: HeroSectionProps) {
+export function HeroSection() {
   const sectionRef = useRef<HTMLElement>(null);
 
   return (
@@ -77,22 +63,6 @@ export function HeroSection({ showAuthCtas = false }: HeroSectionProps) {
           </p>
           <HeroHeadline />
           <HeroLead />
-          {showAuthCtas ? (
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link
-                href="/auth/sign-up"
-                className={buttonVariants({ variant: "primary", size: "lg" })}
-              >
-                Daftar gratis
-              </Link>
-              <Link
-                href={SIGN_IN_ROUTE}
-                className={buttonVariants({ variant: "outline", size: "lg" })}
-              >
-                Masuk
-              </Link>
-            </div>
-          ) : null}
           <p className="mt-10 max-w-prose text-sm text-muted-foreground">
             {HERO_COPY.factLine}
           </p>

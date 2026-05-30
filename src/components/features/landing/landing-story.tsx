@@ -35,7 +35,7 @@ export function LandingStory() {
   return (
     <div className="snap-scrollytelling">
       {/* ACT I — Jendela 1.000 Hari */}
-      <HeroSection showAuthCtas />
+      <HeroSection />
       <ConnectiveBeat beat={CONNECTIVE_BEATS.humanCost} />
       <StakesSection />
       <TimelineSection />

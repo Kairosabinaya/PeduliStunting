@@ -15,9 +15,7 @@ import { createChildInputSchema } from "@/schemas/tracking";
 
 import type { AddChildFormState } from "./_lib/add-child-state";
 
-function toFormState(
-  result: Result<ChildDto, AppError>,
-): AddChildFormState {
+function toFormState(result: Result<ChildDto, AppError>): AddChildFormState {
   if (result.ok) {
     return { ok: true, child: result.value };
   }
@@ -74,15 +72,16 @@ export async function createChild(
 ): Promise<AddChildFormState> {
   const session = await requireServerSession();
 
+  const isPremature = formData.get("birthStatus") === "preterm";
+
   const parsed = createChildInputSchema.safeParse({
     name: String(formData.get("name") ?? "").trim(),
     sex: formData.get("sex"),
     birthDate: formData.get("birthDate"),
     birthWeightKg: parseNullableNumber(formData.get("birthWeightKg")),
     birthLengthCm: parseNullableNumber(formData.get("birthLengthCm")),
-    gestationalAgeWeeks: parseNullableInt(
-      formData.get("gestationalAgeWeeks"),
-    ),
+    isPremature,
+    gestationalAgeWeeks: parseNullableInt(formData.get("gestationalAgeWeeks")),
     notes: parseNullableString(formData.get("notes")),
   });
 
@@ -98,7 +97,9 @@ export async function createChild(
     birthDate: parsed.data.birthDate,
     birthWeightKg: parsed.data.birthWeightKg,
     birthLengthCm: parsed.data.birthLengthCm,
-    gestationalAgeWeeks: parsed.data.gestationalAgeWeeks,
+    gestationalAgeWeeks: parsed.data.isPremature
+      ? parsed.data.gestationalAgeWeeks
+      : null,
     notes: parsed.data.notes,
   });
 

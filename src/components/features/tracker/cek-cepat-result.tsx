@@ -11,6 +11,7 @@ import {
   type CekCepatTone,
 } from "@/config/cek-cepat";
 import { TRACKER_NEW_CHILD_ROUTE } from "@/config/tracker";
+import { LANDING_ROUTE } from "@/config/app";
 import type {
   QuickScreeningIndicatorDto,
   QuickScreeningResultDto,
@@ -20,8 +21,6 @@ import type { SdClass } from "@/domain/tracking/value-objects/sd-classification"
 export interface CekCepatResultProps {
   readonly result: QuickScreeningResultDto;
 }
-
-const EDUKASI_ROUTE = "/edukasi";
 
 /**
  * Render the screening result returned by `POST /api/tracker/cek-cepat`.
@@ -93,7 +92,7 @@ export function CekCepatResult({ result }: CekCepatResultProps) {
           {CEK_CEPAT_COPY.buttons.createChild}
         </Link>
         <Link
-          href={EDUKASI_ROUTE}
+          href={LANDING_ROUTE}
           className={buttonVariants({
             variant: "ghost",
             size: "sm",
