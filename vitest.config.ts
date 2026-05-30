@@ -12,7 +12,10 @@ export default defineConfig({
     environment: "happy-dom",
     setupFiles: ["./tests/setup/vitest.setup.ts"],
     css: false,
-    include: ["src/**/*.{test,spec}.{ts,tsx}", "tests/unit/**/*.{test,spec}.{ts,tsx}"],
+    include: [
+      "src/**/*.{test,spec}.{ts,tsx}",
+      "tests/unit/**/*.{test,spec}.{ts,tsx}",
+    ],
     exclude: ["node_modules", ".next", "tests/e2e/**"],
     coverage: {
       provider: "v8",
@@ -38,6 +41,12 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      // `server-only` throws outside an RSC bundle; treat it as a no-op so
+      // server-only modules (e.g. the choropleth data loader) are unit-testable.
+      "server-only": path.resolve(
+        __dirname,
+        "./tests/setup/server-only-stub.ts",
+      ),
     },
   },
 });
