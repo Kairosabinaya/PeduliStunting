@@ -12,9 +12,12 @@ export const APP_LOCALE = "id-ID";
 /** Route that authenticated users land on after sign-in. */
 export const DEFAULT_AUTHENTICATED_ROUTE = "/map";
 
+/** Public landing page — the pre-auth home surface. */
+export const LANDING_ROUTE = "/";
+
 /** Public routes that do not require an authenticated session. */
 export const PUBLIC_ROUTES: readonly string[] = [
-  "/",
+  LANDING_ROUTE,
   "/map",
   "/auth/sign-in",
   "/auth/sign-up",
