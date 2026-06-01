@@ -35,3 +35,4 @@ export { Skeleton, type SkeletonProps } from "./skeleton";
 export { Slider, type SliderProps } from "./slider";
 export { Spinner, type SpinnerProps } from "./spinner";
 export { Textarea, type TextareaProps } from "./textarea";
+export * from "./info-dialog";

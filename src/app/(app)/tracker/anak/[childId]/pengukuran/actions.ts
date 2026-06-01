@@ -10,7 +10,7 @@ import { err, type Result } from "@/domain/shared/result";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
 import { childTag, measurementsTag } from "@/lib/tracker-cache";
 import { requireServerSession } from "@/lib/server-session";
-import { recordMeasurementInputSchema } from "@/schemas/tracking";
+import { recordMeasurementFormInputSchema } from "@/schemas/tracking";
 
 import type { AddMeasurementFormState } from "./_lib/add-measurement-state";
 
@@ -37,34 +37,9 @@ function validationFromFlatten(
   }
   return toFormState(
     err(
-      AppErrors.validation(
-        formError ?? "Periksa kembali isian Anda.",
-        cleaned,
-      ),
+      AppErrors.validation(formError ?? "Periksa kembali isian Anda.", cleaned),
     ),
   );
-}
-
-function parseNullableNumber(raw: FormDataEntryValue | null): number | null {
-  if (raw === null) return null;
-  const value = String(raw).trim();
-  if (value === "") return null;
-  const num = Number(value);
-  return Number.isFinite(num) ? num : null;
-}
-
-function parseNullableString(raw: FormDataEntryValue | null): string | null {
-  if (raw === null) return null;
-  const value = String(raw).trim();
-  return value === "" ? null : value;
-}
-
-function parseLyingFlag(raw: FormDataEntryValue | null): boolean | null {
-  if (raw === null) return null;
-  const value = String(raw);
-  if (value === "lying") return true;
-  if (value === "standing") return false;
-  return null;
 }
 
 /**
@@ -87,25 +62,21 @@ export async function addMeasurement(
 
   const session = await requireServerSession();
 
-  const parsed = recordMeasurementInputSchema.safeParse({
+  const parsed = recordMeasurementFormInputSchema.safeParse({
     childId,
-    measuredAt: formData.get("measuredAt"),
-    weightKg: parseNullableNumber(formData.get("weightKg")),
-    heightCm: parseNullableNumber(formData.get("heightCm")),
-    measuredLying: parseLyingFlag(formData.get("measuredLying")),
-    headCircumferenceCm: parseNullableNumber(
-      formData.get("headCircumferenceCm"),
-    ),
-    muacCm: parseNullableNumber(formData.get("muacCm")),
-    note: parseNullableString(formData.get("note")),
+    childBirthDate: String(formData.get("childBirthDate") ?? ""),
+    measuredAt: String(formData.get("measuredAt") ?? ""),
+    weightKg: String(formData.get("weightKg") ?? ""),
+    heightCm: String(formData.get("heightCm") ?? ""),
+    measuredLying: String(formData.get("measuredLying") ?? ""),
+    headCircumferenceCm: String(formData.get("headCircumferenceCm") ?? ""),
+    muacCm: String(formData.get("muacCm") ?? ""),
+    note: String(formData.get("note") ?? ""),
   });
 
   if (!parsed.success) {
     const flat = parsed.error.flatten();
-    return validationFromFlatten(
-      flat.fieldErrors,
-      flat.formErrors[0],
-    );
+    return validationFromFlatten(flat.fieldErrors, flat.formErrors[0]);
   }
 
   const supabase = await createSupabaseServerClient();

@@ -36,12 +36,13 @@ import {
   MILESTONE_COPY,
   MILESTONE_DOMAIN_LABEL,
   MILESTONE_STATUS_LABEL,
+  TRACKER_FIELD_LIMITS,
 } from "@/config/tracker";
 import type { ChildMilestoneStatus } from "@/domain/health-plan/entities/child-milestone";
 import type { MilestoneDomain } from "@/domain/health-plan/entities/milestone";
+import { todayIso } from "@/lib/today";
 
 import { MilestoneStimulationPanel } from "./milestone-stimulation-panel";
-import { todayIso } from "@/lib/today";
 
 const DOMAIN_ICON_MAP: Record<MilestoneDomain, typeof PersonStanding> = {
   gross_motor: PersonStanding,
@@ -61,6 +62,7 @@ const STATUS_BADGE_TONE: Record<
 
 export interface MilestoneCardProps {
   readonly childId: string;
+  readonly childBirthDate: string;
   readonly milestone: MilestoneDto;
   readonly record: ChildMilestoneDto | undefined;
 }
@@ -79,6 +81,7 @@ export interface MilestoneCardProps {
  */
 export function MilestoneCard({
   childId,
+  childBirthDate,
   milestone,
   record,
 }: MilestoneCardProps) {
@@ -97,16 +100,18 @@ export function MilestoneCard({
     state?.record?.status ?? record?.status ?? "not_checked";
   const currentCheckedAt = state?.record?.checkedAt ?? record?.checkedAt ?? "";
   const currentNote = state?.record?.note ?? record?.note ?? "";
+  const today = todayIso();
 
   const DomainIcon = DOMAIN_ICON_MAP[milestone.domain];
 
   function submitWithStatus(nextStatus: ChildMilestoneStatus) {
     const form = new FormData();
+    form.set("childBirthDate", childBirthDate);
     form.set("status", nextStatus);
     if (nextStatus === "achieved") {
-      form.set("checkedAt", currentCheckedAt || todayIso());
+      form.set("checkedAt", currentCheckedAt || today);
     } else if (nextStatus === "delayed") {
-      form.set("checkedAt", currentCheckedAt || todayIso());
+      form.set("checkedAt", currentCheckedAt || today);
     } else {
       form.set("checkedAt", "");
     }
@@ -215,12 +220,15 @@ export function MilestoneCard({
           className="grid gap-3 rounded-lg border border-border bg-surface-muted/30 p-3 md:grid-cols-2"
         >
           <input type="hidden" name="status" value={currentStatus} />
+          <input type="hidden" name="childBirthDate" value={childBirthDate} />
           <div className="space-y-1">
             <Label htmlFor={checkedAtId}>{MILESTONE_COPY.checkedAtLabel}</Label>
             <Input
               id={checkedAtId}
               name="checkedAt"
               type="date"
+              min={childBirthDate}
+              max={today}
               defaultValue={currentCheckedAt}
             />
           </div>
@@ -230,7 +238,7 @@ export function MilestoneCard({
               id={noteId}
               name="note"
               rows={2}
-              maxLength={500}
+              maxLength={TRACKER_FIELD_LIMITS.noteMaxLength}
               defaultValue={currentNote}
             />
           </div>
@@ -242,7 +250,7 @@ export function MilestoneCard({
             disabled={pending}
             className="md:col-span-2 md:w-fit"
           >
-            {pending ? MILESTONE_COPY.saving : "Simpan"}
+            {pending ? MILESTONE_COPY.saving : MILESTONE_CARD_COPY.saveNoteCta}
           </Button>
         </form>
       ) : null}

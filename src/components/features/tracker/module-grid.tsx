@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/primitives/badge";
 import { MODULE_CARD_COPY, SD_CLASS_DISPLAY } from "@/config/tracker";
 import type { ChildImmunizationDto } from "@/application/health-plan/dtos";
@@ -9,15 +11,10 @@ import type { GrowthMeasurementDto } from "@/application/tracking/dtos";
 import type { SdClass } from "@/domain/tracking/value-objects/sd-classification";
 
 import { ModuleCard } from "./module-card";
+import { ModalTrigger } from "./modal-trigger";
 
 export interface ModuleGridProps {
   readonly childAgeMonths: number;
-  readonly childDetailRoutes: {
-    readonly measurements: string;
-    readonly immunizations: string;
-    readonly milestones: string;
-    readonly nutrition: string;
-  };
   readonly measurements: readonly GrowthMeasurementDto[];
   readonly immunizationSchedule: readonly ImmunizationDto[];
   readonly childImmunizations: readonly ChildImmunizationDto[];
@@ -28,12 +25,11 @@ export interface ModuleGridProps {
 
 /**
  * Renders the four-card dashboard grid (Pertumbuhan, Imunisasi, Perkembangan,
- * Gizi) on `/tracker/anak/[childId]`. Each card is a thin summary of the
- * relevant sub-route. The Gizi card is a Phase 5 placeholder.
+ * Gizi) on `/tracker`. Each card triggers a modal instead of navigating to a
+ * separate page. The Gizi card is a Phase 5 placeholder.
  */
 export function ModuleGrid({
   childAgeMonths,
-  childDetailRoutes,
   measurements,
   immunizationSchedule,
   childImmunizations,
@@ -59,47 +55,71 @@ export function ModuleGrid({
 
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <ModuleCard
-        title={MODULE_CARD_COPY.growth.title}
-        description={MODULE_CARD_COPY.growth.description}
-        statusLine={growth.statusLine}
-        statusBadge={growth.badge}
-        tone="growth"
-        cta={{
-          label: MODULE_CARD_COPY.growth.cta,
-          href: childDetailRoutes.measurements,
-        }}
-      />
-      <ModuleCard
-        title={MODULE_CARD_COPY.immunization.title}
-        description={MODULE_CARD_COPY.immunization.description}
-        statusLine={immunization.statusLine}
-        tone="immunization"
-        cta={{
-          label: MODULE_CARD_COPY.immunization.cta,
-          href: childDetailRoutes.immunizations,
-        }}
-      />
-      <ModuleCard
-        title={MODULE_CARD_COPY.milestone.title}
-        description={MODULE_CARD_COPY.milestone.description}
-        statusLine={milestone.statusLine}
-        tone="milestone"
-        cta={{
-          label: MODULE_CARD_COPY.milestone.cta,
-          href: childDetailRoutes.milestones,
-        }}
-      />
-      <ModuleCard
-        title={MODULE_CARD_COPY.nutrition.title}
-        description={MODULE_CARD_COPY.nutrition.description}
-        statusLine={nutritionStatus}
-        tone="nutrition"
-        cta={{
-          label: MODULE_CARD_COPY.nutrition.cta,
-          href: childDetailRoutes.nutrition,
-        }}
-      />
+      <ModalTrigger modalKey="pengukuran">
+        {({ onClick }) => (
+          <ModuleCard
+            title={MODULE_CARD_COPY.growth.title}
+            description={MODULE_CARD_COPY.growth.description}
+            statusLine={growth.statusLine}
+            statusBadge={growth.badge}
+            tone="growth"
+            cta={{
+              label: MODULE_CARD_COPY.growth.cta,
+              onClick,
+            }}
+          />
+        )}
+      </ModalTrigger>
+      <ModalTrigger modalKey="imunisasi">
+        {({ onClick }) => (
+          <ModuleCard
+            title={MODULE_CARD_COPY.immunization.title}
+            description={MODULE_CARD_COPY.immunization.description}
+            statusLine={immunization.statusLine}
+            progressValue={immunization.progressValue}
+            progressTotal={immunization.progressTotal}
+            tone="immunization"
+            cta={{
+              label: MODULE_CARD_COPY.immunization.cta,
+              onClick,
+            }}
+          />
+        )}
+      </ModalTrigger>
+      <ModalTrigger modalKey="perkembangan">
+        {({ onClick }) => (
+          <ModuleCard
+            title={MODULE_CARD_COPY.milestone.title}
+            description={MODULE_CARD_COPY.milestone.description}
+            statusLine={milestone.statusLine}
+            progressValue={milestone.progressValue}
+            progressTotal={milestone.progressTotal}
+            tone="milestone"
+            cta={{
+              label: MODULE_CARD_COPY.milestone.cta,
+              onClick,
+            }}
+          />
+        )}
+      </ModalTrigger>
+      <ModalTrigger modalKey="gizi">
+        {({ onClick }) => (
+          <ModuleCard
+            title={MODULE_CARD_COPY.nutrition.title}
+            description={MODULE_CARD_COPY.nutrition.description}
+            statusLine={nutritionStatus}
+            progressValue={
+              nutritionEvents.length > 0 ? nutritionEvents.length : undefined
+            }
+            progressTotal={4} // Total of 4 nutrition aspects
+            tone="nutrition"
+            cta={{
+              label: MODULE_CARD_COPY.nutrition.cta,
+              onClick,
+            }}
+          />
+        )}
+      </ModalTrigger>
     </div>
   );
 }
@@ -137,7 +157,7 @@ function resolveImmunization(
   childAgeMonths: number,
   schedule: readonly ImmunizationDto[],
   records: readonly ChildImmunizationDto[],
-): { statusLine: string } {
+): { statusLine: string; progressValue?: number; progressTotal?: number } {
   const dueScheduleCount = schedule.filter(
     (entry) =>
       entry.recommendedAgeMonths !== null &&
@@ -150,6 +170,8 @@ function resolveImmunization(
   }
   return {
     statusLine: MODULE_CARD_COPY.immunization.statusFormat(done, total),
+    progressValue: done,
+    progressTotal: total,
   };
 }
 
@@ -157,7 +179,7 @@ function resolveMilestone(
   childAgeMonths: number,
   catalog: readonly MilestoneDto[],
   records: readonly ChildMilestoneDto[],
-): { statusLine: string } {
+): { statusLine: string; progressValue?: number; progressTotal?: number } {
   const relevantCatalog = catalog.filter(
     (item) =>
       item.minAgeMonths <= childAgeMonths &&
@@ -174,5 +196,7 @@ function resolveMilestone(
   ).length;
   return {
     statusLine: MODULE_CARD_COPY.milestone.statusFormat(achieved, total),
+    progressValue: achieved,
+    progressTotal: total,
   };
 }

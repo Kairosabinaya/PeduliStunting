@@ -1,61 +1,66 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
-import { ChildDashboard } from "@/components/features/tracker/child-dashboard";
-import { ErrorState } from "@/components/primitives/error-state";
-import { CHILD_DETAIL_COPY, TRACKER_LIST_COPY } from "@/config/tracker";
-import { asChildId, isUuid } from "@/domain/shared/ids";
-import { fetchChildById } from "@/lib/tracker-cache";
-import { loadChildOverview } from "@/lib/child-overview";
-import { requireServerSession } from "@/lib/server-session";
+import {
+  CHILD_DETAIL_COPY,
+  TRACKER_DASHBOARD_SECTIONS,
+  trackerChildDashboardSectionRoute,
+  trackerChildEditRoute,
+  trackerChildNutritionRoute,
+  trackerSelectChildRoute,
+} from "@/config/tracker";
+import { isUuid } from "@/domain/shared/ids";
 
 interface ChildOverviewPageProps {
   readonly params: Promise<{ readonly childId: string }>;
+  readonly searchParams: Promise<{ readonly modal?: string }>;
 }
 
-export async function generateMetadata({
-  params,
-}: ChildOverviewPageProps): Promise<Metadata> {
-  const { childId } = await params;
-  if (!isUuid(childId)) {
-    return { title: CHILD_DETAIL_COPY.metaTitleSuffix };
-  }
-  const session = await requireServerSession();
-  const result = await fetchChildById(session.userId, asChildId(childId));
-  if (!result.ok) {
-    return { title: CHILD_DETAIL_COPY.metaTitleSuffix };
-  }
-  return {
-    title: `${result.value.name} — ${CHILD_DETAIL_COPY.metaTitleSuffix}`,
-  };
-}
+export const metadata: Metadata = {
+  title: CHILD_DETAIL_COPY.metaTitleSuffix,
+};
 
 export const dynamic = "force-dynamic";
 
 export default async function ChildOverviewPage({
   params,
+  searchParams,
 }: ChildOverviewPageProps) {
   const { childId } = await params;
   if (!isUuid(childId)) {
     notFound();
   }
 
-  const session = await requireServerSession();
-  const overview = await loadChildOverview(session.userId, asChildId(childId));
+  const { modal } = await searchParams;
 
-  if (!overview.ok) {
-    if (overview.error.kind === "not_found") {
-      notFound();
-    }
-    return (
-      <ErrorState
-        title={TRACKER_LIST_COPY.errorTitle}
-        description={
-          overview.error.message || TRACKER_LIST_COPY.errorDescriptionFallback
-        }
-      />
-    );
+  switch (modal) {
+    case "edit":
+      redirect(trackerChildEditRoute(childId));
+    case "tambah-pengukuran":
+    case "pengukuran":
+      redirect(
+        trackerChildDashboardSectionRoute(
+          childId,
+          TRACKER_DASHBOARD_SECTIONS.growth,
+        ),
+      );
+    case "imunisasi":
+      redirect(
+        trackerChildDashboardSectionRoute(
+          childId,
+          TRACKER_DASHBOARD_SECTIONS.immunization,
+        ),
+      );
+    case "perkembangan":
+      redirect(
+        trackerChildDashboardSectionRoute(
+          childId,
+          TRACKER_DASHBOARD_SECTIONS.development,
+        ),
+      );
+    case "gizi":
+      redirect(trackerChildNutritionRoute(childId));
+    default:
+      redirect(trackerSelectChildRoute(childId));
   }
-
-  return <ChildDashboard data={overview.value} />;
 }

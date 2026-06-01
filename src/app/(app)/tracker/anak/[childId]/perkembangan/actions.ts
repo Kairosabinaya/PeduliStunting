@@ -37,10 +37,7 @@ function validationFromFlatten(
   }
   return toFormState(
     err(
-      AppErrors.validation(
-        formError ?? "Periksa kembali isian Anda.",
-        cleaned,
-      ),
+      AppErrors.validation(formError ?? "Periksa kembali isian Anda.", cleaned),
     ),
   );
 }
@@ -72,6 +69,8 @@ export async function upsertChildMilestone(
 
   const parsed = upsertChildMilestoneInputSchema.safeParse({
     childId,
+    childBirthDate:
+      parseNullableString(formData.get("childBirthDate")) ?? undefined,
     milestoneId,
     status: formData.get("status"),
     checkedAt: parseNullableString(formData.get("checkedAt")),

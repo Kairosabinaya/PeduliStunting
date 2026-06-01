@@ -14,9 +14,11 @@ describe("ModuleCard", () => {
         statusLine="TB/U terakhir: Normal"
       />,
     );
-    expect(screen.getByText("Pertumbuhan")).toBeInTheDocument();
     expect(
-      screen.getByText("Status terkini menurut standar WHO."),
+      screen.getByRole("heading", { name: "Pertumbuhan", level: 3 }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText("Status terkini menurut standar WHO.")[0],
     ).toBeInTheDocument();
     expect(screen.getByText("TB/U terakhir: Normal")).toBeInTheDocument();
   });

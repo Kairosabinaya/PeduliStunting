@@ -51,7 +51,7 @@ export function ChildDetailHeader({
   const sexLabel = SEX_LABEL[child.sex];
 
   return (
-    <header className="space-y-4 rounded-xl border border-border bg-surface p-5 md:p-6">
+    <header className="space-y-6 rounded-2xl border border-border bg-surface p-6 shadow-sm md:p-8">
       {showBackLink ? (
         <Link
           href={TRACKER_ROUTE}
@@ -74,6 +74,7 @@ export function ChildDetailHeader({
           <Link
             href={trackerChildEditRoute(child.id)}
             aria-label={CHILD_DETAIL_COPY.editAriaLabel(child.name)}
+            scroll={false}
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
             {CHILD_DETAIL_COPY.editLabel}

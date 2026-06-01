@@ -8,6 +8,8 @@ import {
 } from "@/domain/tracking/value-objects/growth-indicator";
 import type { SdClass } from "@/domain/tracking/value-objects/sd-classification";
 
+import { InfoDialog } from "@/components/primitives/info-dialog";
+
 import { SdClassBadge } from "./sd-class-badge";
 
 export interface ChildSummaryProps {
@@ -55,6 +57,28 @@ function formatDate(iso: string): string {
   });
 }
 
+function getMeasurementLabel(
+  indicator: GrowthIndicator,
+  measurement: GrowthMeasurementDto,
+): string {
+  switch (indicator) {
+    case "BB_U":
+      return measurement.weightKg ? `${measurement.weightKg} kg` : "-";
+    case "TB_U":
+      return measurement.heightCm ? `${measurement.heightCm} cm` : "-";
+    case "BB_TB":
+      if (measurement.weightKg && measurement.heightCm)
+        return `${measurement.weightKg} kg, ${measurement.heightCm} cm`;
+      return "-";
+    case "LK_U":
+      return measurement.headCircumferenceCm
+        ? `${measurement.headCircumferenceCm} cm`
+        : "-";
+    default:
+      return "-";
+  }
+}
+
 /**
  * Latest measurement per indicator with SD-class badge. Pulls the most recent
  * row that has a finite z-score for the given indicator — measurements that
@@ -65,14 +89,19 @@ export function ChildSummary({ measurements }: ChildSummaryProps) {
   const summaries = buildSummaries(measurements);
 
   return (
-    <Card elevation="sm" padding="md" className="flex h-full flex-col gap-3">
-      <header>
+    <Card
+      elevation="sm"
+      padding="md"
+      className="flex h-full flex-col gap-3 transition-all hover:shadow-md"
+    >
+      <header className="flex items-start justify-between gap-2">
         <h2 className="text-base font-semibold text-foreground">
           {CHILD_DETAIL_COPY.summaryCardTitle}
         </h2>
-        <p className="text-sm text-muted-foreground">
-          {CHILD_DETAIL_COPY.summaryCardDescription}
-        </p>
+        <InfoDialog
+          title={CHILD_DETAIL_COPY.summaryCardTitle}
+          description={CHILD_DETAIL_COPY.summaryCardDescription}
+        />
       </header>
       {summaries.length === 0 ? (
         <EmptyState
@@ -80,28 +109,26 @@ export function ChildSummary({ measurements }: ChildSummaryProps) {
           description={CHILD_DETAIL_COPY.chartEmpty}
         />
       ) : (
-        <ul className="space-y-2">
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {summaries.map((summary) => (
             <li
               key={summary.indicator}
-              className="rounded-lg border border-border bg-surface-muted p-3"
+              className="flex flex-col justify-between rounded-lg border border-border bg-surface-muted p-3"
             >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium text-foreground">
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-xs font-medium text-muted-foreground">
                   {GROWTH_INDICATOR_LABEL[summary.indicator]}
                 </span>
                 <SdClassBadge sdClass={summary.sdClass} />
               </div>
-              <p className="mt-1 flex items-baseline gap-1.5 text-xs text-muted-foreground">
-                <span className="sr-only">Z-score</span>
-                <span className="font-mono tabular-nums text-foreground">
-                  {summary.zScore.toFixed(2)}
+              <p className="mt-2 flex items-baseline gap-1.5 text-sm text-foreground">
+                <span className="text-lg font-semibold">
+                  {getMeasurementLabel(summary.indicator, summary.measurement)}
                 </span>
-                <span aria-hidden>·</span>
-                <span>
-                  <span className="sr-only">Diukur </span>
-                  {formatDate(summary.measurement.measuredAt)}
-                </span>
+              </p>
+              <p className="mt-1 text-[10px] uppercase tracking-wide text-muted-foreground">
+                <span className="sr-only">Diukur </span>
+                {formatDate(summary.measurement.measuredAt)}
               </p>
             </li>
           ))}

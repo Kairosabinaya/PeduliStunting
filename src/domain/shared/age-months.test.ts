@@ -23,28 +23,38 @@ describe("asAgeMonths", () => {
 
 describe("monthsBetween", () => {
   it("returns 0 when reference equals birth", () => {
-    expect(monthsBetween(asDateOnly("2024-03-15"), asDateOnly("2024-03-15"))).toBe(0);
+    expect(
+      monthsBetween(asDateOnly("2024-03-15"), asDateOnly("2024-03-15")),
+    ).toBe(0);
   });
 
   it("returns 0 when the day-of-month has not been reached", () => {
-    expect(monthsBetween(asDateOnly("2024-01-15"), asDateOnly("2024-08-14"))).toBe(6);
+    expect(
+      monthsBetween(asDateOnly("2024-01-15"), asDateOnly("2024-08-14")),
+    ).toBe(6);
   });
 
   it("counts the full month once the day-of-month is reached", () => {
-    expect(monthsBetween(asDateOnly("2024-01-15"), asDateOnly("2024-08-15"))).toBe(7);
+    expect(
+      monthsBetween(asDateOnly("2024-01-15"), asDateOnly("2024-08-15")),
+    ).toBe(7);
   });
 
   it("handles year boundaries", () => {
-    expect(monthsBetween(asDateOnly("2023-06-10"), asDateOnly("2025-06-10"))).toBe(24);
+    expect(
+      monthsBetween(asDateOnly("2023-06-10"), asDateOnly("2025-06-10")),
+    ).toBe(24);
   });
 
   it("counts an incomplete final month correctly", () => {
-    expect(monthsBetween(asDateOnly("2023-06-10"), asDateOnly("2025-06-09"))).toBe(23);
+    expect(
+      monthsBetween(asDateOnly("2023-06-10"), asDateOnly("2025-06-09")),
+    ).toBe(23);
   });
 
-  it("throws when reference precedes birth", () => {
-    expect(() =>
+  it("returns 0 when reference precedes birth (fallback)", () => {
+    expect(
       monthsBetween(asDateOnly("2024-06-10"), asDateOnly("2024-06-09")),
-    ).toThrow();
+    ).toBe(0);
   });
 });

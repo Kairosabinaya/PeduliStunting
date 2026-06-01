@@ -185,7 +185,6 @@ export const MAP_SUMMARY_COPY = {
   averagePrevalenceLabel: "Rata-rata prevalensi",
   distributionTitle: "Distribusi kategori",
   totalRegionsLabel: "wilayah dipetakan",
-  modelBadgePrefix: "Model",
 } as const;
 
 /** Floating "Apa itu kategori stunting?" explainer copy. */

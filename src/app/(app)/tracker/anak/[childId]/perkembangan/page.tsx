@@ -1,22 +1,12 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
-import { MilestoneAlertBanner } from "@/components/features/tracker/milestone-alert-banner";
-import { MilestoneChecklist } from "@/components/features/tracker/milestone-checklist";
-import { Card } from "@/components/primitives/card";
-import { ErrorState } from "@/components/primitives/error-state";
-import { MILESTONE_COPY } from "@/config/tracker";
-import { monthsBetween } from "@/domain/shared/age-months";
-import { asDateOnly } from "@/domain/shared/date-only";
-import { computeMilestoneAlert } from "@/domain/health-plan/services/milestone-status";
-import { asChildId, isUuid } from "@/domain/shared/ids";
 import {
-  fetchChildById,
-  fetchChildMilestones,
-  fetchMilestoneCatalog,
-} from "@/lib/tracker-cache";
-import { requireServerSession } from "@/lib/server-session";
-import { todayIso } from "@/lib/today";
+  MILESTONE_COPY,
+  TRACKER_DASHBOARD_SECTIONS,
+  trackerChildDashboardSectionRoute,
+} from "@/config/tracker";
+import { isUuid } from "@/domain/shared/ids";
 
 interface MilestonesPageProps {
   readonly params: Promise<{ readonly childId: string }>;
@@ -34,82 +24,10 @@ export default async function MilestonesPage({ params }: MilestonesPageProps) {
     notFound();
   }
 
-  const session = await requireServerSession();
-  const childResolved = asChildId(childId);
-  const [childResult, catalogResult, recordsResult] = await Promise.all([
-    fetchChildById(session.userId, childResolved),
-    fetchMilestoneCatalog(),
-    fetchChildMilestones(session.userId, childResolved),
-  ]);
-
-  if (!childResult.ok) {
-    if (childResult.error.kind === "not_found") notFound();
-    return (
-      <ErrorState
-        title={MILESTONE_COPY.errorTitle}
-        description={childResult.error.message}
-      />
-    );
-  }
-  if (!catalogResult.ok) {
-    return (
-      <ErrorState
-        title={MILESTONE_COPY.errorTitle}
-        description={catalogResult.error.message}
-      />
-    );
-  }
-  if (!recordsResult.ok) {
-    return (
-      <ErrorState
-        title={MILESTONE_COPY.errorTitle}
-        description={recordsResult.error.message}
-      />
-    );
-  }
-
-  const child = childResult.value;
-  const catalog = catalogResult.value;
-  const records = recordsResult.value;
-  const childAgeMonths = monthsBetween(
-    asDateOnly(child.birthDate),
-    asDateOnly(todayIso()),
-  );
-  const alert = computeMilestoneAlert(
-    catalog.map((item) => ({
-      id: item.id,
-      domain: item.domain,
-      minAgeMonths: item.minAgeMonths,
-      maxAgeMonths: item.maxAgeMonths,
-    })),
-    records.map((record) => ({
-      milestoneId: record.milestoneId,
-      status: record.status,
-    })),
-    childAgeMonths,
-  );
-
-  return (
-    <div className="space-y-5">
-      {alert.shouldAlert ? (
-        <MilestoneAlertBanner delayedCount={alert.delayedCount} />
-      ) : null}
-      <Card elevation="sm" padding="md" className="space-y-4">
-        <header>
-          <h2 className="text-base font-semibold text-foreground">
-            {MILESTONE_COPY.cardTitle}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {MILESTONE_COPY.cardDescription}
-          </p>
-        </header>
-        <MilestoneChecklist
-          childId={childId}
-          childAgeMonths={childAgeMonths}
-          catalog={catalog}
-          records={records}
-        />
-      </Card>
-    </div>
+  redirect(
+    trackerChildDashboardSectionRoute(
+      childId,
+      TRACKER_DASHBOARD_SECTIONS.development,
+    ),
   );
 }

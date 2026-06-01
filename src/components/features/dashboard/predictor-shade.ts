@@ -9,23 +9,24 @@
  * automatically in dark mode.
  */
 
-const RISK_TOKEN = "var(--color-primary)";
+const RISK_TOKEN = "var(--color-risk)";
+const RISK_WEAK_TOKEN = "var(--color-risk-weak)";
 const PROTECTIVE_TOKEN = "var(--color-accent)";
+const PROTECTIVE_WEAK_TOKEN = "var(--color-protective-weak)";
 const NEUTRAL_TOKEN = "var(--color-muted-foreground)";
 
-/** Opacity steps from faint (weak) to solid (strong). */
-const ALPHA_STEPS = [0.45, 0.65, 0.85, 1] as const;
-
-/** Below this absolute correlation a predictor reads as effectively unrelated. */
-const NEAR_ZERO = 0.05;
-
 export function shadeFillForCorrelation(value: number, maxAbs: number): string {
-  if (maxAbs <= 0 || Math.abs(value) < NEAR_ZERO) {
+  if (maxAbs <= 0 || Math.abs(value) === 0) {
     return `rgb(${NEUTRAL_TOKEN} / 0.5)`;
   }
-  const ratio = Math.min(1, Math.abs(value) / maxAbs);
-  const index = Math.min(3, Math.max(0, Math.ceil(ratio * 4) - 1));
-  const alpha = ALPHA_STEPS[index] ?? 1;
-  const token = value >= 0 ? RISK_TOKEN : PROTECTIVE_TOKEN;
-  return `rgb(${token} / ${alpha})`;
+
+  const absVal = Math.abs(value);
+  const ratio = Math.min(1, absVal / maxAbs);
+  const percent = Math.round(ratio * 100);
+
+  if (value >= 0) {
+    return `color-mix(in srgb, rgb(${RISK_TOKEN}) ${percent}%, rgb(${RISK_WEAK_TOKEN}))`;
+  } else {
+    return `color-mix(in srgb, rgb(${PROTECTIVE_TOKEN}) ${percent}%, rgb(${PROTECTIVE_WEAK_TOKEN}))`;
+  }
 }

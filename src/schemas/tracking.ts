@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+import {
+  TRACKER_FIELD_LIMITS,
+  TRACKER_VALIDATION_COPY,
+} from "@/config/tracker";
 import type { Tables } from "@/types/supabase";
 import { AppErrors, type ValidationError } from "@/domain/errors/app-error";
 import { type Result, err, ok } from "@/domain/shared/result";
@@ -34,6 +38,108 @@ import {
 } from "@/domain/tracking/value-objects/sd-classification";
 import { SEX_VALUES, type Sex } from "@/domain/tracking/value-objects/sex";
 
+/* ─────────────────────────── helpers ─────────────────────────── */
+
+function getSafeMaxDate(): string {
+  const d = new Date();
+
+  // Di client (browser), gunakan zona waktu lokal user secara persis
+  if (typeof window !== "undefined") {
+    const yyyy = d.getFullYear();
+    const mm = (d.getMonth() + 1).toString().padStart(2, "0");
+    const dd = d.getDate().toString().padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  // Di server, gunakan UTC+14 untuk mengakomodasi timezone paling depan (misal Kiribati)
+  // agar server tidak me-reject 'hari ini' dari user Asia saat di server (UTC) masih 'kemarin'.
+  d.setUTCHours(d.getUTCHours() + 14);
+  const yyyy = d.getUTCFullYear();
+  const mm = (d.getUTCMonth() + 1).toString().padStart(2, "0");
+  const dd = d.getUTCDate().toString().padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+const DECIMAL_INPUT_RE = /^-?\d+(?:[.,]\d+)?$/u;
+const INTEGER_INPUT_RE = /^-?\d+$/u;
+
+interface NumericFieldLimits {
+  readonly min: number;
+  readonly max: number;
+}
+
+function optionalDecimalInputSchema(
+  label: string,
+  unit: string,
+  limits: NumericFieldLimits,
+) {
+  return z
+    .string()
+    .trim()
+    .refine(
+      (value) => value.length === 0 || DECIMAL_INPUT_RE.test(value),
+      TRACKER_VALIDATION_COPY.malformedNumber,
+    )
+    .transform((value): number | null =>
+      value.length === 0 ? null : Number(value.replace(",", ".")),
+    )
+    .refine(
+      (value) =>
+        value === null ||
+        (Number.isFinite(value) && value >= limits.min && value <= limits.max),
+      TRACKER_VALIDATION_COPY.rangeFormat(label, limits.min, limits.max, unit),
+    );
+}
+
+function optionalIntegerInputSchema(
+  label: string,
+  unit: string,
+  limits: NumericFieldLimits,
+) {
+  return z
+    .string()
+    .trim()
+    .refine(
+      (value) => value.length === 0 || INTEGER_INPUT_RE.test(value),
+      TRACKER_VALIDATION_COPY.integer,
+    )
+    .transform((value): number | null =>
+      value.length === 0 ? null : Number(value),
+    )
+    .refine(
+      (value) =>
+        value === null ||
+        (Number.isInteger(value) && value >= limits.min && value <= limits.max),
+      TRACKER_VALIDATION_COPY.rangeFormat(label, limits.min, limits.max, unit),
+    );
+}
+
+function requiredDateInputSchema(futureMessage: string) {
+  return z
+    .string()
+    .trim()
+    .min(1, TRACKER_VALIDATION_COPY.required)
+    .refine(isDateOnly, TRACKER_VALIDATION_COPY.invalidDate)
+    .transform((value): DateOnly => asDateOnly(value))
+    .refine((date) => date <= getSafeMaxDate(), futureMessage);
+}
+
+const measuredLyingInputSchema = z
+  .enum(["", "standing", "lying"], {
+    error: TRACKER_VALIDATION_COPY.required,
+  })
+  .transform((value): boolean | null => {
+    if (value === "lying") return true;
+    if (value === "standing") return false;
+    return null;
+  });
+
+const sexFormInputSchema = z
+  .enum(["", ...SEX_VALUES], { error: TRACKER_VALIDATION_COPY.required })
+  .refine((value): value is Sex => value !== "", {
+    message: TRACKER_VALIDATION_COPY.required,
+  });
+
 /* ─────────────────────────── input parsing ─────────────────────────── */
 
 export const uuidSchema = z.string().refine(isUuid, "harus UUID v4");
@@ -59,19 +165,35 @@ export const sdClassSchema = z.enum(SD_CLASSES);
  */
 export const createChildInputSchema = z
   .object({
-    name: z.string().min(1).max(80),
-    sex: sexSchema,
-    birthDate: dateOnlySchema,
-    birthWeightKg: z.number().positive().max(10).nullable(),
-    birthLengthCm: z.number().positive().max(80).nullable(),
+    name: z.string().min(1).max(TRACKER_FIELD_LIMITS.childNameMaxLength),
+    sex: z.enum(SEX_VALUES, { error: TRACKER_VALIDATION_COPY.required }),
+    birthDate: dateOnlySchema.refine(
+      (d) => d <= getSafeMaxDate(),
+      TRACKER_VALIDATION_COPY.birthDateFuture,
+    ),
+    birthWeightKg: z
+      .number()
+      .min(TRACKER_FIELD_LIMITS.birthWeightKg.min)
+      .max(TRACKER_FIELD_LIMITS.birthWeightKg.max)
+      .nullable(),
+    birthLengthCm: z
+      .number()
+      .min(TRACKER_FIELD_LIMITS.birthLengthCm.min)
+      .max(TRACKER_FIELD_LIMITS.birthLengthCm.max)
+      .nullable(),
     /**
      * Whether the child was born preterm (< 37 weeks). Drives whether the
      * gestational-age-at-birth figure is required: term babies do not carry
      * one, preterm babies must record it.
      */
     isPremature: z.boolean(),
-    gestationalAgeWeeks: z.number().int().min(20).max(45).nullable(),
-    notes: z.string().max(500).nullable(),
+    gestationalAgeWeeks: z
+      .number()
+      .int()
+      .min(TRACKER_FIELD_LIMITS.gestationalAgeWeeks.min)
+      .max(TRACKER_FIELD_LIMITS.gestationalAgeWeeks.max)
+      .nullable(),
+    notes: z.string().max(TRACKER_FIELD_LIMITS.noteMaxLength).nullable(),
   })
   .strict()
   .superRefine((value, ctx) => {
@@ -96,6 +218,74 @@ export const createChildInputSchema = z
 
 export type CreateChildInput = z.infer<typeof createChildInputSchema>;
 
+export const childFormInputSchema = z
+  .object({
+    name: z
+      .string()
+      .trim()
+      .min(1, TRACKER_VALIDATION_COPY.required)
+      .max(
+        TRACKER_FIELD_LIMITS.childNameMaxLength,
+        TRACKER_VALIDATION_COPY.maxLengthFormat(
+          "Nama anak",
+          TRACKER_FIELD_LIMITS.childNameMaxLength,
+        ),
+      ),
+    sex: sexFormInputSchema,
+    birthDate: requiredDateInputSchema(TRACKER_VALIDATION_COPY.birthDateFuture),
+    birthWeightKg: optionalDecimalInputSchema(
+      "Berat lahir",
+      "kg",
+      TRACKER_FIELD_LIMITS.birthWeightKg,
+    ),
+    birthLengthCm: optionalDecimalInputSchema(
+      "Panjang lahir",
+      "cm",
+      TRACKER_FIELD_LIMITS.birthLengthCm,
+    ),
+    birthStatus: z.enum(["term", "preterm"], {
+      error: TRACKER_VALIDATION_COPY.required,
+    }),
+    gestationalAgeWeeks: optionalIntegerInputSchema(
+      "Usia kehamilan saat lahir",
+      "minggu",
+      TRACKER_FIELD_LIMITS.gestationalAgeWeeks,
+    ),
+    notes: z
+      .string()
+      .trim()
+      .max(
+        TRACKER_FIELD_LIMITS.noteMaxLength,
+        TRACKER_VALIDATION_COPY.maxLengthFormat(
+          "Catatan",
+          TRACKER_FIELD_LIMITS.noteMaxLength,
+        ),
+      )
+      .transform((value): string | null => (value.length === 0 ? null : value)),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    if (value.birthStatus !== "preterm") return;
+    if (value.gestationalAgeWeeks === null) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["gestationalAgeWeeks"],
+        message:
+          "Isi usia kehamilan saat lahir untuk anak yang lahir prematur.",
+      });
+      return;
+    }
+    if (value.gestationalAgeWeeks >= 37) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["gestationalAgeWeeks"],
+        message: "Lahir prematur berarti usia kehamilan kurang dari 37 minggu.",
+      });
+    }
+  });
+
+export type ChildFormInput = z.infer<typeof childFormInputSchema>;
+
 /**
  * Server Action payload for recording a growth measurement. The z-score
  * computation happens server-side inside the use case (see
@@ -104,13 +294,32 @@ export type CreateChildInput = z.infer<typeof createChildInputSchema>;
 export const recordMeasurementInputSchema = z
   .object({
     childId: childIdSchema,
-    measuredAt: dateOnlySchema,
-    weightKg: z.number().positive().max(60).nullable(),
-    heightCm: z.number().positive().max(140).nullable(),
+    measuredAt: dateOnlySchema.refine(
+      (d) => d <= getSafeMaxDate(),
+      TRACKER_VALIDATION_COPY.futureDate,
+    ),
+    weightKg: z
+      .number()
+      .min(TRACKER_FIELD_LIMITS.measurementWeightKg.min)
+      .max(TRACKER_FIELD_LIMITS.measurementWeightKg.max)
+      .nullable(),
+    heightCm: z
+      .number()
+      .min(TRACKER_FIELD_LIMITS.measurementHeightCm.min)
+      .max(TRACKER_FIELD_LIMITS.measurementHeightCm.max)
+      .nullable(),
     measuredLying: z.boolean().nullable(),
-    headCircumferenceCm: z.number().positive().max(70).nullable(),
-    muacCm: z.number().positive().max(40).nullable(),
-    note: z.string().max(500).nullable(),
+    headCircumferenceCm: z
+      .number()
+      .min(TRACKER_FIELD_LIMITS.measurementHeadCircumferenceCm.min)
+      .max(TRACKER_FIELD_LIMITS.measurementHeadCircumferenceCm.max)
+      .nullable(),
+    muacCm: z
+      .number()
+      .min(TRACKER_FIELD_LIMITS.measurementMuacCm.min)
+      .max(TRACKER_FIELD_LIMITS.measurementMuacCm.max)
+      .nullable(),
+    note: z.string().max(TRACKER_FIELD_LIMITS.noteMaxLength).nullable(),
   })
   .strict()
   .refine(
@@ -126,6 +335,71 @@ export const recordMeasurementInputSchema = z
 
 export type RecordMeasurementInput = z.infer<
   typeof recordMeasurementInputSchema
+>;
+
+export const recordMeasurementFormInputSchema = z
+  .object({
+    childId: childIdSchema,
+    childBirthDate: dateOnlySchema,
+    measuredAt: requiredDateInputSchema(TRACKER_VALIDATION_COPY.futureDate),
+    weightKg: optionalDecimalInputSchema(
+      "Berat badan",
+      "kg",
+      TRACKER_FIELD_LIMITS.measurementWeightKg,
+    ),
+    heightCm: optionalDecimalInputSchema(
+      "Tinggi/panjang badan",
+      "cm",
+      TRACKER_FIELD_LIMITS.measurementHeightCm,
+    ),
+    measuredLying: measuredLyingInputSchema,
+    headCircumferenceCm: optionalDecimalInputSchema(
+      "Lingkar kepala",
+      "cm",
+      TRACKER_FIELD_LIMITS.measurementHeadCircumferenceCm,
+    ),
+    muacCm: optionalDecimalInputSchema(
+      "LiLA",
+      "cm",
+      TRACKER_FIELD_LIMITS.measurementMuacCm,
+    ),
+    note: z
+      .string()
+      .trim()
+      .max(
+        TRACKER_FIELD_LIMITS.noteMaxLength,
+        TRACKER_VALIDATION_COPY.maxLengthFormat(
+          "Catatan",
+          TRACKER_FIELD_LIMITS.noteMaxLength,
+        ),
+      )
+      .transform((value): string | null => (value.length === 0 ? null : value)),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    if (value.measuredAt < value.childBirthDate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["measuredAt"],
+        message: TRACKER_VALIDATION_COPY.measurementBeforeBirth,
+      });
+    }
+    if (
+      value.weightKg === null &&
+      value.heightCm === null &&
+      value.headCircumferenceCm === null &&
+      value.muacCm === null
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["weightKg"],
+        message: TRACKER_VALIDATION_COPY.atLeastOneMeasurement,
+      });
+    }
+  });
+
+export type RecordMeasurementFormInput = z.infer<
+  typeof recordMeasurementFormInputSchema
 >;
 
 /* ─────────────────────────── DB row mappers ─────────────────────────── */

@@ -10,7 +10,6 @@ import type {
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/primitives/card";
@@ -22,8 +21,8 @@ import { computeGrowthTrend } from "@/domain/tracking/services/growth-trend";
 import type { GrowthIndicator } from "@/domain/tracking/value-objects/growth-indicator";
 import { GROWTH_INDICATORS } from "@/domain/tracking/value-objects/growth-indicator";
 import type { SdClass } from "@/domain/tracking/value-objects/sd-classification";
+import { InfoDialog } from "@/components/primitives/info-dialog";
 
-import { FunSizeCard } from "./fun-size-card";
 import { GrowthDetailSheet } from "./growth-detail-sheet";
 import { GrowthTrendChip } from "./growth-trend-chip";
 import { IndicatorTabs } from "./indicator-tabs";
@@ -64,8 +63,6 @@ export function GrowthChartCard({ child, measurements }: GrowthChartCardProps) {
       .sort((a, b) => (a.measuredAt < b.measuredAt ? 1 : -1));
   }, [measurements]);
 
-  const latest = sortedByDate[0] ?? null;
-
   const latestSdClass = useMemo<
     Partial<Record<GrowthIndicator, SdClass>>
   >(() => {
@@ -96,12 +93,17 @@ export function GrowthChartCard({ child, measurements }: GrowthChartCardProps) {
   }, [child.birthDate, selectedMeasurement]);
 
   return (
-    <Card>
+    <Card className="transition-all hover:shadow-md">
       <CardHeader>
-        <CardTitle>{CHILD_DETAIL_COPY.chartCardTitle}</CardTitle>
-        <CardDescription>
-          {CHILD_DETAIL_COPY.chartCardDescription}
-        </CardDescription>
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="text-base">
+            {CHILD_DETAIL_COPY.chartCardTitle}
+          </CardTitle>
+          <InfoDialog
+            title={CHILD_DETAIL_COPY.chartCardTitle}
+            description={CHILD_DETAIL_COPY.chartCardDescription}
+          />
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         <IndicatorTabs
@@ -110,15 +112,12 @@ export function GrowthChartCard({ child, measurements }: GrowthChartCardProps) {
           latestSdClass={latestSdClass}
         />
         <GrowthTrendChip result={trend} />
-        <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
-          <GrowthChart
-            child={child}
-            measurements={sortedByDate}
-            indicator={indicator}
-            onSelectMeasurement={setSelectedMeasurement}
-          />
-          <FunSizeCard latest={latest} />
-        </div>
+        <GrowthChart
+          child={child}
+          measurements={sortedByDate}
+          indicator={indicator}
+          onSelectMeasurement={setSelectedMeasurement}
+        />
       </CardContent>
       <GrowthDetailSheet
         measurement={selectedMeasurement}

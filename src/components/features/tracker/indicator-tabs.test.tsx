@@ -2,7 +2,10 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { GROWTH_INDICATOR_SHORT, SD_CLASS_DISPLAY } from "@/config/tracker";
+import {
+  GROWTH_INDICATOR_PARENT_LABEL,
+  SD_CLASS_DISPLAY,
+} from "@/config/tracker";
 
 import { IndicatorTabs } from "./indicator-tabs";
 
@@ -13,12 +16,12 @@ describe("IndicatorTabs", () => {
     );
     expect(
       screen.getByRole("tab", {
-        name: new RegExp(GROWTH_INDICATOR_SHORT.TB_U),
+        name: new RegExp(GROWTH_INDICATOR_PARENT_LABEL.TB_U),
       }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("tab", {
-        name: new RegExp(GROWTH_INDICATOR_SHORT.BB_U),
+        name: new RegExp(GROWTH_INDICATOR_PARENT_LABEL.BB_U),
       }),
     ).toBeInTheDocument();
   });
@@ -28,7 +31,7 @@ describe("IndicatorTabs", () => {
       <IndicatorTabs value="BB_U" onChange={vi.fn()} latestSdClass={{}} />,
     );
     const active = screen.getByRole("tab", {
-      name: new RegExp(GROWTH_INDICATOR_SHORT.BB_U),
+      name: new RegExp(GROWTH_INDICATOR_PARENT_LABEL.BB_U),
     });
     expect(active.getAttribute("aria-selected")).toBe("true");
   });
@@ -41,7 +44,7 @@ describe("IndicatorTabs", () => {
     );
     await user.click(
       screen.getByRole("tab", {
-        name: new RegExp(GROWTH_INDICATOR_SHORT.BB_U),
+        name: new RegExp(GROWTH_INDICATOR_PARENT_LABEL.BB_U),
       }),
     );
     expect(onChange).toHaveBeenCalledWith("BB_U");

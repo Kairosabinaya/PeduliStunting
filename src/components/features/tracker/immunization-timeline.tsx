@@ -7,7 +7,10 @@ import type {
   ImmunizationDto,
 } from "@/application/health-plan/dtos";
 import { EmptyState } from "@/components/primitives/empty-state";
-import { IMMUNIZATION_TIMELINE_COPY } from "@/config/tracker";
+import {
+  IMMUNIZATION_TIMELINE_COPY,
+  TRACKER_DASHBOARD_COPY,
+} from "@/config/tracker";
 import { computeImmunizationCellStatus } from "@/domain/health-plan/services/immunization-status";
 
 import { ImmunizationCell } from "./immunization-cell";
@@ -15,6 +18,7 @@ import { ImmunizationDetailSheet } from "./immunization-detail-sheet";
 
 export interface ImmunizationTimelineProps {
   readonly childId: string;
+  readonly childBirthDate: string;
   readonly childAgeMonths: number;
   readonly schedule: readonly ImmunizationDto[];
   readonly records: readonly ChildImmunizationDto[];
@@ -54,6 +58,7 @@ function groupByAge(
  */
 export function ImmunizationTimeline({
   childId,
+  childBirthDate,
   childAgeMonths,
   schedule,
   records,
@@ -88,10 +93,7 @@ export function ImmunizationTimeline({
 
   return (
     <div className="space-y-3">
-      <div
-        className="-mx-1 overflow-x-auto pb-2"
-        style={{ scrollSnapType: "x mandatory" }}
-      >
+      <div className="-mx-1 snap-x snap-mandatory overflow-x-auto pb-2">
         <ul
           aria-label={IMMUNIZATION_TIMELINE_COPY.title}
           className="flex min-w-max gap-3 px-1"
@@ -99,13 +101,12 @@ export function ImmunizationTimeline({
           {columns.map((column) => (
             <li
               key={column.ageMonths}
-              className="flex w-[124px] flex-col gap-2"
-              style={{ scrollSnapAlign: "start" }}
+              className="flex w-32 snap-start flex-col gap-2"
             >
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {column.ageMonths >= 0
                   ? IMMUNIZATION_TIMELINE_COPY.ageColumnLabel(column.ageMonths)
-                  : "Tanpa jadwal"}
+                  : TRACKER_DASHBOARD_COPY.immunization.noSchedule}
               </p>
               {column.items.map((item) => {
                 const record = recordByCode.get(item.code);
@@ -116,8 +117,10 @@ export function ImmunizationTimeline({
                 });
                 const ageHint =
                   item.recommendedAgeMonths !== null
-                    ? `${item.recommendedAgeMonths} bulan`
-                    : "tanpa jadwal";
+                    ? TRACKER_DASHBOARD_COPY.immunization.ageFormat(
+                        item.recommendedAgeMonths,
+                      )
+                    : TRACKER_DASHBOARD_COPY.immunization.noSchedule.toLowerCase();
                 return (
                   <ImmunizationCell
                     key={item.code}
@@ -134,6 +137,7 @@ export function ImmunizationTimeline({
       </div>
       <ImmunizationDetailSheet
         childId={childId}
+        childBirthDate={childBirthDate}
         item={selectedItem}
         record={selectedRecord}
         onClose={() => setSelectedCode(null)}

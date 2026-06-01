@@ -1,13 +1,16 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { Activity, Brain, Circle, Syringe, Utensils } from "lucide-react";
+
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/primitives/card";
+import { InfoDialog } from "@/components/primitives/info-dialog";
+import { ProgressRing } from "@/components/primitives/progress-ring";
 import { cn } from "@/lib/cn";
 
 export type ModuleCardTone =
@@ -26,11 +29,14 @@ export interface ModuleCardProps {
   readonly cta?:
     | {
         readonly label: string;
-        readonly href: string;
+        readonly href?: string;
+        readonly onClick?: () => void;
       }
     | undefined;
   readonly tone?: ModuleCardTone | undefined;
   readonly disabled?: boolean | undefined;
+  readonly progressValue?: number | undefined;
+  readonly progressTotal?: number | undefined;
 }
 
 /**
@@ -40,13 +46,22 @@ export interface ModuleCardProps {
  * carried instead by a small colour dot beside the title, which is unambiguous
  * and keeps every card visually equal-weight.
  */
-const TONE_DOT_CLASS: Readonly<Record<ModuleCardTone, string>> = {
-  default: "bg-muted-foreground",
-  growth: "bg-primary",
-  immunization: "bg-accent",
-  milestone: "bg-warning",
-  nutrition: "bg-success",
-  muted: "bg-muted-foreground",
+const TONE_ICON: Readonly<Record<ModuleCardTone, React.ElementType>> = {
+  default: Circle,
+  growth: Activity,
+  immunization: Syringe,
+  milestone: Brain,
+  nutrition: Utensils,
+  muted: Circle,
+};
+
+const TONE_COLOR: Readonly<Record<ModuleCardTone, string>> = {
+  default: "text-muted-foreground",
+  growth: "text-tracker-growth",
+  immunization: "text-tracker-immunization",
+  milestone: "text-tracker-milestone",
+  nutrition: "text-tracker-nutrition",
+  muted: "text-muted-foreground",
 };
 
 /**
@@ -65,46 +80,84 @@ export function ModuleCard({
   cta,
   tone = "default",
   disabled = false,
+  progressValue,
+  progressTotal,
 }: ModuleCardProps) {
   return (
     <Card
       elevation="sm"
       padding="md"
-      className={cn("flex h-full flex-col gap-3", disabled && "opacity-70")}
+      className={cn(
+        "flex h-full flex-col gap-3 transition-all hover:shadow-md",
+        disabled && "opacity-70",
+      )}
     >
       <CardHeader className="space-y-1">
         <div className="flex items-center justify-between gap-2">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <span
-              aria-hidden="true"
-              className={cn(
-                "inline-block h-2 w-2 shrink-0 rounded-full",
-                TONE_DOT_CLASS[tone],
-              )}
-            />
+          <CardTitle className="flex items-center gap-2.5 text-base">
+            {progressValue !== undefined && progressTotal !== undefined ? (
+              <ProgressRing
+                value={progressValue}
+                total={progressTotal}
+                size={22}
+                strokeWidth={3}
+                ariaLabel={title}
+                arcColorClass={TONE_COLOR[tone]}
+              />
+            ) : (
+              (() => {
+                const Icon = TONE_ICON[tone];
+                return (
+                  <Icon
+                    aria-hidden="true"
+                    size={20}
+                    className={cn("shrink-0", TONE_COLOR[tone])}
+                  />
+                );
+              })()
+            )}
             {title}
           </CardTitle>
-          {statusBadge ?? null}
+          <div className="flex items-center gap-2">
+            {statusBadge ?? null}
+            <InfoDialog title={title} description={description} />
+          </div>
         </div>
-        <CardDescription className="text-xs">{description}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col justify-between gap-3">
         <p className="text-base font-semibold text-foreground">
           {statusLine ?? "—"}
         </p>
         {cta ? (
-          <Link
-            href={disabled ? "#" : cta.href}
-            aria-disabled={disabled || undefined}
-            className={cn(
-              "text-sm font-medium",
-              disabled
-                ? "pointer-events-none text-muted-foreground"
-                : "text-primary hover:underline",
-            )}
-          >
-            {cta.label}
-          </Link>
+          cta.onClick ? (
+            <button
+              type="button"
+              onClick={disabled ? undefined : cta.onClick}
+              disabled={disabled}
+              className={cn(
+                "text-left text-sm font-medium",
+                disabled
+                  ? "cursor-not-allowed text-muted-foreground"
+                  : "text-primary hover:underline",
+              )}
+            >
+              {cta.label}
+            </button>
+          ) : cta.href ? (
+            <Link
+              href={disabled ? "#" : cta.href}
+              aria-disabled={disabled || undefined}
+              scroll={false}
+              className={cn(
+                "text-sm font-medium",
+                disabled
+                  ? "pointer-events-none text-muted-foreground"
+                  : "text-primary hover:underline",
+              )}
+            >
+              {cta.label}
+            </Link>
+          ) : null
         ) : null}
       </CardContent>
     </Card>

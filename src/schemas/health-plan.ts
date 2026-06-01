@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+import {
+  TRACKER_FIELD_LIMITS,
+  TRACKER_VALIDATION_COPY,
+} from "@/config/tracker";
 import type { Tables } from "@/types/supabase";
 import { AppErrors, type ValidationError } from "@/domain/errors/app-error";
 import { type Result, err, ok } from "@/domain/shared/result";
@@ -38,6 +42,26 @@ import {
 } from "@/domain/health-plan/entities/nutrition-event";
 import { childIdSchema, dateOnlySchema } from "./tracking";
 
+function getSafeMaxDate(): string {
+  const d = new Date();
+  if (typeof window !== "undefined") {
+    const yyyy = d.getFullYear().toString().padStart(4, "0");
+    const mm = (d.getMonth() + 1).toString().padStart(2, "0");
+    const dd = d.getDate().toString().padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  d.setUTCHours(d.getUTCHours() + 14);
+  const yyyy = d.getUTCFullYear().toString().padStart(4, "0");
+  const mm = (d.getUTCMonth() + 1).toString().padStart(2, "0");
+  const dd = d.getUTCDate().toString().padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+const dateOnlyNotFutureSchema = dateOnlySchema.refine(
+  (date) => date <= getSafeMaxDate(),
+  TRACKER_VALIDATION_COPY.futureDate,
+);
+
 /* ─────────────────────────── input parsing ─────────────────────────── */
 
 export const immunizationCodeSchema = z
@@ -57,12 +81,26 @@ export const milestoneDomainSchema = z.enum(MILESTONE_DOMAINS);
 export const upsertChildImmunizationInputSchema = z
   .object({
     childId: childIdSchema,
+    childBirthDate: dateOnlySchema.optional(),
     immunizationCode: immunizationCodeSchema,
     status: childImmunizationStatusSchema,
-    givenAt: dateOnlySchema.nullable(),
-    note: z.string().max(500).nullable(),
+    givenAt: dateOnlyNotFutureSchema.nullable(),
+    note: z.string().max(TRACKER_FIELD_LIMITS.noteMaxLength).nullable(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    if (
+      value.childBirthDate !== undefined &&
+      value.givenAt !== null &&
+      value.givenAt < value.childBirthDate
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["givenAt"],
+        message: TRACKER_VALIDATION_COPY.immunizationBeforeBirth,
+      });
+    }
+  });
 
 export type UpsertChildImmunizationInput = z.infer<
   typeof upsertChildImmunizationInputSchema
@@ -71,15 +109,29 @@ export type UpsertChildImmunizationInput = z.infer<
 export const upsertChildMilestoneInputSchema = z
   .object({
     childId: childIdSchema,
+    childBirthDate: dateOnlySchema.optional(),
     milestoneId: z
       .string()
       .uuid("milestoneId harus UUID")
       .transform((v) => asMilestoneId(v)),
     status: childMilestoneStatusSchema,
-    checkedAt: dateOnlySchema.nullable(),
-    note: z.string().max(500).nullable(),
+    checkedAt: dateOnlyNotFutureSchema.nullable(),
+    note: z.string().max(TRACKER_FIELD_LIMITS.noteMaxLength).nullable(),
   })
-  .strict();
+  .strict()
+  .superRefine((value, ctx) => {
+    if (
+      value.childBirthDate !== undefined &&
+      value.checkedAt !== null &&
+      value.checkedAt < value.childBirthDate
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["checkedAt"],
+        message: TRACKER_VALIDATION_COPY.milestoneBeforeBirth,
+      });
+    }
+  });
 
 export type UpsertChildMilestoneInput = z.infer<
   typeof upsertChildMilestoneInputSchema
@@ -189,9 +241,9 @@ export const recordNutritionEventInputSchema = z
   .object({
     childId: childIdSchema,
     kind: nutritionEventKindSchema,
-    eventDate: dateOnlySchema,
+    eventDate: dateOnlyNotFutureSchema,
     data: nutritionEventDataSchema.optional(),
-    note: z.string().max(500).nullable(),
+    note: z.string().max(TRACKER_FIELD_LIMITS.noteMaxLength).nullable(),
   })
   .strict();
 
@@ -203,7 +255,7 @@ export const deleteNutritionEventInputSchema = z
   .object({
     childId: childIdSchema,
     kind: nutritionEventKindSchema,
-    eventDate: dateOnlySchema,
+    eventDate: dateOnlyNotFutureSchema,
   })
   .strict();
 

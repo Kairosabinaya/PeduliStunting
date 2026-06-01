@@ -12,7 +12,7 @@ import type { SdClass } from "@/domain/tracking/value-objects/sd-classification"
 
 export const CEK_CEPAT_ENDPOINT = "/api/tracker/cek-cepat";
 
-export const CEK_CEPAT_STORAGE_KEY = "peduli-stunting:cek-cepat-v1";
+export const CEK_CEPAT_STORAGE_KEY = "peduli-stunting:cek-cepat-v2";
 
 export const CEK_CEPAT_COPY = {
   fabLabel: "Cek Cepat",
@@ -35,7 +35,7 @@ export const CEK_CEPAT_COPY = {
     birthDate: "Tanggal lahir",
     ageMonths: "Usia (bulan)",
     weightKg: "Berat badan (kg)",
-    heightCm: "Tinggi/Panjang badan (cm)",
+    heightCm: "Tinggi badan (cm)",
   },
   fieldPlaceholders: {
     weightKg: "mis. 9.5",
@@ -47,7 +47,7 @@ export const CEK_CEPAT_COPY = {
       "Pilih cara mengisi usia: dari tanggal lahir atau usia bulan langsung.",
     ageRange: "Dukungan usia 0 - 60 bulan.",
     height:
-      "Anak < 24 bulan diukur berbaring (panjang). Anak >= 24 bulan diukur berdiri (tinggi).",
+      "Gunakan tinggi badan berdiri atau panjang badan berbaring sesuai usia anak.",
   },
   buttons: {
     submit: "Hitung skrining",
@@ -60,9 +60,8 @@ export const CEK_CEPAT_COPY = {
   validation: {
     weightRequiredOrHeight:
       "Minimal salah satu dari berat atau tinggi badan harus diisi.",
-    weightInvalid: "Berat harus angka lebih dari 0 dan tidak lebih dari 50 kg.",
-    heightInvalid:
-      "Tinggi harus angka lebih dari 0 dan tidak lebih dari 150 cm.",
+    weightInvalid: "Angka lebih dari 0 dan tidak lebih dari 50 kg.",
+    heightInvalid: "Angka lebih dari 0 dan tidak lebih dari 150 cm.",
     ageInvalid: "Usia harus antara 0 dan 60 bulan.",
     birthDateInvalid: "Tanggal lahir tidak valid.",
     birthDateFuture: "Tanggal lahir tidak boleh di masa depan.",

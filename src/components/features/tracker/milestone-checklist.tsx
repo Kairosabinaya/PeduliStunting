@@ -35,6 +35,7 @@ const DOMAIN_ICON_MAP: Record<MilestoneDomain, typeof PersonStanding> = {
 
 export interface MilestoneChecklistProps {
   readonly childId: string;
+  readonly childBirthDate: string;
   readonly childAgeMonths: number;
   readonly catalog: readonly MilestoneDto[];
   readonly records: readonly ChildMilestoneDto[];
@@ -83,6 +84,7 @@ function groupByDomain(
  */
 export function MilestoneChecklist({
   childId,
+  childBirthDate,
   childAgeMonths,
   catalog,
   records,
@@ -128,6 +130,7 @@ export function MilestoneChecklist({
                 <MilestoneCard
                   key={item.id}
                   childId={childId}
+                  childBirthDate={childBirthDate}
                   milestone={item}
                   record={byMilestoneId.get(item.id)}
                 />

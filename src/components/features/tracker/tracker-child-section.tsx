@@ -4,9 +4,9 @@ import { TRACKER_LIST_COPY } from "@/config/tracker";
 import { asChildId, type UserId } from "@/domain/shared/ids";
 import { loadChildOverview } from "@/lib/child-overview";
 
-import { ChildDashboard } from "./child-dashboard";
-import { ChildDetailHeader } from "./child-detail-header";
+import { ChildDetailHeaderClient } from "./child-detail-header-client";
 import { ChildSwitcher } from "./child-switcher";
+import { TrackerDashboard } from "./tracker-dashboard";
 
 export interface TrackerChildSectionProps {
   /** The account's children. Must be non-empty (the page handles the empty case). */
@@ -21,6 +21,7 @@ export interface TrackerChildSectionProps {
  * child exists), the selected child's header, and the full {@link ChildDashboard}
  * inline. Selection is URL-driven via `?anak=`; an unknown or missing id falls
  * back to the first child so the dashboard is never blank when children exist.
+ * Uses modal triggers instead of navigation for all interactions.
  */
 export async function TrackerChildSection({
   childProfiles,
@@ -57,8 +58,8 @@ export async function TrackerChildSection({
       {childProfiles.length > 1 ? (
         <ChildSwitcher childProfiles={childProfiles} selectedId={selected.id} />
       ) : null}
-      <ChildDetailHeader child={selected} showBackLink={false} />
-      <ChildDashboard data={overview.value} />
+      <ChildDetailHeaderClient child={selected} />
+      <TrackerDashboard data={overview.value} />
     </div>
   );
 }

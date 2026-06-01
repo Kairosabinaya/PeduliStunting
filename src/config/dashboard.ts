@@ -174,7 +174,7 @@ export const DASHBOARD_ANALYSIS = {
   description: "Keeratan tiap indikator dan seberapa sering model memakainya.",
   correlationTitle: "Keeratan dengan stunting",
   correlationHint:
-    "Biru (kanan): menaikkan risiko stunting. Hijau (kiri): menurunkan. Makin panjang barnya, makin erat hubungannya.",
+    "Merah (kanan): menaikkan risiko stunting. Hijau (kiri): menurunkan. Makin panjang barnya, makin erat hubungannya.",
   selectionTitle: "Paling sering dipakai model",
   selectionHint:
     "Persentase wilayah-tahun yang memakai indikator ini saat memprediksi.",

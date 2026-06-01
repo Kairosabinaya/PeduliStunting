@@ -1,8 +1,5 @@
 import type { Brand } from "./brand";
-import {
-  dateOnlyToUtcDate,
-  type DateOnly,
-} from "./date-only";
+import { dateOnlyToUtcDate, type DateOnly } from "./date-only";
 
 /**
  * Age expressed as full elapsed calendar months.
@@ -37,7 +34,8 @@ export function monthsBetween(birth: DateOnly, reference: DateOnly): AgeMonths {
   const b = dateOnlyToUtcDate(birth);
   const r = dateOnlyToUtcDate(reference);
   if (r.getTime() < b.getTime()) {
-    throw new Error("Reference date must not precede the birth date.");
+    // Fallback gracefully for corrupted future dates
+    return asAgeMonths(0);
   }
   let months =
     (r.getUTCFullYear() - b.getUTCFullYear()) * 12 +

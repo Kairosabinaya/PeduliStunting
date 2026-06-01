@@ -6,10 +6,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { DASHBOARD_SIMULATOR } from "@/config/dashboard";
 import { cn } from "@/lib/cn";
 
-import type { SimulatorRegionOption } from "./predictor-simulator";
+export interface RegionOption {
+  readonly kodeBps: string;
+  readonly kabupatenKota: string;
+  readonly provinsi: string;
+}
 
 export interface RegionComboboxProps {
-  readonly regions: readonly SimulatorRegionOption[];
+  readonly regions: readonly RegionOption[];
   /** Selected region BPS code. */
   readonly value: string;
   readonly onChange: (kodeBps: string) => void;
@@ -18,13 +22,13 @@ export interface RegionComboboxProps {
 
 interface ProvinceGroup {
   readonly provinsi: string;
-  readonly items: readonly SimulatorRegionOption[];
+  readonly items: readonly RegionOption[];
 }
 
 function groupByProvince(
-  regions: readonly SimulatorRegionOption[],
+  regions: readonly RegionOption[],
 ): readonly ProvinceGroup[] {
-  const groups = new Map<string, SimulatorRegionOption[]>();
+  const groups = new Map<string, RegionOption[]>();
   for (const region of regions) {
     const bucket = groups.get(region.provinsi) ?? [];
     bucket.push(region);
@@ -132,7 +136,7 @@ export function RegionCombobox({
               onChange={(event) => setQuery(event.target.value)}
               placeholder={DASHBOARD_SIMULATOR.regionSearchPlaceholder}
               aria-label={DASHBOARD_SIMULATOR.regionSearchPlaceholder}
-              className="h-10 w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+              className="h-10 w-full border-none bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-transparent focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0"
             />
           </div>
           <div className="scrollbar-hide max-h-72 overflow-y-auto py-1">

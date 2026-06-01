@@ -25,6 +25,7 @@ vi.mock("@/app/(app)/tracker/anak/[childId]/pengukuran/actions", () => ({
 const { MeasurementForm } = await import("./measurement-form");
 
 const childId = "11111111-1111-1111-1111-111111111111";
+const childBirthDate = "2024-01-01";
 
 describe("MeasurementForm", () => {
   beforeEach(() => {
@@ -36,7 +37,9 @@ describe("MeasurementForm", () => {
   });
 
   it("renders labelled inputs for every measurement field", () => {
-    render(<MeasurementForm childId={childId} />);
+    render(
+      <MeasurementForm childId={childId} childBirthDate={childBirthDate} />,
+    );
     expect(
       screen.getByLabelText(
         new RegExp(MEASUREMENTS_COPY.fields.measuredAtLabel),
@@ -65,7 +68,9 @@ describe("MeasurementForm", () => {
   it("invokes the action bound with childId on submit", async () => {
     addMeasurementMock.mockResolvedValueOnce({ ok: true });
 
-    render(<MeasurementForm childId={childId} />);
+    render(
+      <MeasurementForm childId={childId} childBirthDate={childBirthDate} />,
+    );
     fireEvent.change(
       screen.getByLabelText(MEASUREMENTS_COPY.fields.weightLabel),
       { target: { value: "8.5" } },
@@ -85,7 +90,9 @@ describe("MeasurementForm", () => {
   it("renders the success banner when the action resolves ok", async () => {
     addMeasurementMock.mockResolvedValueOnce({ ok: true });
 
-    render(<MeasurementForm childId={childId} />);
+    render(
+      <MeasurementForm childId={childId} childBirthDate={childBirthDate} />,
+    );
     fireEvent.change(
       screen.getByLabelText(MEASUREMENTS_COPY.fields.weightLabel),
       { target: { value: "8.5" } },
@@ -108,7 +115,9 @@ describe("MeasurementForm", () => {
       fieldErrors: { weightKg: ["Berat badan tidak valid."] },
     });
 
-    render(<MeasurementForm childId={childId} />);
+    render(
+      <MeasurementForm childId={childId} childBirthDate={childBirthDate} />,
+    );
     fireEvent.change(
       screen.getByLabelText(MEASUREMENTS_COPY.fields.weightLabel),
       { target: { value: "8.5" } },

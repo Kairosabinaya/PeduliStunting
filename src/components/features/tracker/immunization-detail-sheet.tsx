@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useId, useTransition } from "react";
+import { useActionState, useId, useRef, useTransition } from "react";
 
 import { upsertChildImmunization } from "@/app/(app)/tracker/anak/[childId]/imunisasi/actions";
 import {
@@ -22,12 +22,14 @@ import {
   IMMUNIZATION_CELL_COPY,
   IMMUNIZATION_DETAIL_COPY,
   IMMUNIZATION_STATUS_LABEL,
+  TRACKER_FIELD_LIMITS,
 } from "@/config/tracker";
 import type { ChildImmunizationStatus } from "@/domain/health-plan/entities/child-immunization";
 import { todayIso } from "@/lib/today";
 
 export interface ImmunizationDetailSheetProps {
   readonly childId: string;
+  readonly childBirthDate: string;
   readonly item: ImmunizationDto | null;
   readonly record: ChildImmunizationDto | null;
   readonly onClose: () => void;
@@ -48,6 +50,7 @@ export interface ImmunizationDetailSheetProps {
  */
 export function ImmunizationDetailSheet({
   childId,
+  childBirthDate,
   item,
   record,
   onClose,
@@ -61,6 +64,7 @@ export function ImmunizationDetailSheet({
       {item ? (
         <SheetBody
           childId={childId}
+          childBirthDate={childBirthDate}
           item={item}
           record={record}
           onClose={onClose}
@@ -72,11 +76,13 @@ export function ImmunizationDetailSheet({
 
 function SheetBody({
   childId,
+  childBirthDate,
   item,
   record,
   onClose,
 }: {
   readonly childId: string;
+  readonly childBirthDate: string;
   readonly item: ImmunizationDto;
   readonly record: ChildImmunizationDto | null;
   readonly onClose: () => void;
@@ -87,6 +93,7 @@ function SheetBody({
     FormData
   >(boundAction, INITIAL_UPSERT_IMMUNIZATION_STATE);
   const [, startTransition] = useTransition();
+  const formRef = useRef<HTMLFormElement | null>(null);
 
   const givenAtId = useId();
   const noteId = useId();
@@ -103,12 +110,16 @@ function SheetBody({
           ? "skipped"
           : "future"
     ].tone;
+  const today = todayIso();
 
   function submitWithStatus(nextStatus: ChildImmunizationStatus) {
-    const form = new FormData();
+    const form = formRef.current
+      ? new FormData(formRef.current)
+      : new FormData();
+    form.set("childBirthDate", childBirthDate);
     form.set("status", nextStatus);
     if (nextStatus === "done") {
-      const value = currentGivenAt || todayIso();
+      const value = currentGivenAt || today;
       form.set("givenAt", value);
     } else {
       form.set("givenAt", "");
@@ -164,10 +175,12 @@ function SheetBody({
       ) : null}
 
       <form
+        ref={formRef}
         action={action}
         className="space-y-3 rounded-lg border border-border bg-surface-muted/30 p-3"
       >
         <input type="hidden" name="status" value={currentStatus} />
+        <input type="hidden" name="childBirthDate" value={childBirthDate} />
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1">
             <Label htmlFor={givenAtId}>
@@ -177,6 +190,8 @@ function SheetBody({
               id={givenAtId}
               name="givenAt"
               type="date"
+              min={childBirthDate}
+              max={today}
               defaultValue={currentGivenAt}
             />
           </div>
@@ -188,7 +203,7 @@ function SheetBody({
               id={noteId}
               name="note"
               rows={2}
-              maxLength={500}
+              maxLength={TRACKER_FIELD_LIMITS.noteMaxLength}
               defaultValue={currentNote}
             />
           </div>

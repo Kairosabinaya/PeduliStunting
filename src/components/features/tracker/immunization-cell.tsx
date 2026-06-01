@@ -51,7 +51,7 @@ export function ImmunizationCell({
       onClick={onClick}
       aria-label={ariaLabel}
       className={cn(
-        "flex w-full min-w-[112px] flex-col items-start gap-1 rounded-lg border px-2.5 py-2 text-left text-xs transition-shadow hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+        "flex w-full min-w-28 flex-col items-start gap-1 rounded-lg border px-2.5 py-2 text-left text-xs transition-shadow hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
         STATUS_CLASSES[status],
       )}
     >
@@ -59,7 +59,7 @@ export function ImmunizationCell({
         <Icon size={14} aria-hidden />
         <span>{label}</span>
       </span>
-      <span className="text-[10px] uppercase tracking-wider opacity-80">
+      <span className="text-xs uppercase tracking-wider opacity-80">
         {copy.label}
       </span>
     </button>

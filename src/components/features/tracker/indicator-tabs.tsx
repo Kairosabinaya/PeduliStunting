@@ -6,7 +6,10 @@ import {
   type SegmentedControlItem,
 } from "@/components/primitives/segmented-control";
 import { cn } from "@/lib/cn";
-import { GROWTH_INDICATOR_SHORT, SD_CLASS_DISPLAY } from "@/config/tracker";
+import {
+  GROWTH_INDICATOR_PARENT_LABEL,
+  SD_CLASS_DISPLAY,
+} from "@/config/tracker";
 import {
   GROWTH_INDICATORS,
   type GrowthIndicator,
@@ -36,13 +39,13 @@ export function IndicatorTabs({
       const display = sd ? SD_CLASS_DISPLAY[sd] : undefined;
       return {
         id: indicator,
-        label: GROWTH_INDICATOR_SHORT[indicator],
+        label: GROWTH_INDICATOR_PARENT_LABEL[indicator],
         trailing: display
           ? (active: boolean) => (
               <Badge
                 tone={display.tone}
                 className={cn(
-                  "px-1.5 py-0 text-[10px]",
+                  "px-1.5 py-0 text-xs",
                   active && "ring-1 ring-white/40",
                 )}
               >

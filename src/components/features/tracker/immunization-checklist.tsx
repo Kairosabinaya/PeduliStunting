@@ -128,6 +128,7 @@ function ImmunizationRow({
             <Select
               id={statusId}
               name="status"
+              key={currentStatus}
               defaultValue={currentStatus}
               errorMessage={fieldError(state, "status")}
             >

@@ -10,6 +10,7 @@ export interface AddChildFormState {
   readonly message?: string;
   readonly fieldErrors?: Readonly<Record<string, readonly string[]>>;
   readonly child?: ChildDto;
+  readonly payload?: Readonly<Record<string, string>>;
 }
 
 /** Stable initial value passed to `useActionState`. */

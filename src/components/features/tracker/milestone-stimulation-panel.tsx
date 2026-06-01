@@ -39,7 +39,7 @@ export function MilestoneStimulationPanel({
           <li key={tip}>{tip}</li>
         ))}
       </ul>
-      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+      <p className="text-xs uppercase tracking-wider text-muted-foreground">
         {guide.sourceLabel}
       </p>
     </section>

@@ -20,6 +20,8 @@ interface PublicLayoutProps {
   readonly children: ReactNode;
 }
 
+import { ParallaxBackground } from "@/components/primitives/parallax-background";
+
 export default async function PublicLayout({ children }: PublicLayoutProps) {
   const session = await tryServerSession();
   let displayName: string | null = null;
@@ -48,6 +50,7 @@ export default async function PublicLayout({ children }: PublicLayoutProps) {
         displayFont.variable,
       )}
     >
+      <ParallaxBackground />
       <FloatingHeader
         session={
           session === null

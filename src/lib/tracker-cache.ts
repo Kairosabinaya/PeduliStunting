@@ -13,14 +13,10 @@ import type {
   MilestoneDto,
   NutritionEventDto,
 } from "@/application/health-plan/dtos";
-import type {
-  PregnancyDto,
-  PregnancyEventDto,
-} from "@/application/pregnancy/dtos";
 import { makeUseCases } from "@/composition";
 import type { AppError } from "@/domain/errors/app-error";
 import type { Result } from "@/domain/shared/result";
-import type { ChildId, PregnancyId, UserId } from "@/domain/shared/ids";
+import type { ChildId, UserId } from "@/domain/shared/ids";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
 
 /**
@@ -54,16 +50,6 @@ export function milestonesTag(childId: string): string {
 /** Cache tag for the nutrition events of a single child. */
 export function nutritionEventsTag(childId: string): string {
   return `child:${childId}:nutrition-events`;
-}
-
-/** Cache tag for the user's active pregnancy snapshot. */
-export function pregnancyTag(userId: string): string {
-  return `user:${userId}:pregnancy`;
-}
-
-/** Cache tag for the events of a single pregnancy. */
-export function pregnancyEventsTag(pregnancyId: string): string {
-  return `pregnancy:${pregnancyId}:events`;
 }
 
 /** Cache tag for the public immunization schedule catalog. */
@@ -160,28 +146,6 @@ export const fetchNutritionEventsByChild = cache(
     return makeUseCases(supabase).listNutritionEventsByChild.execute(
       userId,
       childId,
-    );
-  },
-);
-
-/** Per-request memoised fetch of the user's active pregnancy (Phase 6). */
-export const fetchActivePregnancy = cache(
-  async (userId: UserId): Promise<Result<PregnancyDto | null, AppError>> => {
-    const supabase = await createSupabaseServerClient();
-    return makeUseCases(supabase).getActivePregnancy.execute(userId);
-  },
-);
-
-/** Per-request memoised fetch of a pregnancy's events (Phase 6). */
-export const fetchPregnancyEvents = cache(
-  async (
-    userId: UserId,
-    pregnancyId: PregnancyId,
-  ): Promise<Result<readonly PregnancyEventDto[], AppError>> => {
-    const supabase = await createSupabaseServerClient();
-    return makeUseCases(supabase).listPregnancyEvents.execute(
-      userId,
-      pregnancyId,
     );
   },
 );

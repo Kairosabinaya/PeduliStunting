@@ -38,6 +38,7 @@ import { selectInsightsForYear } from "./dashboard-selectors";
 import { GlobalFilterBar } from "./global-filter-bar";
 import { KpiCards } from "./kpi-cards";
 import { PredictorDivergingChart } from "./predictor-diverging-chart";
+import { RegionCombobox } from "./region-combobox";
 import { RegionRankings, type RankingScope } from "./region-rankings";
 import { RegionSpotlightCard } from "./region-spotlight-card";
 import { SectionHeading } from "./section-heading";
@@ -71,9 +72,9 @@ export function DashboardShell({
 
       <div className="space-y-5 pt-1">
         <KpiCards dataset={dataset} />
-        <RegionSpotlightCard dataset={dataset} />
         <TrendRow dataset={dataset} />
         <MapSection dataset={dataset} geometry={geometry} />
+        <RegionSpotlightCard dataset={dataset} />
         <RankingsSection dataset={dataset} />
         <PredictorSection dataset={dataset} />
       </div>
@@ -134,9 +135,11 @@ function MapSection({
   readonly dataset: DashboardDatasetDto;
   readonly geometry: ChoroplethGeometry;
 }) {
+  const { selectedKodeBps, setSelectedKodeBps } = useDashboardFilter();
+
   return (
     <Card elevation="sm" padding="md" className="space-y-4">
-      <header className="flex flex-wrap items-start justify-between gap-3">
+      <header className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h2 className="text-base font-semibold text-foreground">
             {DASHBOARD_CHOROPLETH.title}
@@ -145,12 +148,25 @@ function MapSection({
             {DASHBOARD_CHOROPLETH.description}
           </p>
         </div>
-        <Link
-          href="/map"
-          className={buttonVariants({ variant: "secondary", size: "sm" })}
-        >
-          {DASHBOARD_CHOROPLETH.openMapLabel}
-        </Link>
+        <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto">
+          <div className="w-full sm:w-64">
+            <RegionCombobox
+              regions={dataset.regions}
+              value={selectedKodeBps ?? ""}
+              onChange={setSelectedKodeBps}
+              ariaLabel="Cari wilayah"
+            />
+          </div>
+          <Link
+            href="/map"
+            className={cn(
+              buttonVariants({ variant: "secondary", size: "sm" }),
+              "w-full sm:w-auto",
+            )}
+          >
+            {DASHBOARD_CHOROPLETH.openMapLabel}
+          </Link>
+        </div>
       </header>
       <DashboardChoroplethInteractive geometry={geometry} dataset={dataset} />
       <ul className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-muted-foreground">

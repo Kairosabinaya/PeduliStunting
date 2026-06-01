@@ -8,7 +8,7 @@ export default function AddChildLoading() {
         <Skeleton className="h-8 w-72" />
         <Skeleton className="h-4 w-full max-w-2xl" />
       </div>
-      <div className="max-w-3xl space-y-4 rounded-xl border border-border bg-surface p-6">
+      <div className="mx-auto w-full max-w-3xl space-y-4 rounded-xl border border-border bg-surface p-6">
         <Skeleton className="h-5 w-2/5" />
         <Skeleton className="h-4 w-full" />
         <div className="grid gap-4 md:grid-cols-2">

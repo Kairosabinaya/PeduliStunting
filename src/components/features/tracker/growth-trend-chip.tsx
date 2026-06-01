@@ -40,7 +40,9 @@ export function GrowthTrendChip({ result }: GrowthTrendChipProps) {
   const deltaLabel =
     result.deltaZ === null
       ? null
-      : `${result.deltaZ >= 0 ? "+" : ""}${result.deltaZ.toFixed(2)} SD`;
+      : result.deltaZ >= 0
+        ? `Naik ${result.deltaZ.toFixed(2)} poin`
+        : `Turun ${Math.abs(result.deltaZ).toFixed(2)} poin`;
 
   return (
     <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -53,7 +55,7 @@ export function GrowthTrendChip({ result }: GrowthTrendChipProps) {
         <span>{copy.label}</span>
       </Badge>
       {deltaLabel ? (
-        <span className="text-muted-foreground">delta z = {deltaLabel}</span>
+        <span className="font-medium text-muted-foreground">{deltaLabel}</span>
       ) : null}
       <span className="text-xs text-muted-foreground">{copy.description}</span>
     </div>

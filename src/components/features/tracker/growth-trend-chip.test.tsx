@@ -18,7 +18,7 @@ describe("GrowthTrendChip", () => {
       />,
     );
     expect(screen.getByText(TREND_COPY.notEnough.label)).toBeInTheDocument();
-    expect(screen.queryByText(/delta z/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Naik|Turun/)).not.toBeInTheDocument();
   });
 
   it("formats positive delta with a leading + sign", () => {
@@ -33,7 +33,7 @@ describe("GrowthTrendChip", () => {
       />,
     );
     expect(screen.getByText(TREND_COPY.improving.label)).toBeInTheDocument();
-    expect(screen.getByText(/delta z = \+0\.50/i)).toBeInTheDocument();
+    expect(screen.getByText(/Naik 0\.50 poin/i)).toBeInTheDocument();
   });
 
   it("formats negative delta as monitor", () => {
@@ -48,6 +48,6 @@ describe("GrowthTrendChip", () => {
       />,
     );
     expect(screen.getByText(TREND_COPY.monitor.label)).toBeInTheDocument();
-    expect(screen.getByText(/delta z = -0\.60/i)).toBeInTheDocument();
+    expect(screen.getByText(/Turun 0\.60 poin/i)).toBeInTheDocument();
   });
 });

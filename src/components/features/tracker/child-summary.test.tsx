@@ -60,14 +60,16 @@ describe("ChildSummary", () => {
     const newer = measurement({
       id: "m-new",
       measuredAt: "2026-02-10",
+      weightKg: 8.5,
+      heightCm: 70,
       zScores: { BB_U: -1.1, TB_U: -3.4 },
       sdClass: { BB_U: "normal", TB_U: "sangat_pendek" },
     });
 
     render(<ChildSummary measurements={[older, newer]} />);
 
-    expect(screen.getByText("-1.10")).toBeInTheDocument();
-    expect(screen.getByText("-3.40")).toBeInTheDocument();
+    expect(screen.getByText("8.5 kg")).toBeInTheDocument();
+    expect(screen.getByText("70 cm")).toBeInTheDocument();
     expect(screen.getByText(GROWTH_INDICATOR_LABEL.BB_U)).toBeInTheDocument();
     expect(screen.getByText(GROWTH_INDICATOR_LABEL.TB_U)).toBeInTheDocument();
     expect(screen.getByText(SD_CLASS_DISPLAY.normal.label)).toBeInTheDocument();
@@ -80,16 +82,18 @@ describe("ChildSummary", () => {
     const older = measurement({
       id: "m-old",
       measuredAt: "2025-12-01",
+      headCircumferenceCm: 42,
       zScores: { LK_U: 0.2 },
       sdClass: { LK_U: "normal" },
     });
     const newer = measurement({
       id: "m-new",
       measuredAt: "2026-02-10",
+      weightKg: 9,
       zScores: { BB_U: -1 },
       sdClass: { BB_U: "normal" },
     });
     render(<ChildSummary measurements={[older, newer]} />);
-    expect(screen.getByText("0.20")).toBeInTheDocument();
+    expect(screen.getByText("42 cm")).toBeInTheDocument();
   });
 });

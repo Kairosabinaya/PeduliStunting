@@ -43,10 +43,12 @@ export function ImmunizationProgress({ done, due }: ImmunizationProgressProps) {
         <span className="text-2xl font-bold leading-none text-foreground">
           {done}
         </span>
-        <span className="text-xs text-muted-foreground">dari {due}</span>
+        <span className="text-xs text-muted-foreground">
+          {IMMUNIZATION_PROGRESS_COPY.countFormat(done, due)}
+        </span>
       </ProgressRing>
 
-      <div className="flex min-w-[180px] flex-1 flex-col gap-2">
+      <div className="flex min-w-44 flex-1 flex-col gap-2">
         <p className="text-sm font-semibold text-foreground">
           {IMMUNIZATION_PROGRESS_COPY.title}
         </p>

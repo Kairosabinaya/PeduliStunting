@@ -37,7 +37,7 @@ export function PredictorDivergingChart({
     <div className="w-full">
       <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-muted-foreground">
         <LegendSwatch
-          className="bg-primary"
+          className="bg-risk"
           label={DASHBOARD_ANALYSIS.riskLabel}
         />
         <LegendSwatch
@@ -61,7 +61,7 @@ export function PredictorDivergingChart({
                 <span
                   className={cn(
                     "shrink-0 font-mono text-sm font-semibold tabular-nums",
-                    positive ? "text-primary" : "text-accent-ink",
+                    positive ? "text-risk" : "text-accent-ink",
                   )}
                 >
                   {formatSigned(predictor.corPrevalence)}

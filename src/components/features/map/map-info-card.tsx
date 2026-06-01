@@ -21,7 +21,7 @@ import { cn } from "@/lib/cn";
 
 const PANDUAN_ITEMS: readonly string[] = [
   "Klik wilayah untuk membuka detail prevalensi.",
-  "Pilih tahun di rel kiri-bawah untuk membandingkan periode.",
+  "Pilih tahun untuk membandingkan periode.",
   "Hover wilayah untuk pratinjau cepat tanpa membuka detail.",
   "Klik laut untuk menutup detail dan kembali ke tampilan Indonesia.",
 ];

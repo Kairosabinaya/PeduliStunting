@@ -20,9 +20,9 @@ export const cekCepatStoredStateSchema = z.object({
       sex: z.union([z.literal("L"), z.literal("P")]).nullable(),
       mode: z.union([z.literal("birth-date"), z.literal("age-months")]),
       birthDate: z.string().nullable(),
-      ageMonths: z.number().int().nullable(),
-      weightKg: z.number().nullable(),
-      heightCm: z.number().nullable(),
+      ageMonths: z.union([z.number().int(), z.string()]).nullable(),
+      weightKg: z.union([z.number(), z.string()]).nullable(),
+      heightCm: z.union([z.number(), z.string()]).nullable(),
     })
     .nullable(),
 });
@@ -30,7 +30,7 @@ export const cekCepatStoredStateSchema = z.object({
 export type CekCepatStoredState = z.infer<typeof cekCepatStoredStateSchema>;
 
 export const DEFAULT_CEK_CEPAT_STATE: CekCepatStoredState = {
-  collapsed: true,
+  collapsed: false,
   inputs: null,
 };
 

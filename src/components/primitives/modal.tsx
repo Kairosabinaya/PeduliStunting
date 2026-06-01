@@ -14,7 +14,7 @@ export interface ModalProps {
   readonly children?: ReactNode;
   readonly footer?: ReactNode;
   /** Adapts to bottom sheet on mobile, centered card on `md+`. Defaults to `auto`. */
-  readonly variant?: "auto" | "centered" | "sheet";
+  readonly variant?: "auto" | "centered" | "sheet" | "wide";
   readonly className?: string;
 }
 
@@ -71,10 +71,12 @@ export function Modal({
 
   const layout =
     variant === "sheet"
-      ? "fixed inset-x-0 bottom-0 mt-auto w-full max-w-none rounded-t-2xl rounded-b-none"
+      ? "fixed inset-x-0 top-auto bottom-0 mt-auto mb-0 w-full max-w-none rounded-t-2xl rounded-b-none"
       : variant === "centered"
         ? "m-auto w-[min(100%-2rem,32rem)] rounded-2xl"
-        : "fixed inset-x-0 bottom-0 mt-auto w-full max-w-none rounded-t-2xl rounded-b-none md:static md:m-auto md:w-[min(100%-2rem,32rem)] md:rounded-2xl";
+        : variant === "wide"
+          ? "fixed inset-x-0 top-auto bottom-0 mt-auto mb-0 w-full max-w-none rounded-t-2xl rounded-b-none md:fixed md:inset-0 md:m-auto md:w-[min(100%-2rem,64rem)] md:rounded-2xl"
+          : "fixed inset-x-0 top-auto bottom-0 mt-auto mb-0 w-full max-w-none rounded-t-2xl rounded-b-none md:fixed md:inset-0 md:m-auto md:w-[min(100%-2rem,32rem)] md:rounded-2xl";
 
   return (
     <dialog

@@ -17,24 +17,31 @@ import {
   TRACKER_ROUTE,
   trackerChildRoute,
 } from "@/config/tracker";
-import { createChildInputSchema } from "@/schemas/tracking";
+import { childFormInputSchema } from "@/schemas/tracking";
 
 import type { AddChildFormState } from "./_lib/add-child-state";
 import type { DeleteChildFormState } from "./_lib/delete-child-state";
 
-function toFormState(result: Result<ChildDto, AppError>): AddChildFormState {
+function toFormState(
+  result: Result<ChildDto, AppError>,
+  payload?: Record<string, string>,
+): AddChildFormState {
   if (result.ok) {
     return { ok: true, child: result.value };
   }
   const fieldErrors =
     result.error.kind === "validation" ? result.error.fieldErrors : undefined;
-  return fieldErrors
+
+  const state: AddChildFormState = fieldErrors
     ? { ok: false, message: result.error.message, fieldErrors }
     : { ok: false, message: result.error.message };
+
+  return payload ? { ...state, payload } : state;
 }
 
 function validationFromFlatten(
   fieldErrors: Record<string, readonly string[] | undefined>,
+  payload?: Record<string, string>,
 ): AddChildFormState {
   const cleaned: Record<string, readonly string[]> = {};
   for (const [key, value] of Object.entries(fieldErrors)) {
@@ -42,29 +49,8 @@ function validationFromFlatten(
   }
   return toFormState(
     err(AppErrors.validation("Periksa kembali isian Anda.", cleaned)),
+    payload,
   );
-}
-
-function parseNullableNumber(raw: FormDataEntryValue | null): number | null {
-  if (raw === null) return null;
-  const value = String(raw).trim();
-  if (value === "") return null;
-  const num = Number(value);
-  return Number.isFinite(num) ? num : null;
-}
-
-function parseNullableInt(raw: FormDataEntryValue | null): number | null {
-  if (raw === null) return null;
-  const value = String(raw).trim();
-  if (value === "") return null;
-  const num = Number.parseInt(value, 10);
-  return Number.isFinite(num) ? num : null;
-}
-
-function parseNullableString(raw: FormDataEntryValue | null): string | null {
-  if (raw === null) return null;
-  const value = String(raw).trim();
-  return value === "" ? null : value;
 }
 
 /**
@@ -81,19 +67,30 @@ export async function createChild(
 
   const isPremature = formData.get("birthStatus") === "preterm";
 
-  const parsed = createChildInputSchema.safeParse({
+  const payload: Record<string, string> = {
     name: String(formData.get("name") ?? "").trim(),
-    sex: formData.get("sex"),
-    birthDate: formData.get("birthDate"),
-    birthWeightKg: parseNullableNumber(formData.get("birthWeightKg")),
-    birthLengthCm: parseNullableNumber(formData.get("birthLengthCm")),
-    isPremature,
-    gestationalAgeWeeks: parseNullableInt(formData.get("gestationalAgeWeeks")),
-    notes: parseNullableString(formData.get("notes")),
+    sex: String(formData.get("sex") ?? ""),
+    birthDate: String(formData.get("birthDate") ?? ""),
+    birthWeightKg: String(formData.get("birthWeightKg") ?? ""),
+    birthLengthCm: String(formData.get("birthLengthCm") ?? ""),
+    birthStatus: String(formData.get("birthStatus") ?? "term"),
+    gestationalAgeWeeks: String(formData.get("gestationalAgeWeeks") ?? ""),
+    notes: String(formData.get("notes") ?? ""),
+  };
+
+  const parsed = childFormInputSchema.safeParse({
+    name: payload.name,
+    sex: payload.sex,
+    birthDate: payload.birthDate,
+    birthWeightKg: payload.birthWeightKg,
+    birthLengthCm: payload.birthLengthCm,
+    birthStatus: isPremature ? "preterm" : "term",
+    gestationalAgeWeeks: payload.gestationalAgeWeeks,
+    notes: payload.notes,
   });
 
   if (!parsed.success) {
-    return validationFromFlatten(parsed.error.flatten().fieldErrors);
+    return validationFromFlatten(parsed.error.flatten().fieldErrors, payload);
   }
 
   const supabase = await createSupabaseServerClient();
@@ -104,14 +101,15 @@ export async function createChild(
     birthDate: parsed.data.birthDate,
     birthWeightKg: parsed.data.birthWeightKg,
     birthLengthCm: parsed.data.birthLengthCm,
-    gestationalAgeWeeks: parsed.data.isPremature
-      ? parsed.data.gestationalAgeWeeks
-      : null,
+    gestationalAgeWeeks:
+      parsed.data.birthStatus === "preterm"
+        ? parsed.data.gestationalAgeWeeks
+        : null,
     notes: parsed.data.notes,
   });
 
   if (!result.ok) {
-    return toFormState(result);
+    return toFormState(result, payload);
   }
 
   revalidateTag(childrenTag(session.userId), "max");
@@ -139,19 +137,30 @@ export async function updateChild(
 
   const isPremature = formData.get("birthStatus") === "preterm";
 
-  const parsed = createChildInputSchema.safeParse({
+  const payload: Record<string, string> = {
     name: String(formData.get("name") ?? "").trim(),
-    sex: formData.get("sex"),
-    birthDate: formData.get("birthDate"),
-    birthWeightKg: parseNullableNumber(formData.get("birthWeightKg")),
-    birthLengthCm: parseNullableNumber(formData.get("birthLengthCm")),
-    isPremature,
-    gestationalAgeWeeks: parseNullableInt(formData.get("gestationalAgeWeeks")),
-    notes: parseNullableString(formData.get("notes")),
+    sex: String(formData.get("sex") ?? ""),
+    birthDate: String(formData.get("birthDate") ?? ""),
+    birthWeightKg: String(formData.get("birthWeightKg") ?? ""),
+    birthLengthCm: String(formData.get("birthLengthCm") ?? ""),
+    birthStatus: String(formData.get("birthStatus") ?? "term"),
+    gestationalAgeWeeks: String(formData.get("gestationalAgeWeeks") ?? ""),
+    notes: String(formData.get("notes") ?? ""),
+  };
+
+  const parsed = childFormInputSchema.safeParse({
+    name: payload.name,
+    sex: payload.sex,
+    birthDate: payload.birthDate,
+    birthWeightKg: payload.birthWeightKg,
+    birthLengthCm: payload.birthLengthCm,
+    birthStatus: isPremature ? "preterm" : "term",
+    gestationalAgeWeeks: payload.gestationalAgeWeeks,
+    notes: payload.notes,
   });
 
   if (!parsed.success) {
-    return validationFromFlatten(parsed.error.flatten().fieldErrors);
+    return validationFromFlatten(parsed.error.flatten().fieldErrors, payload);
   }
 
   const supabase = await createSupabaseServerClient();
@@ -163,14 +172,15 @@ export async function updateChild(
     birthDate: parsed.data.birthDate,
     birthWeightKg: parsed.data.birthWeightKg,
     birthLengthCm: parsed.data.birthLengthCm,
-    gestationalAgeWeeks: parsed.data.isPremature
-      ? parsed.data.gestationalAgeWeeks
-      : null,
+    gestationalAgeWeeks:
+      parsed.data.birthStatus === "preterm"
+        ? parsed.data.gestationalAgeWeeks
+        : null,
     notes: parsed.data.notes,
   });
 
   if (!result.ok) {
-    return toFormState(result);
+    return toFormState(result, payload);
   }
 
   revalidateTag(childrenTag(session.userId), "max");

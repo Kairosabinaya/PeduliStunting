@@ -1,7 +1,15 @@
 "use client";
 
-import { useActionState, useEffect, useId, useRef } from "react";
-import { useFormStatus } from "react-dom";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  useActionState,
+  useEffect,
+  useId,
+  useMemo,
+  useTransition,
+} from "react";
+import { useForm } from "react-hook-form";
+import type { z } from "zod";
 
 import { Button } from "@/components/primitives/button";
 import { FeedbackBanner } from "@/components/primitives/feedback-banner";
@@ -9,8 +17,13 @@ import { Input } from "@/components/primitives/input";
 import { Label } from "@/components/primitives/label";
 import { Select } from "@/components/primitives/select";
 import { Textarea } from "@/components/primitives/textarea";
-import { MEASUREMENTS_COPY } from "@/config/tracker";
+import {
+  MEASUREMENTS_COPY,
+  TRACKER_FIELD_LIMITS,
+  TRACKER_VALIDATION_COPY,
+} from "@/config/tracker";
 import { todayIso } from "@/lib/today";
+import { recordMeasurementFormInputSchema } from "@/schemas/tracking";
 
 import { addMeasurement } from "@/app/(app)/tracker/anak/[childId]/pengukuran/actions";
 import {
@@ -20,13 +33,16 @@ import {
 
 export interface MeasurementFormProps {
   readonly childId: string;
+  readonly childBirthDate: string;
 }
 
-function SubmitButton() {
-  const status = useFormStatus();
+type MeasurementFormFields = z.input<typeof recordMeasurementFormInputSchema>;
+type MeasurementFormOutput = z.output<typeof recordMeasurementFormInputSchema>;
+
+function SubmitButton({ pending }: { readonly pending: boolean }) {
   return (
-    <Button type="submit" loading={status.pending} disabled={status.pending}>
-      {status.pending ? MEASUREMENTS_COPY.submitting : MEASUREMENTS_COPY.submit}
+    <Button type="submit" loading={pending} disabled={pending}>
+      {pending ? MEASUREMENTS_COPY.submitting : MEASUREMENTS_COPY.submit}
     </Button>
   );
 }
@@ -34,8 +50,9 @@ function SubmitButton() {
 function fieldError(
   state: AddMeasurementFormState | null,
   field: string,
+  clientMessage?: string | undefined,
 ): string | undefined {
-  return state?.fieldErrors?.[field]?.[0];
+  return clientMessage ?? state?.fieldErrors?.[field]?.[0];
 }
 
 /**
@@ -45,14 +62,38 @@ function fieldError(
  * {@link recordMeasurementInputSchema}); the form surfaces the resulting
  * banner without blocking the user from retrying.
  */
-export function MeasurementForm({ childId }: MeasurementFormProps) {
+export function MeasurementForm({
+  childId,
+  childBirthDate,
+}: MeasurementFormProps) {
   const boundAction = addMeasurement.bind(null, childId);
   const [state, action] = useActionState<
     AddMeasurementFormState | null,
     FormData
   >(boundAction, INITIAL_ADD_MEASUREMENT_STATE);
+  const [pending, startTransition] = useTransition();
 
-  const formRef = useRef<HTMLFormElement | null>(null);
+  const defaultValues = useMemo<MeasurementFormFields>(
+    () => ({
+      childId,
+      childBirthDate,
+      measuredAt: todayIso(),
+      weightKg: "",
+      heightCm: "",
+      measuredLying: "",
+      headCircumferenceCm: "",
+      muacCm: "",
+      note: "",
+    }),
+    [childBirthDate, childId],
+  );
+  const form = useForm<MeasurementFormFields, undefined, MeasurementFormOutput>(
+    {
+      resolver: zodResolver(recordMeasurementFormInputSchema),
+      defaultValues,
+      shouldFocusError: true,
+    },
+  );
 
   const measuredAtId = useId();
   const weightId = useId();
@@ -64,17 +105,30 @@ export function MeasurementForm({ childId }: MeasurementFormProps) {
 
   useEffect(() => {
     if (state?.ok) {
-      formRef.current?.reset();
+      form.reset(defaultValues);
     }
-  }, [state]);
+  }, [defaultValues, form, state]);
 
   const generalError =
     state && !state.ok
       ? (state.message ?? MEASUREMENTS_COPY.genericError)
       : null;
+  const hasClientErrors = Object.keys(form.formState.errors).length > 0;
 
   return (
-    <form ref={formRef} action={action} className="space-y-6" noValidate>
+    <form
+      onSubmit={form.handleSubmit((_values, event) => {
+        const node = event?.target;
+        if (!(node instanceof HTMLFormElement)) return;
+        startTransition(() => {
+          action(new FormData(node));
+        });
+      })}
+      className="space-y-6"
+      noValidate
+    >
+      <input type="hidden" {...form.register("childId")} />
+      <input type="hidden" {...form.register("childBirthDate")} />
       <div className="grid gap-5 md:grid-cols-2">
         <div className="space-y-2 md:col-span-2">
           <Label htmlFor={measuredAtId} required>
@@ -82,11 +136,16 @@ export function MeasurementForm({ childId }: MeasurementFormProps) {
           </Label>
           <Input
             id={measuredAtId}
-            name="measuredAt"
             type="date"
-            defaultValue={todayIso()}
+            min={childBirthDate}
+            max={todayIso()}
             required
-            errorMessage={fieldError(state, "measuredAt")}
+            errorMessage={fieldError(
+              state,
+              "measuredAt",
+              form.formState.errors.measuredAt?.message,
+            )}
+            {...form.register("measuredAt")}
           />
         </div>
 
@@ -96,13 +155,17 @@ export function MeasurementForm({ childId }: MeasurementFormProps) {
           </Label>
           <Input
             id={weightId}
-            name="weightKg"
             type="number"
             inputMode="decimal"
-            step="0.01"
-            min="0.5"
-            max="60"
-            errorMessage={fieldError(state, "weightKg")}
+            step={TRACKER_FIELD_LIMITS.measurementWeightKg.step}
+            min={TRACKER_FIELD_LIMITS.measurementWeightKg.min}
+            max={TRACKER_FIELD_LIMITS.measurementWeightKg.max}
+            errorMessage={fieldError(
+              state,
+              "weightKg",
+              form.formState.errors.weightKg?.message,
+            )}
+            {...form.register("weightKg")}
           />
         </div>
 
@@ -112,13 +175,17 @@ export function MeasurementForm({ childId }: MeasurementFormProps) {
           </Label>
           <Input
             id={heightId}
-            name="heightCm"
             type="number"
             inputMode="decimal"
-            step="0.1"
-            min="30"
-            max="140"
-            errorMessage={fieldError(state, "heightCm")}
+            step={TRACKER_FIELD_LIMITS.measurementHeightCm.step}
+            min={TRACKER_FIELD_LIMITS.measurementHeightCm.min}
+            max={TRACKER_FIELD_LIMITS.measurementHeightCm.max}
+            errorMessage={fieldError(
+              state,
+              "heightCm",
+              form.formState.errors.heightCm?.message,
+            )}
+            {...form.register("heightCm")}
           />
         </div>
 
@@ -128,9 +195,12 @@ export function MeasurementForm({ childId }: MeasurementFormProps) {
           </Label>
           <Select
             id={measuredLyingId}
-            name="measuredLying"
-            defaultValue=""
-            errorMessage={fieldError(state, "measuredLying")}
+            errorMessage={fieldError(
+              state,
+              "measuredLying",
+              form.formState.errors.measuredLying?.message,
+            )}
+            {...form.register("measuredLying")}
           >
             <option value="">—</option>
             <option value="standing">
@@ -148,13 +218,17 @@ export function MeasurementForm({ childId }: MeasurementFormProps) {
           </Label>
           <Input
             id={headCircumferenceId}
-            name="headCircumferenceCm"
             type="number"
             inputMode="decimal"
-            step="0.1"
-            min="20"
-            max="70"
-            errorMessage={fieldError(state, "headCircumferenceCm")}
+            step={TRACKER_FIELD_LIMITS.measurementHeadCircumferenceCm.step}
+            min={TRACKER_FIELD_LIMITS.measurementHeadCircumferenceCm.min}
+            max={TRACKER_FIELD_LIMITS.measurementHeadCircumferenceCm.max}
+            errorMessage={fieldError(
+              state,
+              "headCircumferenceCm",
+              form.formState.errors.headCircumferenceCm?.message,
+            )}
+            {...form.register("headCircumferenceCm")}
           />
         </div>
 
@@ -162,13 +236,17 @@ export function MeasurementForm({ childId }: MeasurementFormProps) {
           <Label htmlFor={muacId}>{MEASUREMENTS_COPY.fields.muacLabel}</Label>
           <Input
             id={muacId}
-            name="muacCm"
             type="number"
             inputMode="decimal"
-            step="0.1"
-            min="5"
-            max="40"
-            errorMessage={fieldError(state, "muacCm")}
+            step={TRACKER_FIELD_LIMITS.measurementMuacCm.step}
+            min={TRACKER_FIELD_LIMITS.measurementMuacCm.min}
+            max={TRACKER_FIELD_LIMITS.measurementMuacCm.max}
+            errorMessage={fieldError(
+              state,
+              "muacCm",
+              form.formState.errors.muacCm?.message,
+            )}
+            {...form.register("muacCm")}
           />
         </div>
 
@@ -176,16 +254,27 @@ export function MeasurementForm({ childId }: MeasurementFormProps) {
           <Label htmlFor={noteId}>{MEASUREMENTS_COPY.fields.noteLabel}</Label>
           <Textarea
             id={noteId}
-            name="note"
             rows={3}
-            maxLength={500}
+            maxLength={TRACKER_FIELD_LIMITS.noteMaxLength}
             hint={MEASUREMENTS_COPY.fields.noteHint}
-            errorMessage={fieldError(state, "note")}
+            errorMessage={fieldError(
+              state,
+              "note",
+              form.formState.errors.note?.message,
+            )}
+            {...form.register("note")}
           />
         </div>
       </div>
 
-      {generalError ? (
+      {hasClientErrors ? (
+        <FeedbackBanner tone="error">
+          <strong>{TRACKER_VALIDATION_COPY.summaryTitle}</strong>
+          <span className="block">
+            {TRACKER_VALIDATION_COPY.summaryDescription}
+          </span>
+        </FeedbackBanner>
+      ) : generalError ? (
         <FeedbackBanner tone="error">{generalError}</FeedbackBanner>
       ) : state?.ok ? (
         <FeedbackBanner tone="success">
@@ -194,7 +283,7 @@ export function MeasurementForm({ childId }: MeasurementFormProps) {
       ) : null}
 
       <div className="flex flex-wrap items-center justify-end gap-2">
-        <SubmitButton />
+        <SubmitButton pending={pending} />
       </div>
     </form>
   );

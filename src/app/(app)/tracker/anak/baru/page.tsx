@@ -22,7 +22,7 @@ export default async function AddChildPage() {
         title={ADD_CHILD_COPY.title}
         description={ADD_CHILD_COPY.description}
       />
-      <Card elevation="sm" padding="md" className="max-w-3xl">
+      <Card elevation="sm" padding="md" className="mx-auto w-full max-w-3xl">
         <AddChildForm />
       </Card>
     </div>

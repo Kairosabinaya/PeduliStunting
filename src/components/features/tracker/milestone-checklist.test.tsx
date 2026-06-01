@@ -36,6 +36,7 @@ vi.mock("@/app/(app)/tracker/anak/[childId]/perkembangan/actions", () => ({
 const { MilestoneChecklist } = await import("./milestone-checklist");
 
 const childId = "11111111-1111-1111-1111-111111111111";
+const childBirthDate = "2024-01-01";
 
 const catalog: readonly MilestoneDto[] = [
   {
@@ -95,6 +96,7 @@ describe("MilestoneChecklist", () => {
     render(
       <MilestoneChecklist
         childId={childId}
+        childBirthDate={childBirthDate}
         childAgeMonths={2}
         catalog={[]}
         records={[]}
@@ -107,6 +109,7 @@ describe("MilestoneChecklist", () => {
     render(
       <MilestoneChecklist
         childId={childId}
+        childBirthDate={childBirthDate}
         childAgeMonths={2}
         catalog={catalog}
         records={records}
@@ -124,6 +127,7 @@ describe("MilestoneChecklist", () => {
     render(
       <MilestoneChecklist
         childId={childId}
+        childBirthDate={childBirthDate}
         childAgeMonths={2}
         catalog={catalog}
         records={records}
@@ -146,6 +150,7 @@ describe("MilestoneChecklist", () => {
     render(
       <MilestoneChecklist
         childId={childId}
+        childBirthDate={childBirthDate}
         childAgeMonths={2}
         catalog={catalog}
         records={records}

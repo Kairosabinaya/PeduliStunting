@@ -89,6 +89,7 @@ const config: Config = {
         success: "rgb(var(--color-success) / <alpha-value>)",
         warning: "rgb(var(--color-warning) / <alpha-value>)",
         danger: "rgb(var(--color-danger) / <alpha-value>)",
+        risk: "rgb(var(--color-risk) / <alpha-value>)",
         info: "rgb(var(--color-info) / <alpha-value>)",
         focus: "rgb(var(--color-focus) / <alpha-value>)",
         // Edukasi scrollytelling palette. Only the tokens that have no
@@ -103,6 +104,13 @@ const config: Config = {
           "tint-cream": "rgb(var(--edu-tint-cream) / <alpha-value>)",
           night: "rgb(var(--edu-tint-night) / <alpha-value>)",
           footnote: "rgb(var(--edu-fn-color) / <alpha-value>)",
+        },
+        tracker: {
+          growth: "rgb(var(--color-tracker-growth) / <alpha-value>)",
+          immunization:
+            "rgb(var(--color-tracker-immunization) / <alpha-value>)",
+          milestone: "rgb(var(--color-tracker-milestone) / <alpha-value>)",
+          nutrition: "rgb(var(--color-tracker-nutrition) / <alpha-value>)",
         },
       },
       fontFamily: {

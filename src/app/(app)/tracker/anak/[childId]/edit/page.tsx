@@ -55,7 +55,7 @@ export default async function EditChildPage({ params }: EditChildPageProps) {
         title={EDIT_CHILD_COPY.title}
         description={EDIT_CHILD_COPY.description}
       />
-      <Card elevation="sm" padding="md" className="max-w-3xl">
+      <Card elevation="sm" padding="md" className="w-full">
         <EditChildForm child={result.value} />
       </Card>
     </div>

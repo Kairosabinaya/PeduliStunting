@@ -139,14 +139,7 @@ describe("AddChildForm", () => {
     });
 
     render(<AddChildForm />);
-    fireEvent.change(
-      screen.getByLabelText(new RegExp(ADD_CHILD_COPY.fields.sexLabel)),
-      { target: { value: "L" } },
-    );
-    fireEvent.change(
-      screen.getByLabelText(new RegExp(ADD_CHILD_COPY.fields.birthDateLabel)),
-      { target: { value: "2024-01-15" } },
-    );
+    fillIdentity();
     fireEvent.click(
       screen.getByRole("button", { name: ADD_CHILD_COPY.submit }),
     );

@@ -9,9 +9,17 @@ import type { ChildOverviewData } from "@/lib/child-overview";
 import { ChildSummary } from "./child-summary";
 import { GrowthChartCard } from "./growth-chart-card";
 import { ModuleGrid } from "./module-grid";
+import { ModuleGridRouted } from "./module-grid-routed";
+import { StatusHero } from "./status-hero";
+import { StatusHeroClient } from "./status-hero-client";
 
 export interface ChildDashboardProps {
   readonly data: ChildOverviewData;
+  /**
+   * When true, module cards trigger modals via searchParams instead of
+   * navigating to separate pages. Used on `/tracker` main page.
+   */
+  readonly useModals?: boolean;
 }
 
 /**
@@ -28,7 +36,10 @@ export interface ChildDashboardProps {
  * if (overview.ok) return <ChildDashboard data={overview.value} />;
  * ```
  */
-export function ChildDashboard({ data }: ChildDashboardProps) {
+export function ChildDashboard({
+  data,
+  useModals = false,
+}: ChildDashboardProps) {
   const {
     child,
     childAgeMonths,
@@ -41,29 +52,50 @@ export function ChildDashboard({ data }: ChildDashboardProps) {
   } = data;
 
   return (
-    <div className="space-y-5">
-      <ModuleGrid
-        childAgeMonths={childAgeMonths}
-        childDetailRoutes={{
-          measurements: trackerChildMeasurementsRoute(child.id),
-          immunizations: trackerChildImmunizationsRoute(child.id),
-          milestones: trackerChildMilestonesRoute(child.id),
-          nutrition: trackerChildNutritionRoute(child.id),
-        }}
-        measurements={measurements}
-        immunizationSchedule={immunizationSchedule}
-        childImmunizations={childImmunizations}
-        milestoneCatalog={milestoneCatalog}
-        childMilestones={childMilestones}
-        nutritionEvents={nutritionEvents}
-      />
-      <div className="grid gap-4 lg:grid-cols-4 lg:items-stretch">
-        <div className="lg:col-span-3 lg:flex lg:flex-col">
-          <GrowthChartCard child={child} measurements={measurements} />
-        </div>
-        <div className="lg:col-span-1">
-          <ChildSummary measurements={measurements} />
-        </div>
+    <div className="space-y-6">
+      {useModals ? (
+        <StatusHeroClient
+          child={child}
+          childAgeMonths={childAgeMonths}
+          measurements={measurements}
+        />
+      ) : (
+        <StatusHero
+          child={child}
+          childAgeMonths={childAgeMonths}
+          measurements={measurements}
+        />
+      )}
+      {useModals ? (
+        <ModuleGrid
+          childAgeMonths={childAgeMonths}
+          measurements={measurements}
+          immunizationSchedule={immunizationSchedule}
+          childImmunizations={childImmunizations}
+          milestoneCatalog={milestoneCatalog}
+          childMilestones={childMilestones}
+          nutritionEvents={nutritionEvents}
+        />
+      ) : (
+        <ModuleGridRouted
+          childAgeMonths={childAgeMonths}
+          childDetailRoutes={{
+            measurements: trackerChildMeasurementsRoute(child.id),
+            immunizations: trackerChildImmunizationsRoute(child.id),
+            milestones: trackerChildMilestonesRoute(child.id),
+            nutrition: trackerChildNutritionRoute(child.id),
+          }}
+          measurements={measurements}
+          immunizationSchedule={immunizationSchedule}
+          childImmunizations={childImmunizations}
+          milestoneCatalog={milestoneCatalog}
+          childMilestones={childMilestones}
+          nutritionEvents={nutritionEvents}
+        />
+      )}
+      <div className="grid gap-6">
+        <ChildSummary measurements={measurements} />
+        <GrowthChartCard child={child} measurements={measurements} />
       </div>
     </div>
   );

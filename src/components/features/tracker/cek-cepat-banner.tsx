@@ -134,81 +134,94 @@ export function CekCepatBanner() {
   }
 
   return (
-    <div
-      className={cn(
-        "safe-bottom safe-x fixed z-[60]",
-        "bottom-3 right-3 sm:bottom-6 sm:right-6",
-      )}
-    >
-      {state.collapsed ? (
-        <button
-          type="button"
-          onClick={handleExpand}
-          aria-label={CEK_CEPAT_COPY.fabAriaLabel}
-          className="flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-primary-foreground shadow-lg transition-shadow hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-        >
-          <Calculator size={20} aria-hidden />
-          <span className="text-sm font-medium">{CEK_CEPAT_COPY.fabLabel}</span>
-        </button>
-      ) : (
-        <section
-          role="dialog"
-          aria-modal="false"
-          aria-label={CEK_CEPAT_COPY.panelTitle}
-          className={cn(
-            "glass-panel-strong relative flex max-h-[80vh] w-[min(360px,calc(100vw-1.5rem))] flex-col gap-4 overflow-y-auto rounded-2xl border border-border p-5 shadow-2xl",
-            "sm:w-[380px]",
-          )}
-        >
-          <header className="flex items-start justify-between gap-3">
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-                {CEK_CEPAT_COPY.panelTagline}
-              </p>
-              <h2 className="text-lg font-bold text-foreground">
-                {CEK_CEPAT_COPY.panelTitle}
-              </h2>
-              <p className="text-xs text-muted-foreground">
-                {CEK_CEPAT_COPY.panelSubtitle}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={handleCollapse}
-              aria-label={CEK_CEPAT_COPY.collapseAriaLabel}
-              className="rounded-full p-1.5 text-muted-foreground hover:bg-surface-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-            >
-              <X size={18} aria-hidden />
-            </button>
-          </header>
-
-          {result ? (
-            <CekCepatResult result={result} />
-          ) : (
-            <>
-              <p className="text-sm text-muted-foreground">
-                {CEK_CEPAT_COPY.introBody}
-              </p>
-              <CekCepatForm
-                defaultValues={initialFormValues}
-                submitting={submitting}
-                onValuesChange={handleValuesChange}
-                onSubmit={handleSubmit}
-                onReset={handleReset}
-              />
-              {errorMessage ? (
-                <p
-                  className="rounded-md border border-danger/40 bg-danger/10 p-2 text-xs text-danger"
-                  role="alert"
-                >
-                  {errorMessage}
+    <>
+      {!state.collapsed ? (
+        <div
+          className="fixed inset-0 z-[50] bg-background/80 backdrop-blur-sm sm:hidden"
+          onClick={handleCollapse}
+          aria-hidden
+        />
+      ) : null}
+      <div
+        className={cn(
+          "safe-bottom safe-x fixed z-[60]",
+          state.collapsed
+            ? "bottom-3 right-3 sm:bottom-6 sm:right-6"
+            : "pointer-events-none inset-0 flex items-center justify-center p-4 sm:pointer-events-auto sm:inset-auto sm:bottom-6 sm:right-6 sm:block sm:p-0",
+        )}
+      >
+        {state.collapsed ? (
+          <button
+            type="button"
+            onClick={handleExpand}
+            aria-label={CEK_CEPAT_COPY.fabAriaLabel}
+            className="flex items-center gap-2 rounded-full bg-primary px-4 py-3 text-primary-foreground shadow-lg transition-shadow hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            <Calculator size={20} aria-hidden />
+            <span className="text-sm font-medium">
+              {CEK_CEPAT_COPY.fabLabel}
+            </span>
+          </button>
+        ) : (
+          <section
+            role="dialog"
+            aria-modal="false"
+            aria-label={CEK_CEPAT_COPY.panelTitle}
+            className={cn(
+              "glass-panel-strong pointer-events-auto relative flex max-h-[80vh] w-[min(360px,calc(100vw-1.5rem))] flex-col gap-4 overflow-y-auto rounded-2xl border border-border p-5 shadow-2xl",
+              "sm:w-[380px]",
+            )}
+          >
+            <header className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+                  {CEK_CEPAT_COPY.panelTagline}
                 </p>
-              ) : null}
-            </>
-          )}
-        </section>
-      )}
-    </div>
+                <h2 className="text-lg font-bold text-foreground">
+                  {CEK_CEPAT_COPY.panelTitle}
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {CEK_CEPAT_COPY.panelSubtitle}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleCollapse}
+                aria-label={CEK_CEPAT_COPY.collapseAriaLabel}
+                className="rounded-full p-1.5 text-muted-foreground hover:bg-surface-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+              >
+                <X size={18} aria-hidden />
+              </button>
+            </header>
+
+            {result ? (
+              <CekCepatResult result={result} />
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  {CEK_CEPAT_COPY.introBody}
+                </p>
+                <CekCepatForm
+                  defaultValues={initialFormValues}
+                  submitting={submitting}
+                  onValuesChange={handleValuesChange}
+                  onSubmit={handleSubmit}
+                  onReset={handleReset}
+                />
+                {errorMessage ? (
+                  <p
+                    className="rounded-md border border-danger/40 bg-danger/10 p-2 text-xs text-danger"
+                    role="alert"
+                  >
+                    {errorMessage}
+                  </p>
+                ) : null}
+              </>
+            )}
+          </section>
+        )}
+      </div>
+    </>
   );
 }
 

@@ -7,7 +7,6 @@ import {
   trackerChildImmunizationsRoute,
   trackerChildMeasurementsRoute,
   trackerChildMilestonesRoute,
-  trackerChildNutritionRoute,
   trackerChildRoute,
 } from "@/config/tracker";
 import { SegmentedNav } from "@/components/primitives/segmented-control";
@@ -44,11 +43,6 @@ function buildItems(childId: string): readonly NavItem[] {
       label: CHILD_DETAIL_COPY.navMilestones,
       exact: false,
     },
-    {
-      href: trackerChildNutritionRoute(childId),
-      label: CHILD_DETAIL_COPY.navNutrition,
-      exact: false,
-    },
   ];
 }
 
@@ -67,6 +61,11 @@ function isActive(pathname: string | null, item: NavItem): boolean {
  */
 export function ChildNav({ childId }: ChildNavProps) {
   const pathname = usePathname();
+
+  if (pathname?.endsWith("/edit")) {
+    return null;
+  }
+
   const items = buildItems(childId).map((item) => ({
     href: item.href,
     label: item.label,

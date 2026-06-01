@@ -33,7 +33,7 @@ export interface RegionalSummaryCardProps {
 export function RegionalSummaryCard({
   summary,
   tahun,
-  modelVersion,
+  modelVersion: _modelVersion,
   variant = "docked",
   className,
 }: RegionalSummaryCardProps) {
@@ -123,11 +123,6 @@ export function RegionalSummaryCard({
         <span className="font-mono tabular-nums text-muted-foreground">
           {total.toLocaleString("id-ID")} {MAP_SUMMARY_COPY.totalRegionsLabel}
         </span>
-        {modelVersion ? (
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
-            {`${MAP_SUMMARY_COPY.modelBadgePrefix} ${modelVersion}`}
-          </span>
-        ) : null}
       </footer>
     </aside>
   );

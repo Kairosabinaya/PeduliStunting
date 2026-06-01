@@ -115,4 +115,36 @@ describe("CekCepatForm", () => {
     );
     expect(onSubmit).not.toHaveBeenCalled();
   });
+
+  it("rejects decimal age input without truncating it", async () => {
+    const user = userEvent.setup();
+    const onSubmit = vi.fn();
+    render(
+      <CekCepatForm
+        defaultValues={defaultValues}
+        submitting={false}
+        onValuesChange={vi.fn()}
+        onSubmit={onSubmit}
+        onReset={vi.fn()}
+      />,
+    );
+    await user.click(
+      screen.getByRole("radio", { name: CEK_CEPAT_COPY.fieldLabels.sexMale }),
+    );
+    await user.type(
+      screen.getByLabelText(CEK_CEPAT_COPY.fieldLabels.ageMonths),
+      "12.5",
+    );
+    await user.type(
+      screen.getByLabelText(CEK_CEPAT_COPY.fieldLabels.weightKg),
+      "10",
+    );
+    await user.click(
+      screen.getByRole("button", { name: CEK_CEPAT_COPY.buttons.submit }),
+    );
+    expect(onSubmit).not.toHaveBeenCalled();
+    expect(
+      screen.getByText(CEK_CEPAT_COPY.validation.ageInvalid),
+    ).toBeInTheDocument();
+  });
 });

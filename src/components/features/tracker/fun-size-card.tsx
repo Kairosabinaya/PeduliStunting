@@ -17,7 +17,7 @@ export function FunSizeCard({ latest }: FunSizeCardProps) {
   const hasAnything = weightComparison !== null || heightComparison !== null;
 
   return (
-    <aside className="rounded-xl border border-border bg-surface-muted/40 p-4">
+    <aside className="rounded-xl border border-border bg-surface-muted/40 p-5">
       <p className="text-sm font-semibold text-foreground">
         {FUN_SIZE_COPY.title}
       </p>

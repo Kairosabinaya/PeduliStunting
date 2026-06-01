@@ -5,18 +5,20 @@ import { type FormEvent, useId, useState } from "react";
 import { Button } from "@/components/primitives/button";
 import { Input } from "@/components/primitives/input";
 import { Label } from "@/components/primitives/label";
-import { CEK_CEPAT_COPY, CEK_CEPAT_MAX_AGE_MONTHS } from "@/config/cek-cepat";
+import { CEK_CEPAT_COPY } from "@/config/cek-cepat";
+import { TRACKER_FIELD_LIMITS } from "@/config/tracker";
 import { todayIso } from "@/lib/today";
 
 export type CekCepatInputMode = "birth-date" | "age-months";
+type NumericDraft = number | string | null;
 
 export interface CekCepatFormValues {
   readonly sex: "L" | "P" | null;
   readonly mode: CekCepatInputMode;
   readonly birthDate: string | null;
-  readonly ageMonths: number | null;
-  readonly weightKg: number | null;
-  readonly heightCm: number | null;
+  readonly ageMonths: NumericDraft;
+  readonly weightKg: NumericDraft;
+  readonly heightCm: NumericDraft;
 }
 
 export interface CekCepatFormSubmitPayload {
@@ -151,8 +153,9 @@ export function CekCepatForm({
             id={ageId}
             type="number"
             inputMode="numeric"
-            min={0}
-            max={CEK_CEPAT_MAX_AGE_MONTHS}
+            step={TRACKER_FIELD_LIMITS.quickScreeningAgeMonths.step}
+            min={TRACKER_FIELD_LIMITS.quickScreeningAgeMonths.min}
+            max={TRACKER_FIELD_LIMITS.quickScreeningAgeMonths.max}
             placeholder={CEK_CEPAT_COPY.fieldPlaceholders.ageMonths}
             value={values.ageMonths ?? ""}
             errorMessage={errors.ageMonths}
@@ -168,7 +171,7 @@ export function CekCepatForm({
       )}
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="space-y-1">
+        <div className="flex flex-col justify-end gap-1">
           <Label htmlFor={weightId}>
             {CEK_CEPAT_COPY.fieldLabels.weightKg}
           </Label>
@@ -176,8 +179,9 @@ export function CekCepatForm({
             id={weightId}
             type="number"
             inputMode="decimal"
-            step="0.1"
-            min="0"
+            step={TRACKER_FIELD_LIMITS.quickScreeningWeightKg.step}
+            min={TRACKER_FIELD_LIMITS.quickScreeningWeightKg.min}
+            max={TRACKER_FIELD_LIMITS.quickScreeningWeightKg.max}
             placeholder={CEK_CEPAT_COPY.fieldPlaceholders.weightKg}
             value={values.weightKg ?? ""}
             errorMessage={errors.weightKg}
@@ -189,7 +193,7 @@ export function CekCepatForm({
             }
           />
         </div>
-        <div className="space-y-1">
+        <div className="flex flex-col justify-end gap-1">
           <Label htmlFor={heightId}>
             {CEK_CEPAT_COPY.fieldLabels.heightCm}
           </Label>
@@ -197,8 +201,9 @@ export function CekCepatForm({
             id={heightId}
             type="number"
             inputMode="decimal"
-            step="0.1"
-            min="0"
+            step={TRACKER_FIELD_LIMITS.quickScreeningHeightCm.step}
+            min={TRACKER_FIELD_LIMITS.quickScreeningHeightCm.min}
+            max={TRACKER_FIELD_LIMITS.quickScreeningHeightCm.max}
             placeholder={CEK_CEPAT_COPY.fieldPlaceholders.heightCm}
             value={values.heightCm ?? ""}
             errorMessage={errors.heightCm}
@@ -302,16 +307,18 @@ function ModeOption({
   );
 }
 
-function parseIntegerInput(value: string): number | null {
+function parseIntegerInput(value: string): NumericDraft {
   if (value.trim().length === 0) return null;
-  const parsed = Number.parseInt(value, 10);
+  if (!/^-?\d+$/u.test(value.trim())) return value;
+  const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function parseDecimalInput(value: string): number | null {
+function parseDecimalInput(value: string): NumericDraft {
   if (value.trim().length === 0) return null;
+  if (!/^-?\d+(?:[.,]\d+)?$/u.test(value.trim())) return value;
   const normalised = value.replace(",", ".");
-  const parsed = Number.parseFloat(normalised);
+  const parsed = Number(normalised);
   return Number.isFinite(parsed) ? parsed : null;
 }
 
@@ -341,7 +348,7 @@ function validate(values: CekCepatFormValues): ValidationOutcome {
         resolvedAgeMonths = monthsSince(parsed);
         if (
           resolvedAgeMonths < 0 ||
-          resolvedAgeMonths > CEK_CEPAT_MAX_AGE_MONTHS
+          resolvedAgeMonths > TRACKER_FIELD_LIMITS.quickScreeningAgeMonths.max
         ) {
           errors.birthDate = CEK_CEPAT_COPY.validation.ageInvalid;
           resolvedAgeMonths = null;
@@ -351,8 +358,10 @@ function validate(values: CekCepatFormValues): ValidationOutcome {
   } else {
     if (
       values.ageMonths === null ||
-      values.ageMonths < 0 ||
-      values.ageMonths > CEK_CEPAT_MAX_AGE_MONTHS
+      typeof values.ageMonths !== "number" ||
+      !Number.isInteger(values.ageMonths) ||
+      values.ageMonths < TRACKER_FIELD_LIMITS.quickScreeningAgeMonths.min ||
+      values.ageMonths > TRACKER_FIELD_LIMITS.quickScreeningAgeMonths.max
     ) {
       errors.ageMonths = CEK_CEPAT_COPY.validation.ageInvalid;
     } else {
@@ -362,13 +371,19 @@ function validate(values: CekCepatFormValues): ValidationOutcome {
 
   if (
     values.weightKg !== null &&
-    (values.weightKg <= 0 || values.weightKg > 50)
+    (typeof values.weightKg !== "number" ||
+      !Number.isFinite(values.weightKg) ||
+      values.weightKg < TRACKER_FIELD_LIMITS.quickScreeningWeightKg.min ||
+      values.weightKg > TRACKER_FIELD_LIMITS.quickScreeningWeightKg.max)
   ) {
     errors.weightKg = CEK_CEPAT_COPY.validation.weightInvalid;
   }
   if (
     values.heightCm !== null &&
-    (values.heightCm <= 0 || values.heightCm > 150)
+    (typeof values.heightCm !== "number" ||
+      !Number.isFinite(values.heightCm) ||
+      values.heightCm < TRACKER_FIELD_LIMITS.quickScreeningHeightCm.min ||
+      values.heightCm > TRACKER_FIELD_LIMITS.quickScreeningHeightCm.max)
   ) {
     errors.heightCm = CEK_CEPAT_COPY.validation.heightInvalid;
   }
@@ -386,10 +401,14 @@ function validate(values: CekCepatFormValues): ValidationOutcome {
     payload: {
       sex: values.sex,
       ageMonths: resolvedAgeMonths,
-      weightKg: values.weightKg,
-      heightCm: values.heightCm,
+      weightKg: numericOrNull(values.weightKg),
+      heightCm: numericOrNull(values.heightCm),
     },
   };
+}
+
+function numericOrNull(value: NumericDraft): number | null {
+  return typeof value === "number" ? value : null;
 }
 
 function monthsSince(birth: Date): number {
