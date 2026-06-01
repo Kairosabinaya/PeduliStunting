@@ -12,6 +12,11 @@ import { cn } from "@/lib/cn";
  */
 const MARKER_SNAP_FRACTION = 0.02;
 
+/** Locale-formatted bound with thousands separators (e.g. 253.877). */
+function formatBound(value: number): string {
+  return value.toLocaleString("id-ID", { maximumFractionDigits: 2 });
+}
+
 export interface SliderProps extends Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
   "type" | "value" | "defaultValue" | "onChange"
@@ -93,6 +98,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
     ariaLabel,
     className,
     id,
+    disabled,
     ...rest
   },
   ref,
@@ -127,7 +133,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
           {display}
         </output>
         <span className="text-xs text-muted-foreground">
-          {min} – {max}
+          {formatBound(min)} – {formatBound(max)}
         </span>
       </div>
       {/* Custom visual slider: a transparent native input on top owns all
@@ -143,6 +149,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
           max={max}
           step={step}
           value={value}
+          disabled={disabled}
           aria-label={ariaLabel}
           aria-labelledby={ariaLabel ? `${inputId}-label` : undefined}
           aria-valuemin={min}
@@ -183,20 +190,29 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>(function Slider(
         />
         <span
           aria-hidden
-          className="pointer-events-none absolute left-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-primary"
+          className={cn(
+            "pointer-events-none absolute left-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full",
+            disabled ? "bg-muted-foreground/40" : "bg-accent",
+          )}
           style={{ width: positionAt(valueFraction) }}
         />
         {markerFraction !== null ? (
           <span
             aria-hidden
             title={markerLabel}
-            className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-primary bg-surface shadow-sm"
+            className={cn(
+              "pointer-events-none absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 bg-surface shadow-sm",
+              disabled ? "border-muted-foreground/40" : "border-accent",
+            )}
             style={{ left: positionAt(markerFraction) }}
           />
         ) : null}
         <span
           aria-hidden
-          className="pointer-events-none absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface bg-primary shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-focus peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background"
+          className={cn(
+            "pointer-events-none absolute top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-focus peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background",
+            disabled ? "bg-muted-foreground/50" : "bg-accent",
+          )}
           style={{ left: positionAt(valueFraction) }}
         />
       </div>

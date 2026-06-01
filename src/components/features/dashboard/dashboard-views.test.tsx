@@ -8,7 +8,11 @@ import type {
   InsightYearGroup,
 } from "@/application/region/insights";
 
-import { DASHBOARD_MOVERS, DASHBOARD_TIPE_GAP } from "@/config/dashboard";
+import {
+  BASELINE_FULL_NAMES,
+  DASHBOARD_MOVERS,
+  DASHBOARD_TIPE_GAP,
+} from "@/config/dashboard";
 
 import { BaselinesComparison } from "./baselines-comparison";
 import { CategoryLegend } from "./category-legend";
@@ -258,7 +262,9 @@ describe("ModelPerformance", () => {
 describe("BaselinesComparison", () => {
   it("highlights the chosen adaptive model", () => {
     render(<BaselinesComparison metrics={METRICS} />);
-    expect(screen.getByText("GTWENOLR adaptif")).toBeInTheDocument();
+    expect(
+      screen.getByText(BASELINE_FULL_NAMES.GTWENOLR_adaptif ?? ""),
+    ).toBeInTheDocument();
     expect(screen.getByText("Dipakai di sini")).toBeInTheDocument();
   });
 

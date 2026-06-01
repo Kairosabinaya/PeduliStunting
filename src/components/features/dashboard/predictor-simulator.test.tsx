@@ -156,8 +156,9 @@ describe("PredictorSimulator", () => {
       fit: { ...INITIAL_FIT, kodeBps: "3201", kabupatenKota: "Bandung" },
     });
     renderSimulator();
-    const select = screen.getByRole("combobox");
-    fireEvent.change(select, { target: { value: "3201" } });
+    // Open the searchable region combobox, then pick "Bandung".
+    fireEvent.click(screen.getByRole("button", { name: /pilih wilayah/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Bandung" }));
     await waitFor(() => {
       expect(loadRegionFitMock).toHaveBeenCalledWith({
         kodeBps: "3201",

@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 
 import type { RegionFitDto } from "@/application/model/dtos";
-import { DashboardFooter } from "@/components/features/dashboard/dashboard-footer";
 import { PrediksiView } from "@/components/features/dashboard/prediksi-view";
 import type { SimulatorRegionOption } from "@/components/features/dashboard/predictor-simulator";
 import {
   buildRegionOptions,
-  pickInitialSelection,
+  pickSelectionForRegion,
   sortSimulatorPredictors,
 } from "@/components/features/dashboard/simulator-data";
+import { PREDIKSI_REGION_PARAM } from "@/config/dashboard";
 import { makeUseCases } from "@/composition";
 import { asModelVersion } from "@/domain/shared/ids";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
@@ -21,7 +21,17 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function PrediksiPage() {
+interface PrediksiPageProps {
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function PrediksiPage({
+  searchParams,
+}: PrediksiPageProps) {
+  const params = await searchParams;
+  const rawRegion = params[PREDIKSI_REGION_PARAM];
+  const requestedRegion = typeof rawRegion === "string" ? rawRegion : null;
+
   const supabase = await createSupabaseServerClient();
   const useCases = makeUseCases(supabase);
 
@@ -51,7 +61,7 @@ export default async function PrediksiPage() {
     const fittedResult = await useCases.listFittedRegionYears.execute(version);
     const fitted = fittedResult.ok ? fittedResult.value : [];
     regionOptions = buildRegionOptions(regionsList, fitted);
-    const selection = pickInitialSelection(regionOptions);
+    const selection = pickSelectionForRegion(regionOptions, requestedRegion);
     if (selection !== null) {
       const fitResult = await useCases.getRegionFit.execute({
         version,
@@ -65,15 +75,12 @@ export default async function PrediksiPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <PrediksiView
-        predictors={predictors}
-        regions={regionOptions}
-        etaSign={etaSign}
-        initial={initial}
-        model={defaultModel}
-      />
-      <DashboardFooter />
-    </div>
+    <PrediksiView
+      predictors={predictors}
+      regions={regionOptions}
+      etaSign={etaSign}
+      initial={initial}
+      model={defaultModel}
+    />
   );
 }

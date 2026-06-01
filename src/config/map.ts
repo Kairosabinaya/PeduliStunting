@@ -231,6 +231,9 @@ export const MAP_DETAIL_COPY = {
   closeLabel: "Tutup",
   observedAxisLabel: "Observasi",
   prevalenceAxisLabel: "Prevalensi",
+  predictionCta: "Lihat prediksi wilayah ini",
+  predictionCtaAriaLabel: (region: string) =>
+    `Buka simulasi prediksi untuk ${region}`,
 } as const;
 
 /** Vertical year rail (sits at the edge of the map). */

@@ -42,7 +42,9 @@ export default async function PublicLayout({ children }: PublicLayoutProps) {
         // Soft brand wash at the top fading into the page so the dashboard
         // never reads as a flat white sheet. `--font-display` (Bricolage) is
         // exposed here so editorial headings can opt in via `font-display`.
-        "min-h-dvh bg-gradient-to-b from-brand-50/60 via-background to-background dark:from-brand-900/25",
+        // `overflow-x-clip` lets `.full-bleed` sections span the viewport width
+        // without their `100vw` introducing a horizontal scrollbar.
+        "min-h-dvh overflow-x-clip bg-gradient-to-b from-brand-50/60 via-background to-background dark:from-brand-900/25",
         displayFont.variable,
       )}
     >

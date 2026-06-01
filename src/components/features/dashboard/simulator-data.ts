@@ -64,3 +64,23 @@ export function pickInitialSelection(
     tahun: Math.max(...first.years),
   };
 }
+
+/**
+ * Pick the initial selection, honouring a requested region (its latest fitted
+ * year) when that region has a fit. Falls back to {@link pickInitialSelection}
+ * when the request is absent or the region is not in the fitted set — so a
+ * deep-link from the map (`/prediksi?wilayah=…`) opens on that region, and a
+ * stale or unfitted code degrades gracefully instead of showing nothing.
+ */
+export function pickSelectionForRegion(
+  options: readonly SimulatorRegionOption[],
+  requestedKodeBps: string | null,
+): { readonly kodeBps: string; readonly tahun: number } | null {
+  if (requestedKodeBps !== null) {
+    const match = options.find((option) => option.kodeBps === requestedKodeBps);
+    if (match !== undefined && match.years.length > 0) {
+      return { kodeBps: match.kodeBps, tahun: Math.max(...match.years) };
+    }
+  }
+  return pickInitialSelection(options);
+}

@@ -4,7 +4,7 @@ import { motion, useReducedMotion } from "motion/react";
 
 import { Badge } from "@/components/primitives/badge";
 import { EmptyState } from "@/components/primitives/empty-state";
-import { DASHBOARD_MODEL } from "@/config/dashboard";
+import { BASELINE_FULL_NAMES, DASHBOARD_MODEL } from "@/config/dashboard";
 import { parseBaselines } from "@/schemas/model";
 import { cn } from "@/lib/cn";
 
@@ -13,7 +13,7 @@ export interface BaselinesComparisonProps {
 }
 
 function formatName(name: string): string {
-  return name.replace(/_/gu, " ");
+  return BASELINE_FULL_NAMES[name] ?? name.replace(/_/gu, " ");
 }
 
 /**
@@ -71,8 +71,8 @@ export function BaselinesComparison({ metrics }: BaselinesComparisonProps) {
                 className={cn(
                   "h-full rounded-full",
                   highlighted
-                    ? "bg-gradient-to-r from-accent to-primary"
-                    : "bg-brand-300",
+                    ? "bg-gradient-to-r from-success to-accent"
+                    : "bg-accent/60",
                 )}
                 initial={animate ? { width: 0 } : false}
                 animate={{ width: `${pct}%` }}

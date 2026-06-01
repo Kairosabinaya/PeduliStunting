@@ -61,6 +61,9 @@ export function PredictorSliderGroup({
             >
               <div className="flex items-start justify-between gap-2">
                 <span className="text-sm font-medium leading-snug text-foreground">
+                  <span className="font-mono text-muted-foreground">
+                    {slider.code}
+                  </span>{" "}
                   {slider.name}
                 </span>
                 {slider.inactive ? (

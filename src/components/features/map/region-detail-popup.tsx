@@ -12,15 +12,19 @@
  * is merged into a single 2021–2024 timeline upstream by MapShell.
  */
 
+import Link from "next/link";
+
 import type { ModelPredictionDto } from "@/application/model/dtos";
 import type { RegionDto, RegionIndicatorsDto } from "@/application/region/dtos";
 import { Badge } from "@/components/primitives/badge";
+import { buttonVariants } from "@/components/primitives/button";
 import {
   CATEGORY_BADGE_TONE,
   CATEGORY_TEXT_CLASS,
   MAP_DETAIL_COPY,
   type MapSource,
 } from "@/config/map";
+import { prediksiRegionHref } from "@/config/dashboard";
 import { cn } from "@/lib/cn";
 
 import {
@@ -144,6 +148,29 @@ export function RegionDetailPopup({
         />
         <StatTile label={MAP_DETAIL_COPY.typeLabel} value={region.tipe} />
       </dl>
+
+      {/* Deep-link to the what-if simulator, pre-filtered to this region. */}
+      <Link
+        href={prediksiRegionHref(region.kodeBps)}
+        aria-label={MAP_DETAIL_COPY.predictionCtaAriaLabel(
+          region.kabupatenKota,
+        )}
+        className={cn(buttonVariants({ variant: "primary", fullWidth: true }))}
+      >
+        <span>{MAP_DETAIL_COPY.predictionCta}</span>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="h-4 w-4"
+        >
+          <path d="M5 12h14M13 5l7 7-7 7" />
+        </svg>
+      </Link>
 
       <MiniHistoryChart points={points} activeTahun={tahun} />
       {/* In the docked variant the article itself has no scroll, so a long

@@ -14,7 +14,6 @@ import { Card } from "@/components/primitives/card";
 import { EmptyState } from "@/components/primitives/empty-state";
 import { ErrorState } from "@/components/primitives/error-state";
 import { PageHeader } from "@/components/primitives/page-header";
-import { Select } from "@/components/primitives/select";
 import {
   SegmentedControl,
   type SegmentedControlItem,
@@ -32,6 +31,7 @@ import { cn } from "@/lib/cn";
 
 import { loadRegionFit } from "@/app/(public)/prediksi/actions";
 import { ModelEquationFit } from "./model-equation-fit";
+import { RegionCombobox } from "./region-combobox";
 import {
   PredictionResult,
   PREDICTION_BADGE_TONE,
@@ -114,17 +114,6 @@ export function PredictorSimulator({
     [predictors],
   );
 
-  const provinceGroups = useMemo(() => {
-    const groups = new Map<string, SimulatorRegionOption[]>();
-    for (const region of regions) {
-      const bucket = groups.get(region.provinsi);
-      if (bucket) bucket.push(region);
-      else groups.set(region.provinsi, [region]);
-    }
-    return [...groups.entries()]
-      .sort((a, b) => a[0].localeCompare(b[0], "id"))
-      .map(([provinsi, items]) => ({ provinsi, items }));
-  }, [regions]);
   const selectedRegion = regions.find((r) => r.kodeBps === selectedKode);
   const availableYears = selectedRegion?.years ?? [];
 
@@ -219,48 +208,68 @@ export function PredictorSimulator({
 
   return (
     <div>
-      {/* The region and year pickers live in the page-header actions slot, on
-          the same line as the description and outside the simulator card. */}
-      <PageHeader
-        eyebrow={eyebrow}
-        title={title}
-        description={description}
-        actions={
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <label className="flex items-center gap-3 text-sm sm:w-72">
-              <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {DASHBOARD_SIMULATOR.regionShortLabel}
-              </span>
-              <Select
-                value={selectedKode}
-                onChange={(event) => handleRegionChange(event.target.value)}
-                aria-label={DASHBOARD_SIMULATOR.regionLabel}
-              >
-                {provinceGroups.map((group) => (
-                  <optgroup key={group.provinsi} label={group.provinsi}>
-                    {group.items.map((region) => (
-                      <option key={region.kodeBps} value={region.kodeBps}>
-                        {region.kabupatenKota}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </Select>
-            </label>
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {DASHBOARD_SIMULATOR.yearLabel}
-              </span>
-              <SegmentedControl
-                ariaLabel={DASHBOARD_SIMULATOR.yearLabel}
-                value={String(selectedYear)}
-                onValueChange={(id) => load(selectedKode, Number(id))}
-                items={yearItems}
-              />
+      {/* Floating Control Panel: Sticky group containing the title, controls, and prediction result. 
+          Uses top-0 so it scrolls all the way up behind the floating header and touches the very edge of the screen before sticking. */}
+      <div className="sticky top-0 z-sticky mb-6 rounded-2xl border border-border/50 bg-surface/95 p-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-surface/80 md:p-6">
+        <PageHeader
+          eyebrow={eyebrow}
+          title={title}
+          description={description}
+          actions={
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div className="flex items-center gap-3 text-sm sm:w-72">
+                <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {DASHBOARD_SIMULATOR.regionShortLabel}
+                </span>
+                <RegionCombobox
+                  regions={regions}
+                  value={selectedKode}
+                  onChange={handleRegionChange}
+                  ariaLabel={DASHBOARD_SIMULATOR.regionLabel}
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {DASHBOARD_SIMULATOR.yearLabel}
+                </span>
+                <SegmentedControl
+                  ariaLabel={DASHBOARD_SIMULATOR.yearLabel}
+                  value={String(selectedYear)}
+                  onValueChange={(id) => load(selectedKode, Number(id))}
+                  items={yearItems}
+                />
+              </div>
             </div>
+          }
+        />
+
+        {fit !== null && prediction !== null && errorMessage === null ? (
+          <div className="mt-5">
+            <Card elevation="sm" padding="md" className="shadow-sm">
+              <PredictionResult
+                category={prediction.category}
+                probabilities={prediction.probabilities}
+                actualCategory={fit.actualCategory}
+                layout="split"
+                action={
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (fit !== null) setValues(fit.defaults);
+                    }}
+                    disabled={!isChanged}
+                  >
+                    <RotateCcw className="h-4 w-4" aria-hidden />
+                    {DASHBOARD_SIMULATOR.resetLabel}
+                  </Button>
+                }
+              />
+            </Card>
           </div>
-        }
-      />
+        ) : null}
+      </div>
 
       <Card padding="lg">
         {errorMessage !== null ? (
@@ -281,59 +290,33 @@ export function PredictorSimulator({
             )}
             aria-busy={isPending}
           >
-            {/* Prediction + model equation — one banner above the slider list,
-              shown on every size. The equation's general form (server KaTeX) and
-              the region's fitted form sit under the result. */}
-            <aside className="z-elevated mb-5">
+            {/* Model equations: Scrollable along with sliders */}
+            <aside className="mb-5">
               <Card elevation="sm" padding="md" className="space-y-4">
-                {prediction !== null ? (
-                  <PredictionResult
-                    category={prediction.category}
-                    probabilities={prediction.probabilities}
-                    actualCategory={fit.actualCategory}
-                    layout="split"
-                    action={
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          if (fit !== null) setValues(fit.defaults);
-                        }}
-                        disabled={!isChanged}
-                      >
-                        <RotateCcw className="h-4 w-4" aria-hidden />
-                        {DASHBOARD_SIMULATOR.resetLabel}
-                      </Button>
-                    }
-                  />
-                ) : null}
-                <div className="space-y-4 border-t border-border pt-4">
-                  <section className="space-y-2">
-                    <h3 className="text-sm font-semibold text-foreground">
-                      {SIMULATOR_EQUATION.generalTitle}
-                    </h3>
-                    {generalEquation}
-                  </section>
-                  <ModelEquationFit
-                    regionName={fit.kabupatenKota}
-                    tahun={fit.tahun}
-                    alfa1={fit.alfa1}
-                    alfa2={fit.alfa2}
-                    beta={fit.beta}
-                    nActive={fit.nActive}
-                  />
-                </div>
+                <section className="space-y-2">
+                  <h3 className="text-sm font-semibold text-foreground">
+                    {SIMULATOR_EQUATION.generalTitle}
+                  </h3>
+                  {generalEquation}
+                </section>
+                <ModelEquationFit
+                  regionName={fit.kabupatenKota}
+                  tahun={fit.tahun}
+                  alfa1={fit.alfa1}
+                  alfa2={fit.alfa2}
+                  beta={fit.beta}
+                  nActive={fit.nActive}
+                />
               </Card>
             </aside>
 
             {/* Sliders — two explicit columns so placement is deterministic:
               left holds Sosial-Ekonomi, Pendidikan, Gender; right holds
               Kesehatan and Konsumsi dan Ketahanan Pangan (with wider slider
-              spacing so both columns end at roughly the same height). The list
-              scrolls within a capped box on desktop so the panel fits roughly
-              one screen below the pinned prediction. */}
-            <div className="slider-scroll scrollbar-hide">
+              spacing so both columns end at roughly the same height). The full
+              list is shown — no capped scroll box — so every predictor is
+              visible without an inner scroll. */}
+            <div>
               <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
                 <div className="space-y-4">
                   {leftGroups.map((group) => (

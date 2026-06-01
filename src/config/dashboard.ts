@@ -24,6 +24,21 @@ export const PREDIKSI_HEADER = {
   description: "Geser indikator wilayah, lihat prediksinya berubah.",
 } as const;
 
+/** Canonical route for the prediction simulator. */
+export const PREDIKSI_ROUTE = "/prediksi";
+
+/**
+ * Query param the `/prediksi` page reads to pre-select a region by its BPS
+ * code. Mirrors the map's `wilayah` param so a deep-link from the map detail
+ * panel opens the simulator already filtered to the same region.
+ */
+export const PREDIKSI_REGION_PARAM = "wilayah";
+
+/** Deep-link to the simulator pre-filtered to a region. */
+export function prediksiRegionHref(kodeBps: string): string {
+  return `${PREDIKSI_ROUTE}?${PREDIKSI_REGION_PARAM}=${encodeURIComponent(kodeBps)}`;
+}
+
 /** Headline KPI tiles for the insight section. */
 export const DASHBOARD_KPI = {
   errorTitle: "Belum bisa menampilkan ringkasan",
@@ -245,6 +260,22 @@ export const DASHBOARD_MODEL = {
 } as const;
 
 /**
+ * Full, unabbreviated names for each baseline model in the comparison list,
+ * keyed by the raw `name` from `metrics.baselines`. Falls back to the
+ * underscore-stripped name when a key is missing.
+ */
+export const BASELINE_FULL_NAMES: Readonly<Record<string, string>> = {
+  OLR: "Ordinal Logistic Regression",
+  ENOLR: "Elastic Net Ordinal Logistic Regression",
+  GWOLR: "Geographically Weighted Ordinal Logistic Regression",
+  GTWOLR: "Geographically and Temporally Weighted Ordinal Logistic Regression",
+  GTWENOLR_tetap:
+    "Geographically and Temporally Weighted Elastic Net Ordinal Logistic Regression (bandwidth tetap)",
+  GTWENOLR_adaptif:
+    "Geographically and Temporally Weighted Elastic Net Ordinal Logistic Regression (bandwidth adaptif)",
+};
+
+/**
  * "Persamaan Model" content on /prediksi, merged into the prediction card.
  * Part A is the single general equation (server-rendered KaTeX from
  * {@link SIMULATOR_EQUATION.katexGeneral}); Part B is the per-region fitted
@@ -273,6 +304,8 @@ export const DASHBOARD_SIMULATOR = {
   regionLabel: "Pilih wilayah",
   regionShortLabel: "Wilayah",
   regionPlaceholder: "Pilih wilayah",
+  regionSearchPlaceholder: "Cari kabupaten/kota…",
+  regionSearchEmpty: "Wilayah tidak ditemukan.",
   yearLabel: "Tahun",
   loadError: "Belum bisa memuat data wilayah ini. Coba lagi sebentar.",
   noFitTitle: "Wilayah-tahun ini belum dimodelkan",
