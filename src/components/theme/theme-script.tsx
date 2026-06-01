@@ -17,15 +17,18 @@ const SCRIPT = `(() => {
  * applied to `<html>` on first paint and the user does not see a flash of
  * the wrong palette.
  *
- * In React 19 / Next.js 16, scripts rendered inside components are SSR-only
- * (React does not execute them on the client). The `suppressHydrationWarning`
- * prop tells React to skip the attribute mismatch check on this element so
- * the no-flash script can live in the server HTML without producing hydration
- * warnings. No `type` trickery is needed; React 19 handles this correctly.
+ * The `type` is `text/javascript` on the server (so the browser executes it
+ * synchronously while parsing the initial HTML, before first paint) and
+ * `text/plain` on the client. The client value stops React from flagging an
+ * executable `<script>` during reconciliation — the source of the dev warning
+ * "Encountered a script tag while rendering React component" — while
+ * `suppressHydrationWarning` silences the resulting attribute mismatch. This is
+ * the Next.js-documented no-flash pattern for the App Router.
  */
 export function ThemeScript() {
   return (
     <script
+      type={typeof window === "undefined" ? "text/javascript" : "text/plain"}
       suppressHydrationWarning
       dangerouslySetInnerHTML={{ __html: SCRIPT }}
     />

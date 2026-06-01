@@ -142,7 +142,10 @@ export function MythCard({ card }: MythCardProps) {
           aria-hidden={!showFact}
         >
           <div>
-            <span className="inline-flex items-center rounded-full bg-accent/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent-foreground">
+            {/* Solid accent fill: a translucent `bg-accent/20` collapsed to
+                dark-green-on-dark-green in dark mode. The solid `accent` /
+                `accent-foreground` pair clears AA in both themes. */}
+            <span className="inline-flex items-center rounded-full bg-accent px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent-foreground">
               {MYTHS_COPY.factBadge}
             </span>
             <p className="mt-4 text-base leading-relaxed text-foreground">
@@ -156,7 +159,7 @@ export function MythCard({ card }: MythCardProps) {
                 {card.sourceLabel}
               </span>
             </p>
-            <p className="inline-flex items-center gap-1 text-xs font-medium text-accent-foreground/80">
+            <p className="inline-flex items-center gap-1 text-xs font-medium text-foreground/70">
               <span aria-hidden="true">↺</span>
               <span>{MYTHS_COPY.backFaceHint}</span>
             </p>

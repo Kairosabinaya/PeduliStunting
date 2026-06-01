@@ -12,8 +12,7 @@ export const POSYANDU_COPY = {
   scheduleCta: "Lihat jadwal imunisasi dasar",
   scheduleAriaLabel: "Buka modal jadwal imunisasi dasar 0–24 bulan",
   modalTitle: "Jadwal imunisasi dasar 0–24 bulan",
-  modalSubtitle:
-    "Diadaptasi dari Buku KIA 2024 hal. 124–125. Klik atau hover sel untuk melihat penyakit yang dicegah.",
+  modalSubtitle: "Diadaptasi dari Buku KIA 2024 hal. 124–125.",
   modalCloseLabel: "Tutup",
   monthLabel: "Bulan ke-",
   legendDose: "Dosis terjadwal",

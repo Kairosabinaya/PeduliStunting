@@ -14,19 +14,11 @@ import { POSYANDU_COPY } from "@/config/edukasi";
 import {
   IMMUNIZATION_MONTHS,
   IMMUNIZATION_VACCINES,
-  type ImmunizationVaccineCategory,
 } from "@/data/edukasi/posyandu";
 
-const CATEGORY_TO_FILL: Record<ImmunizationVaccineCategory, string> = {
-  tuberculosis: "bg-primary",
-  polio: "bg-primary-soft",
-  combo: "bg-accent",
-  pneumococcal: "bg-edu-warm",
-  rotavirus: "bg-edu-flag",
-  measles: "bg-info",
-  hepatitis: "bg-success",
-  encephalitis: "bg-warning",
-};
+// One uniform colour for every scheduled dose — the project's brand green —
+// since the grid communicates WHEN a vaccine is due, not a per-vaccine category.
+const SCHEDULED_FILL = "bg-accent";
 
 function ImmunizationGrid() {
   return (
@@ -41,7 +33,7 @@ function ImmunizationGrid() {
           <tr>
             <th
               scope="col"
-              className="sticky left-0 z-elevated bg-surface text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+              className="sticky left-0 z-elevated w-36 bg-surface text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground"
             >
               {POSYANDU_COPY.monthLabel}
             </th>
@@ -61,17 +53,19 @@ function ImmunizationGrid() {
             <tr key={vaccine.id}>
               <th
                 scope="row"
-                className="sticky left-0 z-elevated bg-surface px-2 py-2 text-left text-xs font-semibold text-foreground"
+                className="sticky left-0 z-elevated w-36 bg-surface px-2 py-2 text-left align-middle text-xs font-semibold text-foreground"
                 title={`${POSYANDU_COPY.preventsLabel}: ${vaccine.prevents}`}
               >
-                {vaccine.label}
+                {/* Capped at two lines so every row is the same height and the
+                    vertical dose bars line up uniformly across the grid. */}
+                <span className="line-clamp-2">{vaccine.label}</span>
               </th>
               {IMMUNIZATION_MONTHS.map((month) => {
                 const scheduled = vaccine.recommendedMonths.includes(month);
                 return (
                   <td
                     key={month}
-                    className="h-6 w-6 rounded-sm align-middle"
+                    className="h-12 w-6 rounded-sm align-middle"
                     aria-label={
                       scheduled
                         ? `${vaccine.label} terjadwal pada bulan ke-${month}. Mencegah ${vaccine.prevents}.`
@@ -79,7 +73,7 @@ function ImmunizationGrid() {
                     }
                   >
                     <span
-                      className={`block h-full w-full rounded-sm ${scheduled ? CATEGORY_TO_FILL[vaccine.category] : "bg-muted/40"}`}
+                      className={`block h-full w-full rounded-sm ${scheduled ? SCHEDULED_FILL : "bg-muted/40"}`}
                       title={
                         scheduled
                           ? `${vaccine.label} · bulan ke-${month}`

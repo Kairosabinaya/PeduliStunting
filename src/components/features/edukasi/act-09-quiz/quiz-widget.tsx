@@ -244,7 +244,10 @@ function QuestionCard({ state, dispatch, reduceMotion }: QuestionCardProps) {
                     onClick={() =>
                       dispatch({ type: "answer", choice: option.key })
                     }
-                    className="border-2 border-white/30 bg-white text-foreground transition-colors hover:bg-white/90"
+                    // The button is always white, so the label needs a fixed
+                    // dark colour — `text-foreground` flips to light in dark
+                    // mode and vanished against the white fill.
+                    className="border-2 border-white/30 bg-white text-edu-night transition-colors hover:bg-white/90"
                   >
                     {option.label}
                   </Button>
