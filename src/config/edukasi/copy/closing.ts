@@ -5,10 +5,16 @@
  */
 
 export const CLOSING_COPY = {
-  eyebrow: "Penutup",
+  eyebrow: "LANGKAH BERIKUTNYA",
   footnoteBackLabel: "Kembali ke teks",
   footnoteBackAriaTemplate: (number: number): string =>
     `Kembali ke teks dari catatan kaki ${number}`,
+  /**
+   * Transient flag shown on the footnote entry the reader just jumped to,
+   * so that with the inline marker reduced to a uniform asterisk they can
+   * still tell which source was referenced.
+   */
+  footnoteTargetFlag: "Sumber yang dirujuk",
   headline: [
     { kind: "text", value: "Setiap anak Indonesia berhak" } as const,
     { kind: "break" } as const,
@@ -22,20 +28,18 @@ export const CLOSING_COPY = {
   ],
   body: [
     "Mulai dari satu keluarga, satu posyandu, satu kabupaten.",
-    "Perubahan dimulai dari pemahaman yang sama.",
+    "Pemahaman tentang stunting bisa menjadi awal perubahan yang lebih besar.",
   ],
   ctaPrimary: { label: "Pelajari peta nasional", href: "/map" },
   ctaSecondary: { label: "Mulai pantau anak", href: "/tracker" },
   footnoteHeading: "Sumber & catatan",
-  footnoteIntro:
-    "Setiap angka di halaman ini terhubung ke sumber resmi. Klik nomor superscript pada teks untuk melompat ke entri terkait.",
+  footnoteIntro: "Setiap angka di halaman ini terhubung ke sumber resmi.",
   metaCopyright: "© 2026 Peduli Stunting",
   metaSources: "Sumber data: SSGI 2024, SKI 2023, BPS RI, Buku KIA 2024",
   metaIndependent: "Independen, non-komersial",
   lastUpdatedPrefix: "Halaman ini terakhir diperbarui",
   lastUpdatedDate: "28 Mei 2026",
-  caveat:
-    "Data dapat berubah seiring rilis survei berikutnya. Kontribusi koreksi terbuka melalui repositori publik.",
+  caveat: "Data dapat berubah seiring waktu.",
 } as const;
 
 export type ClosingHeadlineWord =

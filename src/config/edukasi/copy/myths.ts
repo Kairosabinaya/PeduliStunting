@@ -5,7 +5,7 @@
  */
 
 export const MYTHS_COPY = {
-  eyebrow: "Pause dulu",
+  eyebrow: "CEK FAKTANYA",
   headlineLead: "Banyak",
   headlineHighlights: [
     { value: "mitos", variant: "danger" as const },
@@ -14,7 +14,7 @@ export const MYTHS_COPY = {
   headlineMid: "yang masih beredar. Buka kartu untuk mengungkap",
   headlineTail: "nya.",
   helperText:
-    "Setiap kartu mengutip halaman atau survei sumber sehingga Anda bisa memeriksa sendiri.",
+    "Kenali informasi yang sering terdengar benar, padahal belum tentu tepat.",
   mythBadge: "Mitos",
   factBadge: "Fakta",
   showFactCta: "Lihat fakta",

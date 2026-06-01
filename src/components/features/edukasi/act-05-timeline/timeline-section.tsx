@@ -25,6 +25,8 @@ import {
   resolveTimelineFrame,
   type TimelineFrame,
 } from "@/data/edukasi/timeline";
+import { cn } from "@/lib/cn";
+import { useMediaQuery } from "@/lib/use-media-query";
 
 import { ActSection } from "../primitives/act-section";
 import { FadeInView } from "../primitives/fade-in-view";
@@ -33,7 +35,19 @@ import { PinnedSection, usePinnedProgress } from "../primitives/pinned-section";
 
 import { TimelineIllustration } from "./timeline-illustration";
 
-function TimelinePanel({ frame }: { readonly frame: TimelineFrame }) {
+function TimelinePanel({
+  frame,
+  fixedHeight = false,
+}: {
+  readonly frame: TimelineFrame;
+  /**
+   * When true (the pinned scroll layout), the panel locks to the shared
+   * `.edu-frame-box` height and its body region scrolls internally so the
+   * panel never resizes between frames. When false (the reduced-motion
+   * stacked list), the panel grows naturally to fit its content.
+   */
+  readonly fixedHeight?: boolean;
+}) {
   return (
     <motion.aside
       key={frame.id}
@@ -41,42 +55,68 @@ function TimelinePanel({ frame }: { readonly frame: TimelineFrame }) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -8 }}
       transition={{ duration: 0.4, ease: [0.2, 0, 0, 1] }}
-      // Fixed `min-h` keeps the panel the same height every frame so the
-      // illustration column to the left of it doesn't bounce up and down
-      // during scroll-driven frame swaps. Content shorter than min-h
-      // leaves whitespace at the bottom; longer content overflows
-      // gracefully without forcing a layout shift on neighbouring frames.
-      className="flex min-h-[26rem] flex-col rounded-2xl border border-border bg-surface p-6 shadow-sm sm:min-h-[28rem] sm:p-7"
+      className={cn(
+        "flex flex-col rounded-2xl border border-border bg-surface p-6 shadow-sm sm:p-7",
+        fixedHeight && "edu-frame-box",
+      )}
     >
-      <p className="eyebrow">{frame.railLabel}</p>
-      <h3 className="mt-2 text-xl font-bold text-foreground sm:text-2xl">
-        {frame.title}
-      </h3>
-      <p className="mt-3 text-sm font-medium uppercase tracking-wider text-primary">
-        {frame.sizeAnalogy}
+      <div className="shrink-0">
+        <p className="eyebrow">{frame.railLabel}</p>
+        <h3 className="mt-2 text-xl font-bold text-foreground sm:text-2xl">
+          {frame.title}
+        </h3>
+        <p className="mt-3 text-sm font-medium uppercase tracking-wider text-primary">
+          {frame.sizeAnalogy}
+        </p>
+      </div>
+      {/* Body + actions scroll inside the fixed box when pinned, so longer
+          frames never push the panel taller than its neighbours. */}
+      <div
+        className={cn(
+          "mt-4",
+          fixedHeight && "min-h-0 flex-1 overflow-y-auto pr-1",
+        )}
+      >
+        <p className="text-base leading-relaxed text-foreground/85">
+          {frame.body}
+        </p>
+        <h4 className="mt-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {TIMELINE_COPY.actionsTitle}
+        </h4>
+        <ul className="mt-2 space-y-1.5 text-sm leading-relaxed text-foreground/85">
+          {frame.actions.map((action) => (
+            <li key={action} className="grid grid-cols-[1rem_1fr] gap-2">
+              <span aria-hidden="true" className="text-primary">
+                •
+              </span>
+              <span>{action}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <p className="mt-4 shrink-0 text-xs text-muted-foreground">
+        {frame.sourceLabel}
       </p>
-      <p className="mt-4 text-base leading-relaxed text-foreground/85">
-        {frame.body}
-      </p>
-      <h4 className="mt-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        {TIMELINE_COPY.actionsTitle}
-      </h4>
-      <ul className="mt-2 space-y-1.5 text-sm leading-relaxed text-foreground/85">
-        {frame.actions.map((action) => (
-          <li key={action} className="grid grid-cols-[1rem_1fr] gap-2">
-            <span aria-hidden="true" className="text-primary">
-              •
-            </span>
-            <span>{action}</span>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-5 text-xs text-muted-foreground">{frame.sourceLabel}</p>
     </motion.aside>
   );
 }
 
-function ReducedMotionTimeline() {
+/**
+ * Static, naturally-flowing timeline used both for reduced-motion users and on
+ * mobile/tablet (below `lg`), where the pinned-scroll layout cannot fit two
+ * fixed-height frames inside a single viewport without clipping. Each frame
+ * stacks on phones and sits side-by-side from `sm` up; the page scrolls
+ * normally so nothing is ever cut off.
+ *
+ * @param showReducedMotionNote - render the reduced-motion explainer aside.
+ *   Only true when this fallback is chosen because the user prefers reduced
+ *   motion (not merely because the viewport is small).
+ */
+function StaticTimeline({
+  showReducedMotionNote,
+}: {
+  readonly showReducedMotionNote: boolean;
+}) {
   return (
     <ActSection id="act-5" eyebrow={TIMELINE_COPY.eyebrow} maxWidth="wide">
       <FadeInView as="div" className="max-w-prose">
@@ -90,21 +130,23 @@ function ReducedMotionTimeline() {
         <p className="mt-5 text-base text-muted-foreground sm:text-lg">
           {TIMELINE_COPY.helper}
         </p>
-        <aside className="mt-6 rounded-xl border border-border bg-surface p-4 text-sm text-muted-foreground">
-          <p className="font-semibold text-foreground">
-            {TIMELINE_COPY.reduceMotionFallbackTitle}
-          </p>
-          <p className="mt-1">{TIMELINE_COPY.reduceMotionFallbackBody}</p>
-        </aside>
+        {showReducedMotionNote ? (
+          <aside className="mt-6 rounded-xl border border-border bg-surface p-4 text-sm text-muted-foreground">
+            <p className="font-semibold text-foreground">
+              {TIMELINE_COPY.reduceMotionFallbackTitle}
+            </p>
+            <p className="mt-1">{TIMELINE_COPY.reduceMotionFallbackBody}</p>
+          </aside>
+        ) : null}
       </FadeInView>
 
-      <ol className="mt-12 space-y-6">
+      <ol className="mt-12 space-y-10 sm:space-y-6">
         {TIMELINE_FRAMES.map((frame) => (
           <li
             key={frame.id}
             className="grid items-start gap-6 sm:grid-cols-[1fr_2fr]"
           >
-            <div className="relative aspect-square w-full max-w-xs">
+            <div className="relative mx-auto aspect-square w-full max-w-[16rem] sm:mx-0 sm:max-w-xs">
               <TimelineIllustration frame={frame} />
             </div>
             <TimelinePanel frame={frame} />
@@ -115,12 +157,39 @@ function ReducedMotionTimeline() {
   );
 }
 
+/**
+ * Map a day count to the progress-rail fraction (0–1) on an EQUAL-segment
+ * scale: each of the six frames owns one sixth of the rail regardless of how
+ * many calendar days it spans. This keeps the fill, the segment dividers, and
+ * the evenly-spaced labels in lockstep — the day-proportional mapping used
+ * before bunched the three trimesters into the leftmost ~27% while the labels
+ * were spread evenly, so nothing lined up. The "HARI KE-" counter still shows
+ * the real day, so no information is lost.
+ */
+function timelineRailFraction(day: number): number {
+  const count = TIMELINE_FRAMES.length;
+  for (let index = 0; index < count; index += 1) {
+    const frame = TIMELINE_FRAMES[index];
+    if (!frame) continue;
+    if (day < frame.endDayExclusive || index === count - 1) {
+      const span = frame.endDayExclusive - frame.startDay;
+      const intra =
+        span > 0 ? Math.min(1, Math.max(0, (day - frame.startDay) / span)) : 0;
+      return (index + intra) / count;
+    }
+  }
+  return 1;
+}
+
 function TimelineInner() {
   const progress = usePinnedProgress();
   const day = useTransform(progress, (latest) =>
     Math.round(latest * TIMELINE_TOTAL_DAYS),
   );
-  const railWidth = useTransform(progress, [0, 1], ["0%", "100%"]);
+  const railWidth = useTransform(
+    day,
+    (latest) => `${(timelineRailFraction(latest) * 100).toFixed(2)}%`,
+  );
 
   const fallbackFrame = TIMELINE_FRAMES[0];
   const [activeFrameId, setActiveFrameId] = useState<string>(
@@ -155,14 +224,14 @@ function TimelineInner() {
       </header>
 
       <div className="grid items-center gap-8 lg:grid-cols-[5fr_4fr] lg:gap-12">
-        <div className="relative aspect-square w-full max-w-md justify-self-center">
+        <div className="edu-frame-box relative w-full max-w-md justify-self-center">
           <AnimatePresence mode="wait" initial={false}>
             <TimelineIllustration frame={activeFrame} />
           </AnimatePresence>
         </div>
         <div className="relative">
           <AnimatePresence mode="wait" initial={false}>
-            <TimelinePanel frame={activeFrame} />
+            <TimelinePanel frame={activeFrame} fixedHeight />
           </AnimatePresence>
         </div>
       </div>
@@ -187,9 +256,11 @@ function TimelineInner() {
             className="absolute inset-y-0 left-0 rounded-full bg-primary"
             style={{ width: railWidth }}
           />
+          {/* Dividers sit on the equal-segment boundaries (between each of the
+              six phases) so they line up with the centred labels below. */}
           <div className="pointer-events-none absolute inset-0">
-            {TIMELINE_FRAMES.map((frame) => {
-              const leftPct = (frame.startDay / TIMELINE_TOTAL_DAYS) * 100;
+            {TIMELINE_FRAMES.slice(1).map((frame, index) => {
+              const leftPct = ((index + 1) / TIMELINE_FRAMES.length) * 100;
               return (
                 <span
                   key={`marker-${frame.id}`}
@@ -201,9 +272,19 @@ function TimelineInner() {
             })}
           </div>
         </div>
-        <div className="mt-2 flex justify-between text-[10px] uppercase tracking-wider text-foreground/70">
+        {/* One equal column per phase, label centred in its column, so each
+            label sits under its segment. The active phase is emphasised. */}
+        <div className="mt-2 grid grid-cols-6 text-center text-[10px] uppercase tracking-wider text-foreground/70">
           {TIMELINE_FRAMES.map((frame) => (
-            <span key={`rail-${frame.id}`}>{frame.railLabel}</span>
+            <span
+              key={`rail-${frame.id}`}
+              className={cn(
+                "px-0.5",
+                frame.id === activeFrame.id && "font-semibold text-primary",
+              )}
+            >
+              {frame.railLabel}
+            </span>
           ))}
         </div>
       </div>
@@ -213,7 +294,13 @@ function TimelineInner() {
 
 export function TimelineSection() {
   const reduceMotion = useReducedMotion();
-  if (reduceMotion) return <ReducedMotionTimeline />;
+  // Below `lg` the pinned-scroll layout cannot fit the illustration plus the
+  // panel inside one viewport, so it clipped on phones/tablets. Fall back to
+  // the static stacked timeline there; keep the pinned scroll for desktop.
+  const isBelowDesktop = useMediaQuery("(max-width: 1023px)");
+
+  if (reduceMotion) return <StaticTimeline showReducedMotionNote />;
+  if (isBelowDesktop) return <StaticTimeline showReducedMotionNote={false} />;
 
   return (
     <PinnedSection

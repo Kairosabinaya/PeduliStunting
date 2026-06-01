@@ -41,8 +41,7 @@ export function ChildDashboard({ data }: ChildDashboardProps) {
   } = data;
 
   return (
-    <div className="space-y-6">
-      <ChildSummary measurements={measurements} />
+    <div className="space-y-5">
       <ModuleGrid
         childAgeMonths={childAgeMonths}
         childDetailRoutes={{
@@ -58,7 +57,14 @@ export function ChildDashboard({ data }: ChildDashboardProps) {
         childMilestones={childMilestones}
         nutritionEvents={nutritionEvents}
       />
-      <GrowthChartCard child={child} measurements={measurements} />
+      <div className="grid gap-4 lg:grid-cols-4 lg:items-stretch">
+        <div className="lg:col-span-3 lg:flex lg:flex-col">
+          <GrowthChartCard child={child} measurements={measurements} />
+        </div>
+        <div className="lg:col-span-1">
+          <ChildSummary measurements={measurements} />
+        </div>
+      </div>
     </div>
   );
 }

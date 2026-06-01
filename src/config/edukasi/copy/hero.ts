@@ -7,7 +7,7 @@
  */
 
 export const HERO_COPY = {
-  eyebrow: "Edukasi pencegahan stunting",
+  eyebrow: "Mulai dari 1.000 hari pertama",
   /**
    * Headline rendered word-by-word in ACT 1. Each entry is a `HeadlineWord`
    * variant so the renderer can apply HighlightWord variants without parsing
@@ -32,22 +32,36 @@ export const HERO_COPY = {
     { kind: "text", value: "." } as const,
   ],
   lead: [
-    { kind: "text", value: "Tapi angka itu " } as const,
-    {
-      kind: "highlight",
-      value: "bisa berubah",
-      variant: "success" as const,
-    } as const,
+    { kind: "text", value: "" } as const,
     {
       kind: "text",
-      value: " — dan jendela waktunya jelas: 1.000 hari pertama kehidupan.",
+      value: "Angka itu masih bisa berubah. Kuncinya ada pada ",
     } as const,
+    {
+      kind: "highlight",
+      value: "1.000 hari pertama",
+      variant: "success" as const,
+    } as const,
+    { kind: "text", value: " kehidupan." } as const,
   ],
   factLine:
-    "19,8% balita Indonesia mengalami stunting per SSGI 2024 — setara 4.482.340 anak.",
+    "Berdasarkan SSGI 2024, 19,8% balita Indonesia mengalami stunting, sekitar 4.482.340 anak.",
   scrollPrompt: "Scroll untuk memahami",
   illustrationAlt:
     "Ilustrasi garis seorang ibu memangku bayinya, dikelilingi simbol gizi dan pengukuran.",
+} as const;
+
+/**
+ * Hero illustration raster asset. Square (1000x1000) PNG with a transparent
+ * background, so the consuming component sits it on a light backing panel that
+ * stays light in dark mode (the dark line-art would otherwise vanish). Path
+ * lives here so the component stays free of hardcoded asset strings
+ * (project guidelines §2).
+ */
+export const HERO_ILLUSTRATION = {
+  src: "/edukasi/Hero - Ibu pangku anak.png",
+  width: 1000,
+  height: 1000,
 } as const;
 
 /**

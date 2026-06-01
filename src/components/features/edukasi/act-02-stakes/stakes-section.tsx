@@ -25,13 +25,13 @@ import {
   useTransform,
 } from "motion/react";
 
-import { STAKES_COPY, BRAIN_DEVELOPMENT_TILES } from "@/config/edukasi";
+import { STAKES_COPY } from "@/config/edukasi";
 
 import { AnimatedCounter } from "../primitives/animated-counter";
 import { FootnoteRef } from "../primitives/footnote-ref";
 import { HighlightWord } from "../primitives/highlight-word";
-import { StatTile } from "../primitives/stat-tile";
 
+import { BrainGrowthCurve } from "./brain-growth-curve";
 import { SynapseCanvas } from "./synapse-canvas";
 
 const FRAMES_COUNT = 3;
@@ -135,15 +135,14 @@ export function StakesSection() {
           <SynapseCanvas ariaLabel="Animasi titik dan garis menggambarkan koneksi saraf yang terbentuk di otak bayi." />
         </motion.div>
 
-        <p className="eyebrow absolute inset-x-0 top-24 z-elevated text-center">
-          {STAKES_COPY.eyebrow}
-        </p>
-
-        {/* Frame 1 — intro headline */}
+        {/* Frame 1 — intro headline (eyebrow sits directly above so the
+            "MENGAPA 1.000 HARI?" kicker reads as a label for the headline
+            rather than floating, detached, at the top of the viewport). */}
         <motion.div
           style={{ opacity: introOpacity, y: introY }}
           className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center"
         >
+          <p className="eyebrow mb-4 text-sm">{STAKES_COPY.eyebrow}</p>
           <h2 className="section-headline max-w-3xl text-balance text-foreground">
             {STAKES_COPY.frameIntro.title}
           </h2>
@@ -193,24 +192,7 @@ export function StakesSection() {
             </HighlightWord>
             <FootnoteRef id={STAKES_COPY.frameImplication.footnoteId} />
           </p>
-          <div className="grid w-full max-w-4xl gap-4 sm:grid-cols-3">
-            {BRAIN_DEVELOPMENT_TILES.map((tile) => (
-              <StatTile
-                key={tile.caption}
-                value={
-                  <AnimatedCounter
-                    value={tile.value}
-                    suffix={tile.suffix}
-                    className="inline-block"
-                    enabled={cardsActive}
-                  />
-                }
-                caption={tile.caption}
-                helper={tile.helper}
-                tone={tile.tone}
-              />
-            ))}
-          </div>
+          <BrainGrowthCurve enabled={cardsActive} />
           <p className="mt-8 max-w-2xl text-balance text-center text-base leading-relaxed text-muted-foreground">
             {STAKES_COPY.frameImplication.closing}
           </p>

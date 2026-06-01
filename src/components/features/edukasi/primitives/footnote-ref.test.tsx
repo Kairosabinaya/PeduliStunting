@@ -6,11 +6,11 @@ import { EDUKASI_FOOTNOTES } from "@/data/edukasi/footnotes";
 import { FootnoteRef } from "./footnote-ref";
 
 describe("FootnoteRef", () => {
-  it("renders the 1-based footnote number for a known id", () => {
+  it("renders a uniform asterisk marker for a known id", () => {
     const first = EDUKASI_FOOTNOTES[0];
     if (!first) throw new Error("expected at least one footnote");
     render(<FootnoteRef id={first.id} />);
-    expect(screen.getByText("1")).toBeInTheDocument();
+    expect(screen.getByText("*")).toBeInTheDocument();
   });
 
   it("renders nothing when the id is unknown so the page stays renderable", () => {

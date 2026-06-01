@@ -65,6 +65,8 @@ export interface MapShellProps {
   readonly displayName: string | null;
   /** Session email used as the fallback identity surface. */
   readonly email: string | null;
+  /** Profile avatar URL. Null falls the avatar back to initials. */
+  readonly avatarUrl: string | null;
 }
 
 export function MapShell({
@@ -77,6 +79,7 @@ export function MapShell({
   bounds,
   displayName,
   email,
+  avatarUrl,
 }: MapShellProps) {
   const { tahun, sumber, wilayah, isInteracting } = useMapState();
   // `accountOpen` swaps the bottom-sheet content from the map summary/
@@ -287,6 +290,7 @@ export function MapShell({
         regions={regions}
         displayName={displayName}
         email={email}
+        avatarUrl={avatarUrl}
         accountOpen={accountOpen}
         onAccountClick={onAccountClick}
         hideYearRow={isDesktop}
@@ -347,6 +351,7 @@ export function MapShell({
             <AccountMenuPanel
               displayName={displayName}
               email={email}
+              avatarUrl={avatarUrl}
               onItemSelected={onMenuItemSelected}
             />
           ) : (

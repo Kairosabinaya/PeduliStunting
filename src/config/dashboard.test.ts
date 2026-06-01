@@ -3,30 +3,20 @@ import { describe, expect, it } from "vitest";
 import {
   DASHBOARD_ERROR,
   DASHBOARD_FOOTER,
-  DASHBOARD_HEADER,
   DASHBOARD_INSIGHTS,
   DASHBOARD_METRIC_TILES,
   DASHBOARD_MODEL,
-  DASHBOARD_SECTIONS,
   DASHBOARD_SIMULATOR,
+  DATA_HEADER,
+  PREDIKSI_HEADER,
 } from "./dashboard";
 
 describe("dashboard config", () => {
-  it("exposes header copy with eyebrow, title, and description", () => {
-    expect(DASHBOARD_HEADER.eyebrow.length).toBeGreaterThan(0);
-    expect(DASHBOARD_HEADER.title.length).toBeGreaterThan(0);
-    expect(DASHBOARD_HEADER.description.length).toBeGreaterThan(0);
-  });
-
-  it("declares all three sections with eyebrow/title/description", () => {
-    for (const section of [
-      DASHBOARD_SECTIONS.insight,
-      DASHBOARD_SECTIONS.model,
-      DASHBOARD_SECTIONS.simulator,
-    ]) {
-      expect(section.eyebrow.length).toBeGreaterThan(0);
-      expect(section.title.length).toBeGreaterThan(0);
-      expect(section.description.length).toBeGreaterThan(0);
+  it("exposes Data and Prediksi header copy with eyebrow, title, and description", () => {
+    for (const header of [DATA_HEADER, PREDIKSI_HEADER]) {
+      expect(header.eyebrow.length).toBeGreaterThan(0);
+      expect(header.title.length).toBeGreaterThan(0);
+      expect(header.description.length).toBeGreaterThan(0);
     }
   });
 
@@ -59,6 +49,7 @@ describe("dashboard config", () => {
   it("uses positive ranking limits", () => {
     expect(DASHBOARD_INSIGHTS.rankingLimit).toBeGreaterThan(0);
     expect(DASHBOARD_INSIGHTS.provinceLimit).toBeGreaterThan(0);
+    expect(DASHBOARD_INSIGHTS.moverLimit).toBeGreaterThan(0);
   });
 
   it("provides simulator and error copy", () => {

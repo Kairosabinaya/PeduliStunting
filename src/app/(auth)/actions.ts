@@ -7,6 +7,7 @@ import {
   CHECK_EMAIL_ROUTE,
   DEFAULT_AUTHENTICATED_ROUTE,
   SIGN_IN_ROUTE,
+  SIGNED_OUT_REDIRECT_ROUTE,
   UPDATE_PASSWORD_ROUTE,
 } from "@/config/routes";
 import { env } from "@/config/env";
@@ -274,9 +275,13 @@ export async function updatePassword(
   redirect(DEFAULT_AUTHENTICATED_ROUTE);
 }
 
-/** Sign-out. Clears the session and bounces the user back to sign-in. */
+/**
+ * Sign-out. Clears the session and returns the user to the landing page with
+ * the post-sign-out notice flag so the landing can confirm the action with a
+ * toast.
+ */
 export async function signOut(): Promise<void> {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
-  redirect(SIGN_IN_ROUTE);
+  redirect(SIGNED_OUT_REDIRECT_ROUTE);
 }

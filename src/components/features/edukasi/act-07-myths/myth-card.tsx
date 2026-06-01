@@ -1,9 +1,9 @@
 "use client";
 
-// Client component because the flip relies on `useState` and motion's
-// per-axis rotate transforms.
+// Client component because the flip relies on `useState`, a scroll listener,
+// and motion's per-axis rotate transforms.
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
 import { MYTHS_COPY } from "@/config/edukasi";
@@ -17,22 +17,74 @@ export interface MythCardProps {
 }
 
 /**
- * Flip card that hides the fact behind the myth until interacted with.
+ * Flip card showing a myth on the front and the corrective fact on the back.
+ * It flips automatically as the reader scrolls: when the card's vertical
+ * centre crosses the middle of the viewport it turns to the fact, and turns
+ * back to the myth when scrolled above that line again — so scrolling the
+ * section reveals myth then fact for every card, and scrolling back up lets
+ * the reader re-read either side. A manual click still toggles the card
+ * (handy for revisiting a face); the next scroll crossing re-syncs it.
+ *
  * Implemented as a `<button>` (not a `<div>` with `role="button"`) so it
  * comes with native Enter/Space handling and focus management out of the
  * box, satisfying project guidelines §20 "Semantic HTML before ARIA".
  *
- * Reduced-motion users see an instant swap instead of the 3D flip.
+ * Reduced-motion users get the legacy click-only behaviour with an instant
+ * swap instead of the scroll-driven 3D flip.
  */
 export function MythCard({ card }: MythCardProps) {
   const [showFact, setShowFact] = useState(false);
   const reduceMotion = useReducedMotion();
   const baseId = useId();
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  // Scroll-driven flip. We mirror the native-scroll-listener pattern used by
+  // ACT 2 (see `stakes-section.tsx`) rather than motion's `useScroll`, which
+  // proved unreliable under the page's Lenis smooth-scroll. We only write
+  // state when the card crosses the viewport centre (a threshold change), so
+  // a manual click stays put until the reader scrolls across that line again.
+  const lastScrollFactRef = useRef(false);
+  useEffect(() => {
+    if (reduceMotion) return;
+    if (typeof window === "undefined") return;
+    let rafId = 0;
+    let pending = false;
+    const compute = () => {
+      pending = false;
+      const node = buttonRef.current;
+      if (!node) return;
+      const rect = node.getBoundingClientRect();
+      // Skip until the card has a measurable box (avoids a spurious flip on
+      // mount before layout, and in zero-size test environments).
+      if (rect.height === 0) return;
+      const cardCenter = rect.top + rect.height / 2;
+      const viewportCenter = window.innerHeight / 2;
+      const scrollFact = cardCenter <= viewportCenter;
+      if (scrollFact !== lastScrollFactRef.current) {
+        lastScrollFactRef.current = scrollFact;
+        setShowFact(scrollFact);
+      }
+    };
+    const onScroll = () => {
+      if (pending) return;
+      pending = true;
+      rafId = requestAnimationFrame(compute);
+    };
+    compute();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", compute);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", compute);
+      cancelAnimationFrame(rafId);
+    };
+  }, [reduceMotion]);
 
   const toggle = () => setShowFact((prev) => !prev);
 
   return (
     <button
+      ref={buttonRef}
       type="button"
       onClick={toggle}
       aria-pressed={showFact}

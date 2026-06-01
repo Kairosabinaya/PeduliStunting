@@ -20,6 +20,8 @@ export interface DashboardTooltipProps {
   readonly label?: string | number;
   /** Suffix appended to each value (e.g. "%"). */
   readonly unit?: string;
+  /** Decimal places for numeric values (default 1; use 0 for counts). */
+  readonly decimals?: number;
 }
 
 export function DashboardTooltip({
@@ -27,6 +29,7 @@ export function DashboardTooltip({
   payload,
   label,
   unit = "",
+  decimals = 1,
 }: DashboardTooltipProps) {
   if (active !== true || payload === undefined || payload.length === 0) {
     return null;
@@ -49,7 +52,9 @@ export function DashboardTooltip({
             />
             <span className="text-foreground">{entry.name}</span>
             <span className="ml-auto pl-4 font-mono font-semibold tabular-nums text-foreground">
-              {typeof entry.value === "number" ? entry.value.toFixed(1) : "-"}
+              {typeof entry.value === "number"
+                ? entry.value.toFixed(decimals)
+                : "-"}
               {unit}
             </span>
           </li>

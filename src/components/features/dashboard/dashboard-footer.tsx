@@ -14,12 +14,6 @@ export function DashboardFooter() {
         </span>{" "}
         {DASHBOARD_FOOTER.sources}
       </p>
-      <p>
-        <span className="font-medium text-foreground">
-          {DASHBOARD_FOOTER.modelLabel}:
-        </span>{" "}
-        {DASHBOARD_FOOTER.model}
-      </p>
     </footer>
   );
 }

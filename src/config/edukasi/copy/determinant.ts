@@ -4,19 +4,14 @@
  */
 
 export const DETERMINANT_COPY = {
-  eyebrow: "Bukan satu sebab, tapi banyak",
-  headlineLead: "Stunting bukan sekadar",
-  headlineHighlight: { value: "kurang makan", variant: "danger" as const },
-  body: "Ia adalah hasil dari rantai sebab yang saling berkaitan — dari kebijakan negara, kondisi sanitasi, sampai keputusan-keputusan kecil di meja makan.",
+  eyebrow: "BANYAK HAL YANG BERKONTRIBUSI PADA STUNTING",
+  headlineLead: "Stunting bukan hanya tentang",
+  headlineHighlight: { value: "kurang makan", variant: "primary" as const },
+  body: "Stunting terjadi karena banyak hal saling berkaitan, mulai dari kebijakan, sanitasi, pola asuh, hingga pilihan makanan di rumah.",
   bodyFootnoteId: "fn-who-framework",
-  helper: "Klik tiap lapisan untuk membuka penjelasan dan bukti riset terkait.",
+  helper: "Geser untuk menelusuri tiap lapisan dan bukti risetnya.",
   outcomeLabel: "Stunting",
   closeButton: "Tutup",
   evidenceLabel: "Bukti",
-  layerSelectLabel: "Pilih lapisan determinant",
-  quintileTitle: "Disparitas berdasarkan kelompok ekonomi",
-  quintileDescription:
-    "Prevalensi stunting per quintile ekonomi (SSGI 2024). Q2-Q5 adalah estimasi monoton; angka eksak menunggu rilis BKPK Kemenkes RI.",
-  quintileAxisLabel: "Prevalensi (%)",
-  quintileNationalLabel: "Rata-rata nasional 19,8%",
+  layerSelectLabel: "Lima lapisan determinan stunting menurut WHO",
 } as const;

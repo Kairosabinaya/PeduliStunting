@@ -35,9 +35,6 @@ export const ACCOUNT_FORM_COPY = {
   themeLabel: "Tema tampilan",
   themeHint:
     "Mengikuti sistem berarti menyesuaikan mode terang/gelap perangkat Anda.",
-  localeLabel: "Bahasa",
-  localeHint:
-    "Saat ini hanya Bahasa Indonesia. Bahasa lain akan ditambahkan menyusul.",
   submit: "Simpan perubahan",
   resetDirty: "Batalkan",
   successMessage: "Perubahan profil berhasil disimpan.",
@@ -49,14 +46,10 @@ export const ACCOUNT_DETAILS_COPY = {
     "Informasi identitas yang ditautkan ke sesi masuk Anda saat ini.",
   emailLabel: "Email",
   emailMissing: "Email tidak tersedia",
-  roleLabel: "Peran",
   userIdLabel: "ID pengguna",
 } as const;
 
 export const ACCOUNT_SIGN_OUT_COPY = {
-  cardTitle: "Sesi & keamanan",
-  cardDescription:
-    "Keluar dari perangkat ini. Anda harus masuk kembali untuk mengakses data anak.",
   triggerLabel: "Keluar dari akun",
   dialogTitle: "Keluar dari akun?",
   dialogDescription:

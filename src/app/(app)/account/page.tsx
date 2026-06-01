@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import type { UserProfileDto } from "@/application/account/dtos";
-import { Badge } from "@/components/primitives/badge";
 import {
   Card,
   CardContent,
@@ -21,8 +20,6 @@ import {
   ACCOUNT_ERROR_STATE_COPY,
   ACCOUNT_FORM_COPY,
   ACCOUNT_PAGE_COPY,
-  ACCOUNT_SIGN_OUT_COPY,
-  ROLE_LABEL,
 } from "@/config/account";
 import { fetchCurrentProfile } from "@/lib/account-cache";
 import { requireServerSession } from "@/lib/server-session";
@@ -95,9 +92,8 @@ async function AccountContent() {
         </Card>
       </section>
 
-      <aside className="space-y-6">
+      <aside className="lg:sticky lg:top-24 lg:self-start">
         <AccountDetailsCard profile={result.value} email={session.email} />
-        <SignOutCard />
       </aside>
     </div>
   );
@@ -129,16 +125,6 @@ function AccountDetailsCard({ profile, email }: AccountDetailsCardProps) {
           </div>
           <div className="flex flex-col gap-1">
             <dt className="text-xs uppercase tracking-wide text-muted-foreground">
-              {ACCOUNT_DETAILS_COPY.roleLabel}
-            </dt>
-            <dd>
-              <Badge tone={profile.role === "admin" ? "primary" : "neutral"}>
-                {ROLE_LABEL[profile.role]}
-              </Badge>
-            </dd>
-          </div>
-          <div className="flex flex-col gap-1">
-            <dt className="text-xs uppercase tracking-wide text-muted-foreground">
               {ACCOUNT_DETAILS_COPY.userIdLabel}
             </dt>
             <dd className="break-all font-mono text-xs text-muted-foreground">
@@ -147,20 +133,7 @@ function AccountDetailsCard({ profile, email }: AccountDetailsCardProps) {
           </div>
         </dl>
       </CardContent>
-    </Card>
-  );
-}
-
-function SignOutCard() {
-  return (
-    <Card padding="lg">
-      <CardHeader>
-        <CardTitle>{ACCOUNT_SIGN_OUT_COPY.cardTitle}</CardTitle>
-        <CardDescription>
-          {ACCOUNT_SIGN_OUT_COPY.cardDescription}
-        </CardDescription>
-      </CardHeader>
-      <CardFooter className="mt-5 justify-start">
+      <CardFooter className="justify-start border-t border-border pt-5">
         <SignOutDialog />
       </CardFooter>
     </Card>
@@ -195,28 +168,20 @@ function AccountSkeleton() {
           </div>
         </div>
       </Card>
-      <div className="space-y-6">
-        <Card padding="lg">
-          <div className="space-y-3">
-            <Skeleton className="h-5 w-32" />
-            <Skeleton className="h-4 w-full max-w-xs" />
-          </div>
-          <div className="mt-5 space-y-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        </Card>
-        <Card padding="lg">
-          <div className="space-y-3">
-            <Skeleton className="h-5 w-40" />
-            <Skeleton className="h-4 w-full max-w-xs" />
-          </div>
-          <div className="mt-5 flex justify-start">
-            <Skeleton className="h-11 w-40" />
-          </div>
-        </Card>
-      </div>
+      <Card padding="lg" className="self-start">
+        <div className="space-y-3">
+          <Skeleton className="h-5 w-32" />
+          <Skeleton className="h-4 w-full max-w-xs" />
+        </div>
+        <div className="mt-5 space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="mt-5 flex justify-start border-t border-border pt-5">
+          <Skeleton className="h-11 w-40" />
+        </div>
+      </Card>
     </div>
   );
 }

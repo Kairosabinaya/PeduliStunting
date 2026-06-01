@@ -9,6 +9,7 @@ import { useId, useState, useCallback, useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
 import { cn } from "@/lib/cn";
+import { SegmentedControl } from "@/components/primitives/segmented-control";
 import { GUIDE_COPY } from "@/config/edukasi";
 import { GUIDE_TABS, type GuideTab } from "@/data/edukasi/guide-content";
 
@@ -19,63 +20,96 @@ const CALLOUT_TONE_CLASS = {
 } as const;
 
 function GuideTabContent({ tab }: { readonly tab: GuideTab }) {
+  // Mobile only: which advice category column is visible. Desktop (lg+) shows
+  // all four side by side. GuideTabContent is keyed by phase in AgeTabs, so it
+  // remounts on phase change and this resets to the first category.
+  const [activeCategory, setActiveCategory] = useState("c0");
+  const catBase = useId();
+  const categoryItems = tab.columns.map((column, index) => ({
+    id: `c${index}`,
+    label: column.heading,
+  }));
+
   return (
     <div>
-      <h3 className="text-2xl font-bold text-foreground sm:text-3xl">
+      <h3 className="text-xl font-bold text-foreground sm:text-2xl">
         {tab.headline}
       </h3>
-      <p className="mt-3 max-w-3xl text-base text-muted-foreground sm:text-lg">
+      <p className="mt-2 max-w-3xl text-sm text-muted-foreground sm:text-base">
         {tab.lead}
       </p>
+
       {tab.callouts.length > 0 ? (
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
           {tab.callouts.map((callout) => (
             <aside
               key={callout.title}
               className={cn(
-                "rounded-xl border p-4",
+                "rounded-xl border p-3 transition-[transform,box-shadow] duration-fast hover:-translate-y-0.5 hover:shadow-sm motion-reduce:transition-none motion-reduce:hover:translate-y-0",
                 CALLOUT_TONE_CLASS[callout.tone],
               )}
             >
               <p className="text-xs font-semibold uppercase tracking-wider text-primary">
                 {callout.title}
               </p>
-              <p className="mt-2 text-sm leading-relaxed">{callout.body}</p>
+              <p className="mt-1 text-xs leading-relaxed">{callout.body}</p>
             </aside>
           ))}
         </div>
       ) : null}
-      {/* Each column wraps as its own card. Previous layout had four bare
-          columns side-by-side at lg+, which under variable content lengths
-          read as a wall of bullets with no visual containment — "berantakan".
-          A 2-column grid with bordered cards gives clean groupings, breath,
-          and consistent rhythm regardless of list length. */}
-      <div className="mt-8 grid gap-4 md:grid-cols-2">
-        {tab.columns.map((column) => (
-          <div
-            key={column.heading}
-            className="rounded-2xl border border-border bg-surface/60 p-5 sm:p-6"
-          >
-            <h4 className="text-sm font-bold tracking-tight text-foreground">
-              {column.heading}
-            </h4>
-            <ul className="mt-4 space-y-2.5 text-sm leading-relaxed text-foreground/85">
-              {column.items.map((item) => (
-                <li key={item} className="grid grid-cols-[1rem_1fr] gap-2">
-                  <span
-                    aria-hidden="true"
-                    className="leading-relaxed text-primary"
-                  >
-                    •
-                  </span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+
+      {/* Mobile: a category switcher so only one column shows at a time,
+          keeping each phase within one screen. Hidden on lg+ where the four
+          columns sit side by side. */}
+      <div className="mt-5 lg:hidden">
+        <SegmentedControl
+          idBase={catBase}
+          ariaLabel={GUIDE_COPY.categorySelectLabel}
+          value={activeCategory}
+          onValueChange={setActiveCategory}
+          items={categoryItems}
+        />
       </div>
-      <p className="mt-8 text-xs text-muted-foreground">
+
+      {/* Four advice columns. No inner scroll — the column grows to fit its
+          bullets; on desktop the `lg:grid-cols-4` grid stretches all four to
+          the tallest so they stay equal height, with `.edu-guide-col` giving a
+          min-height floor. On mobile only the active category shows. */}
+      <div className="mt-4 grid gap-4 lg:mt-6 lg:grid-cols-4">
+        {tab.columns.map((column, index) => {
+          const categoryId = `c${index}`;
+          const isActive = categoryId === activeCategory;
+          return (
+            <div
+              key={column.heading}
+              id={`${catBase}-${categoryId}-panel`}
+              className={cn(
+                "edu-guide-col rounded-2xl border border-border bg-surface/60 p-4 sm:p-5",
+                !isActive && "hidden lg:block",
+              )}
+            >
+              <h4 className="text-sm font-bold tracking-tight text-foreground">
+                {column.heading}
+              </h4>
+              <ul className="mt-3 space-y-2.5 text-sm leading-relaxed text-foreground/85">
+                {column.items.map((item) => (
+                  <li key={item} className="grid grid-cols-[1rem_1fr] gap-2">
+                    <span
+                      aria-hidden="true"
+                      className="leading-relaxed text-primary"
+                    >
+                      •
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
+
+      <p className="mt-5 text-xs text-muted-foreground">
         {GUIDE_COPY.sourceLabel}: {tab.sourceLabel}
       </p>
     </div>
@@ -113,7 +147,9 @@ export function AgeTabs() {
         role="tablist"
         aria-label={GUIDE_COPY.tablistAriaLabel}
         id={tablistId}
-        className="flex flex-wrap gap-2 border-b border-border pb-3"
+        // Single no-wrap line: all five phases fit on one row on desktop and
+        // scroll horizontally on narrow phones (no two-line wrap).
+        className="scrollbar-hide flex gap-2 overflow-x-auto border-b border-border pb-3"
       >
         {GUIDE_TABS.map((tab, index) => {
           const active = activeId === tab.id;
@@ -133,17 +169,14 @@ export function AgeTabs() {
               onClick={() => setActiveId(tab.id)}
               onKeyDown={(event) => handleKeyDown(event, index)}
               className={cn(
-                "rounded-full px-4 py-2 text-sm font-semibold transition-colors",
+                "whitespace-nowrap rounded-full px-4 py-2 text-sm font-semibold transition-colors",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
                 active
                   ? "bg-primary text-primary-foreground shadow-sm"
                   : "bg-surface text-foreground hover:bg-surface-muted",
               )}
             >
-              <span>{tab.label}</span>
-              <span className="ml-2 hidden text-xs font-medium uppercase tracking-wider opacity-70 sm:inline">
-                {tab.subLabel}
-              </span>
+              {tab.label}
             </button>
           );
         })}

@@ -1,12 +1,12 @@
 import type { ChildDto } from "@/application/tracking/dtos";
 import { ErrorState } from "@/components/primitives/error-state";
-import { SegmentedNav } from "@/components/primitives/segmented-control";
-import { TRACKER_LIST_COPY, trackerSelectChildRoute } from "@/config/tracker";
+import { TRACKER_LIST_COPY } from "@/config/tracker";
 import { asChildId, type UserId } from "@/domain/shared/ids";
 import { loadChildOverview } from "@/lib/child-overview";
 
 import { ChildDashboard } from "./child-dashboard";
 import { ChildDetailHeader } from "./child-detail-header";
+import { ChildSwitcher } from "./child-switcher";
 
 export interface TrackerChildSectionProps {
   /** The account's children. Must be non-empty (the page handles the empty case). */
@@ -55,14 +55,7 @@ export async function TrackerChildSection({
   return (
     <div className="space-y-6">
       {childProfiles.length > 1 ? (
-        <SegmentedNav
-          ariaLabel={TRACKER_LIST_COPY.switcherAriaLabel}
-          items={childProfiles.map((child) => ({
-            href: trackerSelectChildRoute(child.id),
-            label: child.name,
-            active: child.id === selected.id,
-          }))}
-        />
+        <ChildSwitcher childProfiles={childProfiles} selectedId={selected.id} />
       ) : null}
       <ChildDetailHeader child={selected} showBackLink={false} />
       <ChildDashboard data={overview.value} />

@@ -89,6 +89,7 @@ export function SignInForm({ redirectTo, errorCode }: SignInFormProps) {
               name="password"
               autoComplete="current-password"
               required
+              placeholder={AUTH_LABELS.passwordPlaceholder}
               errorMessage={fieldError(state, "password")}
               leftIcon={<LockIcon />}
             />

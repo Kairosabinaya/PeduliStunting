@@ -21,70 +21,71 @@ export const EDUKASI_MYTHS: readonly MythCardData[] = [
     id: "myth-stunting-only-height",
     mythText: "Stunting hanya soal anak yang pendek.",
     factText:
-      "Stunting adalah gagal tumbuh akibat kekurangan gizi kronis. Ia memengaruhi otak dan kemampuan belajar — bukan sekadar tinggi badan.",
+      "Stunting adalah gagal tumbuh akibat kekurangan gizi kronis. Dampaknya bukan hanya pada tinggi badan, tetapi juga pada perkembangan otak dan kemampuan belajar anak.",
     sourceLabel: "Buku KIA 2024, hal. 4",
   },
   {
     id: "myth-water-under-6-months",
-    mythText: "Bayi sebelum 6 bulan boleh diberi air putih supaya tidak haus.",
+    mythText: "Bayi di bawah 6 bulan boleh diberi air putih supaya tidak haus.",
     factText:
-      "ASI sudah memenuhi seluruh kebutuhan cairan dan gizi bayi. Memberi air, makanan, atau minuman lain sebelum 6 bulan justru memicu masalah gizi, termasuk stunting.",
+      "ASI sudah mencukupi kebutuhan cairan dan gizi bayi sampai usia 6 bulan. Air, madu, makanan, atau minuman lain tidak perlu diberikan kecuali atas anjuran tenaga kesehatan.",
     sourceLabel: "Buku KIA 2024, hal. 38",
   },
   {
     id: "myth-reversible-anytime",
     mythText: "Stunting bisa dipulihkan kapan saja, bahkan saat anak remaja.",
     factText:
-      "Jendela emas pencegahan adalah 1.000 hari pertama — konsepsi hingga usia 2 tahun. Setelahnya, dampak pada otak dan tinggi badan sulit dikejar.",
+      "Pencegahan paling penting dilakukan pada 1.000 hari pertama kehidupan, sejak kehamilan hingga anak berusia 2 tahun. Setelah lewat masa ini, dampaknya lebih sulit dikejar.",
     sourceLabel: "Buku KIA 2024, hal. 4",
   },
   {
     id: "myth-throw-kolostrum",
-    mythText: "Membuang ASI pertama (kolostrum) karena terlihat kotor.",
+    mythText:
+      "ASI pertama atau kolostrum sebaiknya dibuang karena terlihat kotor.",
     factText:
-      "Kolostrum sangat berharga — kaya gizi dan antibodi yang melindungi bayi dari penyakit. Tidak boleh dibuang.",
+      "Kolostrum justru sangat berharga. ASI pertama ini kaya gizi dan antibodi yang membantu melindungi bayi dari penyakit.",
     sourceLabel: "Buku KIA 2024, hal. 25",
   },
   {
     id: "myth-mpasi-rice-only",
-    mythText: "MPASI cukup dengan bubur nasi dan sayur — daging belum perlu.",
+    mythText: "MPASI cukup dengan bubur nasi dan sayur. Daging belum perlu.",
     factText:
-      "MPASI harus kaya protein hewani: daging, telur, ikan. Protein hewani membawa asam amino esensial untuk pertumbuhan otak.",
+      "MPASI perlu mengandung protein hewani seperti daging, telur, dan ikan. Protein hewani penting untuk mendukung pertumbuhan tubuh dan perkembangan otak anak.",
     sourceLabel: "Buku KIA 2024, hal. 56–57",
   },
   {
     id: "myth-fat-baby-safe",
     mythText: "Anak gemuk pasti tidak stunting.",
     factText:
-      "Stunting diukur dari panjang/tinggi badan terhadap usia. Anak yang berat cukup pun bisa stunting bila tinggi di bawah standar WHO.",
+      "Stunting dilihat dari panjang atau tinggi badan anak terhadap usianya. Anak dengan berat badan cukup pun tetap bisa stunting jika tinggi badannya berada di bawah standar.",
     sourceLabel: "Buku KIA 2024, hal. 4",
   },
   {
     id: "myth-only-poor-families",
-    mythText: "Stunting hanya masalah keluarga miskin.",
+    mythText: "Stunting hanya terjadi pada keluarga miskin.",
     factText:
-      "Quintile termiskin memang 29,8% (lebih tinggi dari nasional 19,8%), tapi stunting bukan eksklusif keluarga miskin. Pola asuh, ASI, MPASI, dan akses kesehatan menentukan di setiap lapisan ekonomi.",
+      "Risiko stunting memang lebih tinggi pada keluarga miskin, tetapi stunting bisa terjadi di berbagai lapisan ekonomi. Pola asuh, ASI, MPASI, sanitasi, dan akses layanan kesehatan tetap berperan penting.",
     sourceLabel: "SSGI 2024",
   },
   {
     id: "myth-formula-equals-asi",
-    mythText: "Pemberian susu formula sama bagusnya dengan ASI.",
+    mythText: "Susu formula sama baiknya dengan ASI.",
     factText:
-      "ASI mengandung gizi dan antibodi yang tidak bisa direplikasi oleh susu formula. WHO dan Kemenkes merekomendasikan ASI eksklusif 0–6 bulan lalu lanjut hingga 2 tahun.",
+      "ASI mengandung gizi dan antibodi yang tidak dapat sepenuhnya digantikan oleh susu formula. Karena itu, bayi dianjurkan mendapat ASI eksklusif sampai usia 6 bulan dan dilanjutkan hingga 2 tahun atau lebih.",
     sourceLabel: "Buku KIA 2024, hal. 34",
   },
   {
     id: "myth-short-equals-stunting",
-    mythText: "Anak pendek pasti stunting — pasti karena gizi.",
+    mythText: "Anak pendek pasti stunting karena kurang gizi.",
     factText:
-      "Tidak semua anak pendek adalah stunting; faktor genetik berperan. Diagnosis harus berdasarkan pengukuran tenaga kesehatan dengan standar WHO sesuai usia.",
+      "Tidak semua anak pendek mengalami stunting. Faktor genetik juga bisa berpengaruh. Status stunting perlu ditentukan melalui pengukuran oleh tenaga kesehatan dengan standar yang sesuai usia.",
     sourceLabel: "Buku KIA 2024, hal. 4",
   },
   {
     id: "myth-immunization-unrelated",
     mythText: "Imunisasi tidak ada hubungannya dengan stunting.",
     factText:
-      "Imunisasi dasar yang tidak lengkap berkorelasi dengan risiko stunting yang lebih tinggi — karena infeksi berulang mengganggu penyerapan gizi.",
+      "Imunisasi membantu melindungi anak dari infeksi berulang. Jika anak sering sakit, penyerapan gizi dapat terganggu dan risiko stunting bisa meningkat.",
     sourceLabel: "SKI 2023",
   },
 ] as const;

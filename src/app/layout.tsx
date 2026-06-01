@@ -4,6 +4,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "@/styles/globals.css";
 import { APP_NAME, APP_LOCALE } from "@/config/app";
 import { BROWSER_THEME_COLOR } from "@/config/theme";
+import { Toaster } from "@/components/primitives/toaster";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ThemeScript } from "@/components/theme/theme-script";
 
@@ -67,7 +68,10 @@ export default function RootLayout({
         <ThemeScript />
       </head>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

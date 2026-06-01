@@ -17,6 +17,7 @@ import {
 import type {
   ChildRepository,
   NewChildInput,
+  UpdateChildInput,
 } from "@/domain/tracking/ports/child-repository";
 import type {
   GrowthMeasurementRepository,
@@ -39,10 +40,10 @@ class InMemoryChildRepository implements ChildRepository {
     this.children.set(child.id, child);
   }
 
-  async listByOwner(userId: string): Promise<Result<readonly Child[], AppError>> {
-    return ok(
-      [...this.children.values()].filter((c) => c.userId === userId),
-    );
+  async listByOwner(
+    userId: string,
+  ): Promise<Result<readonly Child[], AppError>> {
+    return ok([...this.children.values()].filter((c) => c.userId === userId));
   }
 
   async findById(
@@ -55,6 +56,10 @@ class InMemoryChildRepository implements ChildRepository {
   }
 
   async create(_input: NewChildInput): Promise<Result<Child, AppError>> {
+    throw new Error("not implemented in this fake");
+  }
+
+  async update(_input: UpdateChildInput): Promise<Result<Child, AppError>> {
     throw new Error("not implemented in this fake");
   }
 
@@ -82,7 +87,9 @@ class InMemoryMeasurementRepository implements GrowthMeasurementRepository {
     this.counter += 1;
     return ok(
       new GrowthMeasurement({
-        id: asMeasurementId(`00000000-0000-0000-0000-${String(this.counter).padStart(12, "0")}`),
+        id: asMeasurementId(
+          `00000000-0000-0000-0000-${String(this.counter).padStart(12, "0")}`,
+        ),
         userId: input.userId,
         childId: input.childId,
         measuredAt: input.measuredAt,

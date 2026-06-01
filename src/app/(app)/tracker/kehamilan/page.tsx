@@ -3,13 +3,7 @@ import type { Metadata } from "next";
 import { PregnancyOverviewHeader } from "@/components/features/tracker/pregnancy-overview-header";
 import { PregnancyProfileForm } from "@/components/features/tracker/pregnancy-profile-form";
 import { PregnancyTabs } from "@/components/features/tracker/pregnancy-tabs";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/primitives/card";
+import { Card } from "@/components/primitives/card";
 import { ErrorState } from "@/components/primitives/error-state";
 import { PageHeader } from "@/components/primitives/page-header";
 import { PREGNANCY_PAGE_COPY } from "@/config/tracker";
@@ -34,7 +28,7 @@ export default async function PregnancyPage() {
 
   if (!pregnancyResult.ok) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-5">
         <PageHeader
           eyebrow={PREGNANCY_PAGE_COPY.eyebrow}
           title={PREGNANCY_PAGE_COPY.title}
@@ -52,22 +46,22 @@ export default async function PregnancyPage() {
 
   if (!pregnancy) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-5">
         <PageHeader
           eyebrow={PREGNANCY_PAGE_COPY.eyebrow}
           title={PREGNANCY_PAGE_COPY.title}
           description={PREGNANCY_PAGE_COPY.description}
         />
-        <Card>
-          <CardHeader>
-            <CardTitle>{PREGNANCY_PAGE_COPY.emptyTitle}</CardTitle>
-            <CardDescription>
+        <Card elevation="sm" padding="md" className="space-y-4">
+          <header>
+            <h2 className="text-base font-semibold text-foreground">
+              {PREGNANCY_PAGE_COPY.emptyTitle}
+            </h2>
+            <p className="text-sm text-muted-foreground">
               {PREGNANCY_PAGE_COPY.emptyDescription}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <PregnancyProfileForm pregnancy={null} />
-          </CardContent>
+            </p>
+          </header>
+          <PregnancyProfileForm pregnancy={null} />
         </Card>
       </div>
     );
@@ -80,7 +74,7 @@ export default async function PregnancyPage() {
 
   if (!eventsResult.ok) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-5">
         <PageHeader
           eyebrow={PREGNANCY_PAGE_COPY.eyebrow}
           title={PREGNANCY_PAGE_COPY.title}
@@ -109,14 +103,12 @@ export default async function PregnancyPage() {
         description={PREGNANCY_PAGE_COPY.description}
       />
       <PregnancyOverviewHeader overview={overview} />
-      <Card>
-        <CardContent>
-          <PregnancyTabs
-            pregnancy={pregnancy}
-            overview={overview}
-            events={eventsResult.value}
-          />
-        </CardContent>
+      <Card elevation="sm" padding="md">
+        <PregnancyTabs
+          pregnancy={pregnancy}
+          overview={overview}
+          events={eventsResult.value}
+        />
       </Card>
     </div>
   );

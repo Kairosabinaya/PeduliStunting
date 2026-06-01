@@ -19,6 +19,10 @@ export const LANDING_ROUTE = "/";
 export const PUBLIC_ROUTES: readonly string[] = [
   LANDING_ROUTE,
   "/map",
+  "/data",
+  "/prediksi",
+  // Kept public so old links hitting /dashboard pass the proxy gate and reach
+  // its server-side redirect to /data.
   "/dashboard",
   "/auth/sign-in",
   "/auth/sign-up",

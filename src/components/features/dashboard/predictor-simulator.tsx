@@ -3,30 +3,40 @@
 // Client component: recomputes the prediction synchronously on every slider
 // drag and fetches a region-year's local fit on selection (useTransition).
 
-import { useMemo, useState, useTransition } from "react";
+import { RotateCcw } from "lucide-react";
+import { useMemo, useState, useTransition, type ReactNode } from "react";
 
 import type { RegionFitDto } from "@/application/model/dtos";
 import type { IndicatorDefinitionDto } from "@/application/region/dtos";
 import { Badge } from "@/components/primitives/badge";
 import { Button } from "@/components/primitives/button";
+import { Card } from "@/components/primitives/card";
 import { EmptyState } from "@/components/primitives/empty-state";
 import { ErrorState } from "@/components/primitives/error-state";
+import { PageHeader } from "@/components/primitives/page-header";
 import { Select } from "@/components/primitives/select";
 import {
   SegmentedControl,
   type SegmentedControlItem,
 } from "@/components/primitives/segmented-control";
-import { DASHBOARD_SIMULATOR } from "@/config/dashboard";
-import { CATEGORY_BADGE_TONE } from "@/config/map";
-import { MODEL_DIMENSIONS } from "@/domain/region/entities/indicator-definition";
+import {
+  DASHBOARD_SIMULATOR,
+  SIMULATOR_DIMENSION_GROUPS,
+  SIMULATOR_EQUATION,
+} from "@/config/dashboard";
 import {
   predictOrdinal,
   type PredictorMetaPoint,
 } from "@/domain/model/services/ordinal-predictor";
 import { cn } from "@/lib/cn";
 
-import { loadRegionFit } from "@/app/(public)/dashboard/actions";
-import { PredictionResult } from "./prediction-result";
+import { loadRegionFit } from "@/app/(public)/prediksi/actions";
+import { ModelEquationFit } from "./model-equation-fit";
+import {
+  PredictionResult,
+  PREDICTION_BADGE_TONE,
+  PREDICTION_BAR_CLASS,
+} from "./prediction-result";
 import {
   PredictorSliderGroup,
   type SimulatorSlider,
@@ -40,6 +50,12 @@ export interface SimulatorRegionOption {
 }
 
 export interface PredictorSimulatorProps {
+  /** Page-header copy; the region/year controls render in the header actions. */
+  readonly eyebrow: string;
+  readonly title: string;
+  readonly description: string;
+  /** Server-rendered KaTeX general equation, shown in the equation section. */
+  readonly generalEquation: ReactNode;
   /** The 20 predictors, pre-sorted by display order (X1..X20). */
   readonly predictors: readonly IndicatorDefinitionDto[];
   readonly etaSign: number;
@@ -71,24 +87,11 @@ function stepFor(min: number, max: number): number {
   return range > 0 ? range / 200 : 1;
 }
 
-function regionsByProvince(
-  regions: readonly SimulatorRegionOption[],
-): readonly {
-  readonly provinsi: string;
-  readonly items: readonly SimulatorRegionOption[];
-}[] {
-  const groups = new Map<string, SimulatorRegionOption[]>();
-  for (const region of regions) {
-    const bucket = groups.get(region.provinsi);
-    if (bucket) bucket.push(region);
-    else groups.set(region.provinsi, [region]);
-  }
-  return [...groups.entries()]
-    .sort((a, b) => a[0].localeCompare(b[0], "id"))
-    .map(([provinsi, items]) => ({ provinsi, items }));
-}
-
 export function PredictorSimulator({
+  eyebrow,
+  title,
+  description,
+  generalEquation,
   predictors,
   etaSign,
   regions,
@@ -111,33 +114,55 @@ export function PredictorSimulator({
     [predictors],
   );
 
-  const provinceGroups = useMemo(() => regionsByProvince(regions), [regions]);
+  const provinceGroups = useMemo(() => {
+    const groups = new Map<string, SimulatorRegionOption[]>();
+    for (const region of regions) {
+      const bucket = groups.get(region.provinsi);
+      if (bucket) bucket.push(region);
+      else groups.set(region.provinsi, [region]);
+    }
+    return [...groups.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0], "id"))
+      .map(([provinsi, items]) => ({ provinsi, items }));
+  }, [regions]);
   const selectedRegion = regions.find((r) => r.kodeBps === selectedKode);
   const availableYears = selectedRegion?.years ?? [];
 
   const sliderGroups = useMemo(() => {
     const beta = fit?.beta ?? [];
-    return MODEL_DIMENSIONS.map((dimension) => ({
-      dimension,
-      sliders: predictors
-        .map((predictor, index): SimulatorSlider | null => {
-          if (predictor.model.modelDimension !== dimension) return null;
-          const min = predictor.model.origMin ?? 0;
-          const max = predictor.model.origMax ?? min + 1;
-          return {
-            index,
-            code: predictor.code,
-            name: predictor.name,
-            unit: predictor.unit,
-            min,
-            max,
-            step: stepFor(min, max),
-            inactive: (beta[index] ?? 0) === 0,
-          };
-        })
-        .filter((slider): slider is SimulatorSlider => slider !== null),
+    const defaults = fit?.defaults ?? [];
+    const buildSlider = (
+      predictor: IndicatorDefinitionDto,
+      index: number,
+    ): SimulatorSlider => {
+      const min = predictor.model.origMin ?? 0;
+      const max = predictor.model.origMax ?? min + 1;
+      return {
+        index,
+        code: predictor.code,
+        name: predictor.name,
+        unit: predictor.unit,
+        min,
+        max,
+        step: stepFor(min, max),
+        defaultValue: defaults[index] ?? min,
+        inactive: (beta[index] ?? 0) === 0,
+      };
+    };
+    return SIMULATOR_DIMENSION_GROUPS.map((group) => ({
+      title: group.title,
+      column: group.column,
+      roomy: group.roomy ?? false,
+      sliders: predictors.flatMap((predictor, index) =>
+        group.dimensions.includes(predictor.model.modelDimension ?? "")
+          ? [buildSlider(predictor, index)]
+          : [],
+      ),
     }));
   }, [predictors, fit]);
+
+  const leftGroups = sliderGroups.filter((group) => group.column === "left");
+  const rightGroups = sliderGroups.filter((group) => group.column === "right");
 
   const prediction = useMemo(() => {
     if (fit === null) return null;
@@ -180,172 +205,215 @@ export function PredictorSimulator({
     load(kodeBps, tahun);
   }
 
+  function handleSliderChange(index: number, value: number): void {
+    setValues((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
+  }
+
   const yearItems: readonly SegmentedControlItem<string>[] = availableYears.map(
     (year) => ({ id: String(year), label: String(year) }),
   );
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="space-y-1.5 text-sm">
-          <span className="font-medium text-foreground">
-            {DASHBOARD_SIMULATOR.regionLabel}
-          </span>
-          <Select
-            value={selectedKode}
-            onChange={(event) => handleRegionChange(event.target.value)}
-          >
-            {provinceGroups.map((group) => (
-              <optgroup key={group.provinsi} label={group.provinsi}>
-                {group.items.map((region) => (
-                  <option key={region.kodeBps} value={region.kodeBps}>
-                    {region.kabupatenKota}
-                  </option>
+    <div>
+      {/* The region and year pickers live in the page-header actions slot, on
+          the same line as the description and outside the simulator card. */}
+      <PageHeader
+        eyebrow={eyebrow}
+        title={title}
+        description={description}
+        actions={
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+            <label className="flex items-center gap-3 text-sm sm:w-72">
+              <span className="shrink-0 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {DASHBOARD_SIMULATOR.regionShortLabel}
+              </span>
+              <Select
+                value={selectedKode}
+                onChange={(event) => handleRegionChange(event.target.value)}
+                aria-label={DASHBOARD_SIMULATOR.regionLabel}
+              >
+                {provinceGroups.map((group) => (
+                  <optgroup key={group.provinsi} label={group.provinsi}>
+                    {group.items.map((region) => (
+                      <option key={region.kodeBps} value={region.kodeBps}>
+                        {region.kabupatenKota}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
-              </optgroup>
-            ))}
-          </Select>
-        </label>
-        <div className="space-y-1.5 text-sm">
-          <span className="font-medium text-foreground">
-            {DASHBOARD_SIMULATOR.yearLabel}
-          </span>
-          <SegmentedControl
-            ariaLabel={DASHBOARD_SIMULATOR.yearLabel}
-            value={String(selectedYear)}
-            onValueChange={(id) => load(selectedKode, Number(id))}
-            items={yearItems}
-          />
-        </div>
-      </div>
-
-      {errorMessage !== null ? (
-        <ErrorState
-          title={DASHBOARD_SIMULATOR.loadError}
-          description={errorMessage}
-        />
-      ) : fit === null ? (
-        <EmptyState
-          title={DASHBOARD_SIMULATOR.noFitTitle}
-          description={DASHBOARD_SIMULATOR.noFitDescription}
-        />
-      ) : (
-        <div
-          className={cn(
-            "grid gap-8 pb-24 transition-opacity lg:grid-cols-[1fr_22rem] lg:items-start lg:pb-0",
-            isPending && "pointer-events-none opacity-60",
-          )}
-          aria-busy={isPending}
-        >
-          {/* Sliders (left on desktop) */}
-          <div className="space-y-8 lg:order-1">
-            <div>
-              <h3 className="text-base font-semibold text-foreground">
-                {DASHBOARD_SIMULATOR.slidersTitle}
-              </h3>
-              <p className="mt-1 max-w-prose text-sm text-muted-foreground">
-                {DASHBOARD_SIMULATOR.slidersHint}
-              </p>
-            </div>
-            {sliderGroups.map((group) => (
-              <PredictorSliderGroup
-                key={group.dimension}
-                title={group.dimension}
-                sliders={group.sliders}
-                values={values}
-                onValueChange={(index, value) =>
-                  setValues((prev) => {
-                    const next = [...prev];
-                    next[index] = value;
-                    return next;
-                  })
-                }
-                formatValue={formatMetric}
+              </Select>
+            </label>
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {DASHBOARD_SIMULATOR.yearLabel}
+              </span>
+              <SegmentedControl
+                ariaLabel={DASHBOARD_SIMULATOR.yearLabel}
+                value={String(selectedYear)}
+                onValueChange={(id) => load(selectedKode, Number(id))}
+                items={yearItems}
               />
-            ))}
-            {!fit.converged ? (
-              <p className="text-xs text-muted-foreground">
-                {DASHBOARD_SIMULATOR.convergedNote}
-              </p>
+            </div>
+          </div>
+        }
+      />
+
+      <Card padding="lg">
+        {errorMessage !== null ? (
+          <ErrorState
+            title={DASHBOARD_SIMULATOR.loadError}
+            description={errorMessage}
+          />
+        ) : fit === null ? (
+          <EmptyState
+            title={DASHBOARD_SIMULATOR.noFitTitle}
+            description={DASHBOARD_SIMULATOR.noFitDescription}
+          />
+        ) : (
+          <div
+            className={cn(
+              "pb-28 transition-opacity lg:pb-0",
+              isPending && "pointer-events-none opacity-60",
+            )}
+            aria-busy={isPending}
+          >
+            {/* Prediction + model equation — one banner above the slider list,
+              shown on every size. The equation's general form (server KaTeX) and
+              the region's fitted form sit under the result. */}
+            <aside className="z-elevated mb-5">
+              <Card elevation="sm" padding="md" className="space-y-4">
+                {prediction !== null ? (
+                  <PredictionResult
+                    category={prediction.category}
+                    probabilities={prediction.probabilities}
+                    actualCategory={fit.actualCategory}
+                    layout="split"
+                    action={
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (fit !== null) setValues(fit.defaults);
+                        }}
+                        disabled={!isChanged}
+                      >
+                        <RotateCcw className="h-4 w-4" aria-hidden />
+                        {DASHBOARD_SIMULATOR.resetLabel}
+                      </Button>
+                    }
+                  />
+                ) : null}
+                <div className="space-y-4 border-t border-border pt-4">
+                  <section className="space-y-2">
+                    <h3 className="text-sm font-semibold text-foreground">
+                      {SIMULATOR_EQUATION.generalTitle}
+                    </h3>
+                    {generalEquation}
+                  </section>
+                  <ModelEquationFit
+                    regionName={fit.kabupatenKota}
+                    tahun={fit.tahun}
+                    alfa1={fit.alfa1}
+                    alfa2={fit.alfa2}
+                    beta={fit.beta}
+                    nActive={fit.nActive}
+                  />
+                </div>
+              </Card>
+            </aside>
+
+            {/* Sliders — two explicit columns so placement is deterministic:
+              left holds Sosial-Ekonomi, Pendidikan, Gender; right holds
+              Kesehatan and Konsumsi dan Ketahanan Pangan (with wider slider
+              spacing so both columns end at roughly the same height). The list
+              scrolls within a capped box on desktop so the panel fits roughly
+              one screen below the pinned prediction. */}
+            <div className="slider-scroll scrollbar-hide">
+              <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+                <div className="space-y-4">
+                  {leftGroups.map((group) => (
+                    <PredictorSliderGroup
+                      key={group.title}
+                      title={group.title}
+                      sliders={group.sliders}
+                      values={values}
+                      onValueChange={handleSliderChange}
+                      formatValue={formatMetric}
+                      roomy={group.roomy}
+                    />
+                  ))}
+                </div>
+                <div className="space-y-4">
+                  {rightGroups.map((group) => (
+                    <PredictorSliderGroup
+                      key={group.title}
+                      title={group.title}
+                      sliders={group.sliders}
+                      values={values}
+                      onValueChange={handleSliderChange}
+                      formatValue={formatMetric}
+                      roomy={group.roomy}
+                    />
+                  ))}
+                </div>
+              </div>
+              {!fit.converged ? (
+                <p className="mt-4 text-xs text-muted-foreground">
+                  {DASHBOARD_SIMULATOR.convergedNote}
+                </p>
+              ) : null}
+            </div>
+
+            {prediction !== null ? (
+              <div className="safe-bottom fixed inset-x-0 bottom-0 z-sticky border-t border-border bg-surface/95 px-4 py-3 shadow-lg backdrop-blur lg:hidden">
+                <div className="mx-auto flex max-w-6xl items-center gap-3">
+                  <div className="shrink-0">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {DASHBOARD_SIMULATOR.predictedLabel}
+                    </p>
+                    <Badge tone={PREDICTION_BADGE_TONE[prediction.category]}>
+                      {prediction.category}
+                    </Badge>
+                  </div>
+                  <div className="flex h-2.5 flex-1 overflow-hidden rounded-full bg-surface-muted">
+                    <span
+                      className={PREDICTION_BAR_CLASS.Rendah}
+                      style={{
+                        width: `${prediction.probabilities.rendah * 100}%`,
+                      }}
+                    />
+                    <span
+                      className={PREDICTION_BAR_CLASS.Sedang}
+                      style={{
+                        width: `${prediction.probabilities.sedang * 100}%`,
+                      }}
+                    />
+                    <span
+                      className={PREDICTION_BAR_CLASS.Tinggi}
+                      style={{
+                        width: `${prediction.probabilities.tinggi * 100}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {DASHBOARD_SIMULATOR.actualLabel}
+                    </p>
+                    <span className="text-sm font-semibold text-foreground">
+                      {fit.actualCategory}
+                    </span>
+                  </div>
+                </div>
+              </div>
             ) : null}
           </div>
-
-          {/* Result — sticky aside on desktop, fixed bottom bar on mobile */}
-          <aside className="hidden lg:sticky lg:top-24 lg:order-2 lg:block">
-            <div className="space-y-5 rounded-2xl border border-primary/20 bg-primary/5 p-5 shadow-sm">
-              {prediction !== null ? (
-                <PredictionResult
-                  category={prediction.category}
-                  probabilities={prediction.probabilities}
-                  actualCategory={fit.actualCategory}
-                />
-              ) : null}
-              <div className="space-y-2 border-t border-border pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  fullWidth
-                  onClick={() => {
-                    if (fit !== null) setValues(fit.defaults);
-                  }}
-                  disabled={!isChanged}
-                >
-                  {DASHBOARD_SIMULATOR.resetLabel}
-                </Button>
-                <p className="text-xs text-muted-foreground">
-                  {isChanged
-                    ? DASHBOARD_SIMULATOR.changedNote
-                    : DASHBOARD_SIMULATOR.matchNote}
-                </p>
-              </div>
-            </div>
-          </aside>
-
-          {prediction !== null ? (
-            <div className="safe-bottom fixed inset-x-0 bottom-0 z-sticky border-t border-border bg-surface/95 px-4 py-3 shadow-lg backdrop-blur lg:hidden">
-              <div className="mx-auto flex max-w-6xl items-center gap-3">
-                <div className="shrink-0">
-                  <p className="text-[0.625rem] font-semibold uppercase tracking-wide text-muted-foreground">
-                    {DASHBOARD_SIMULATOR.predictedLabel}
-                  </p>
-                  <Badge tone={CATEGORY_BADGE_TONE[prediction.category]}>
-                    {prediction.category}
-                  </Badge>
-                </div>
-                <div className="flex h-2.5 flex-1 overflow-hidden rounded-full bg-surface-muted">
-                  <span
-                    className="bg-ordinal-rendah"
-                    style={{
-                      width: `${prediction.probabilities.rendah * 100}%`,
-                    }}
-                  />
-                  <span
-                    className="bg-ordinal-sedang"
-                    style={{
-                      width: `${prediction.probabilities.sedang * 100}%`,
-                    }}
-                  />
-                  <span
-                    className="bg-ordinal-tinggi"
-                    style={{
-                      width: `${prediction.probabilities.tinggi * 100}%`,
-                    }}
-                  />
-                </div>
-                <div className="shrink-0 text-right">
-                  <p className="text-[0.625rem] font-semibold uppercase tracking-wide text-muted-foreground">
-                    {DASHBOARD_SIMULATOR.actualLabel}
-                  </p>
-                  <span className="text-sm font-semibold text-foreground">
-                    {fit.actualCategory}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </div>
-      )}
+        )}
+      </Card>
     </div>
   );
 }

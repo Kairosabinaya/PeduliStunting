@@ -49,6 +49,7 @@ export function UpdatePasswordForm() {
             name="password"
             autoComplete="new-password"
             required
+            placeholder={AUTH_LABELS.passwordPlaceholder}
             hint={AUTH_LABELS.passwordHint}
             errorMessage={fieldError(state, "password")}
             leftIcon={<LockIcon />}
@@ -63,6 +64,7 @@ export function UpdatePasswordForm() {
             name="confirmPassword"
             autoComplete="new-password"
             required
+            placeholder={AUTH_LABELS.confirmPasswordPlaceholder}
             errorMessage={fieldError(state, "confirmPassword")}
             leftIcon={<LockIcon />}
           />

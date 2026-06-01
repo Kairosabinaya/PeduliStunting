@@ -12,30 +12,43 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
-import { signOut } from "@/app/(auth)/actions";
 import { PRIMARY_NAV } from "@/config/navigation";
+import { ACCOUNT_SIGN_OUT_COPY } from "@/config/account";
+import { Avatar } from "@/components/primitives/avatar";
+import { SignOutConfirmModal } from "@/components/navigation/sign-out-confirm-modal";
 import { useTheme } from "@/components/theme/theme-provider";
 import { cn } from "@/lib/cn";
 
 export interface AccountMenuPanelProps {
   readonly displayName: string | null;
   readonly email: string | null;
+  readonly avatarUrl: string | null;
   readonly onItemSelected: () => void;
 }
 
 export function AccountMenuPanel({
   displayName,
   email,
+  avatarUrl,
   onItemSelected,
 }: AccountMenuPanelProps) {
   const pathname = usePathname();
   const { resolvedTheme, toggle } = useTheme();
   const isDark = resolvedTheme === "dark";
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   return (
     <div className="space-y-4">
       <header className="flex flex-col items-center gap-2 text-center">
+        <Avatar
+          src={avatarUrl}
+          displayName={displayName}
+          email={email}
+          size="2xl"
+          aria-hidden
+        />
         {email ? (
           <p className="truncate text-xs text-muted-foreground">{email}</p>
         ) : null}
@@ -119,14 +132,17 @@ export function AccountMenuPanel({
         </svg>
       </button>
 
-      <form action={signOut}>
-        <button
-          type="submit"
-          className="flex min-h-11 w-full items-center justify-center rounded-xl bg-danger/10 px-3 text-sm font-medium text-danger hover:bg-danger/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-        >
-          Keluar
-        </button>
-      </form>
+      <button
+        type="button"
+        onClick={() => setConfirmOpen(true)}
+        className="flex min-h-11 w-full items-center justify-center rounded-xl bg-danger/10 px-3 text-sm font-medium text-danger hover:bg-danger/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+      >
+        {ACCOUNT_SIGN_OUT_COPY.triggerLabel}
+      </button>
+      <SignOutConfirmModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+      />
     </div>
   );
 }

@@ -3,13 +3,7 @@ import { notFound } from "next/navigation";
 
 import { MilestoneAlertBanner } from "@/components/features/tracker/milestone-alert-banner";
 import { MilestoneChecklist } from "@/components/features/tracker/milestone-checklist";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/primitives/card";
+import { Card } from "@/components/primitives/card";
 import { ErrorState } from "@/components/primitives/error-state";
 import { MILESTONE_COPY } from "@/config/tracker";
 import { monthsBetween } from "@/domain/shared/age-months";
@@ -96,23 +90,25 @@ export default async function MilestonesPage({ params }: MilestonesPageProps) {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {alert.shouldAlert ? (
         <MilestoneAlertBanner delayedCount={alert.delayedCount} />
       ) : null}
-      <Card>
-        <CardHeader>
-          <CardTitle>{MILESTONE_COPY.cardTitle}</CardTitle>
-          <CardDescription>{MILESTONE_COPY.cardDescription}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <MilestoneChecklist
-            childId={childId}
-            childAgeMonths={childAgeMonths}
-            catalog={catalog}
-            records={records}
-          />
-        </CardContent>
+      <Card elevation="sm" padding="md" className="space-y-4">
+        <header>
+          <h2 className="text-base font-semibold text-foreground">
+            {MILESTONE_COPY.cardTitle}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {MILESTONE_COPY.cardDescription}
+          </p>
+        </header>
+        <MilestoneChecklist
+          childId={childId}
+          childAgeMonths={childAgeMonths}
+          catalog={catalog}
+          records={records}
+        />
       </Card>
     </div>
   );

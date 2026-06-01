@@ -14,14 +14,14 @@ export const STAKES_COPY = {
     label: "koneksi saraf baru per detik",
     rangeMin: 700,
     rangeMax: 1000,
-    body: "Setiap detik di tahun-tahun pertama kehidupan, otak bayi membentuk antara 700 sampai 1.000 koneksi saraf baru. Kecepatan ini tidak akan pernah terulang lagi seumur hidupnya.",
+    body: "Pada tahun-tahun pertama kehidupan, otak bayi membentuk 700 sampai 1.000 koneksi saraf baru setiap detik. Masa secepat ini tidak akan terulang lagi.",
     footnoteId: "fn-unicef-neurons",
   },
   frameImplication: {
-    headline: "Pada usia 3 tahun, 85% perkembangan otak sudah terjadi —",
-    tail: "sebelum sebagian besar anak Indonesia bahkan masuk PAUD.",
+    headline: "Pada usia 3 tahun, 85% perkembangan otak anak sudah terbentuk.",
+    tail: "Sebagian besar anak Indonesia belum masuk PAUD pada usia ini.",
     closing:
-      "Karena itu, gizi dan stimulasi di 1.000 hari pertama menentukan sebagian besar masa depan kemampuan belajar anak.",
+      "Karena itu, gizi dan stimulasi pada 1.000 hari pertama sangat berpengaruh terhadap kemampuan belajar anak di masa depan.",
     footnoteId: "fn-brain-window",
   },
 } as const;
@@ -39,14 +39,16 @@ export const BRAIN_DEVELOPMENT_TILES: readonly BrainDevelopmentTile[] = [
     value: 25,
     suffix: "%",
     caption: "Saat lahir",
-    helper: "Sebagian besar struktur dasar sudah terbentuk di rahim.",
+    helper:
+      "Sebagian besar struktur dasar otak sudah terbentuk sejak dalam kandungan.",
     tone: "primary",
   },
   {
     value: 70,
     suffix: "%",
     caption: "Usia 0–1 tahun",
-    helper: "Fase paling pesat — sinapsis dibentuk dengan kecepatan puncak.",
+    helper:
+      "Otak berkembang sangat cepat. Koneksi saraf pada kecepatan tertingginya.",
     tone: "success",
   },
   {
@@ -54,7 +56,7 @@ export const BRAIN_DEVELOPMENT_TILES: readonly BrainDevelopmentTile[] = [
     suffix: "%",
     caption: "Usia 1–3 tahun",
     helper:
-      "Jendela penyempurnaan terakhir sebelum tahap belajar formal dimulai.",
+      "Otak terus mematangkan fungsi penting sebelum anak memasuki tahap berikutnya.",
     tone: "warm",
   },
 ] as const;

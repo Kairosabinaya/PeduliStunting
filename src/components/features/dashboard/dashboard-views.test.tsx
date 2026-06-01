@@ -1,11 +1,22 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import type { DashboardInsightsDto } from "@/application/region/insights";
+import { buildDashboardDataset } from "@/application/region/dashboard-dataset";
+import type { RegionDto } from "@/application/region/dtos";
+import type {
+  DashboardInsightsDto,
+  InsightYearGroup,
+} from "@/application/region/insights";
+
+import { DASHBOARD_MOVERS, DASHBOARD_TIPE_GAP } from "@/config/dashboard";
 
 import { BaselinesComparison } from "./baselines-comparison";
+import { CategoryLegend } from "./category-legend";
+import { DashboardFilterProvider } from "./dashboard-filter-context";
 import { DashboardFooter } from "./dashboard-footer";
 import { KpiCards } from "./kpi-cards";
+import { MoversLeaderboard } from "./movers-leaderboard";
+import { TipeGapCard } from "./tipe-gap-card";
 import { ModelComponents } from "./model-components";
 import { ModelEquation } from "./model-equation";
 import { ModelPerformance } from "./model-performance";
@@ -68,19 +79,167 @@ const METRICS = {
   },
 };
 
+const KPI_REGIONS: readonly RegionDto[] = [
+  {
+    kodeBps: "1101",
+    provinsi: "Aceh",
+    kabupatenKota: "Alpha",
+    tipe: "Kabupaten",
+    latitude: null,
+    longitude: null,
+  },
+  {
+    kodeBps: "3201",
+    provinsi: "Jawa Barat",
+    kabupatenKota: "Bravo",
+    tipe: "Kota",
+    latitude: null,
+    longitude: null,
+  },
+];
+const KPI_GROUPS: readonly InsightYearGroup[] = [
+  {
+    tahun: 2023,
+    rows: [
+      {
+        kodeBps: "1101",
+        tahun: 2023,
+        yCategory: "Tinggi",
+        y1Prevalence: 30,
+        predictors: {},
+      },
+      {
+        kodeBps: "3201",
+        tahun: 2023,
+        yCategory: "Sedang",
+        y1Prevalence: 18,
+        predictors: {},
+      },
+    ],
+  },
+  {
+    tahun: 2024,
+    rows: [
+      {
+        kodeBps: "1101",
+        tahun: 2024,
+        yCategory: "Sedang",
+        y1Prevalence: 22,
+        predictors: {},
+      },
+      {
+        kodeBps: "3201",
+        tahun: 2024,
+        yCategory: "Rendah",
+        y1Prevalence: 18,
+        predictors: {},
+      },
+    ],
+  },
+];
+const KPI_DATASET = buildDashboardDataset(KPI_REGIONS, KPI_GROUPS, [], []);
+
 describe("KpiCards", () => {
-  it("renders the focus-year mean and year-over-year change", () => {
-    render(<KpiCards insights={INSIGHTS} />);
+  it("renders the focus-year mean", () => {
+    render(
+      <DashboardFilterProvider initialYear={2024} initialKodeBps={null}>
+        <KpiCards dataset={KPI_DATASET} />
+      </DashboardFilterProvider>,
+    );
     expect(screen.getByText("20.0%")).toBeInTheDocument();
-    expect(screen.getByText("-4.0 poin")).toBeInTheDocument();
   });
 });
 
 describe("RegionRankings", () => {
   it("lists best and worst regions", () => {
-    render(<RegionRankings insights={INSIGHTS} />);
+    render(<RegionRankings insights={INSIGHTS} scope="region" />);
     expect(screen.getByText("Bandung")).toBeInTheDocument();
     expect(screen.getByText("Simeulue")).toBeInTheDocument();
+  });
+});
+
+describe("CategoryLegend", () => {
+  it("explains the three categories with their thresholds", () => {
+    render(<CategoryLegend />);
+    expect(screen.getByText("Cara membaca kategori")).toBeInTheDocument();
+    expect(screen.getByText("< 20%")).toBeInTheDocument();
+    expect(screen.getByText("≥ 30%")).toBeInTheDocument();
+  });
+});
+
+describe("TipeGapCard", () => {
+  it("shows stacked category bars for Kota and Kabupaten", () => {
+    render(
+      <TipeGapCard
+        kota={{
+          label: "Kota",
+          rendah: 64,
+          sedang: 30,
+          tinggi: 4,
+          regionCount: 98,
+        }}
+        kabupaten={{
+          label: "Kabupaten",
+          rendah: 125,
+          sedang: 182,
+          tinggi: 109,
+          regionCount: 416,
+        }}
+      />,
+    );
+    expect(screen.getByText(DASHBOARD_TIPE_GAP.kotaLabel)).toBeInTheDocument();
+    expect(
+      screen.getByText(DASHBOARD_TIPE_GAP.kabupatenLabel),
+    ).toBeInTheDocument();
+  });
+
+  it("renders nothing when no data", () => {
+    const { container } = render(<TipeGapCard />);
+    expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe("MoversLeaderboard", () => {
+  it("lists improvements and declines with before to after values", () => {
+    render(
+      <MoversLeaderboard
+        movers={{
+          improvements: [
+            {
+              kodeBps: "1101",
+              kabupatenKota: "Alpha",
+              provinsi: "Aceh",
+              priorPrevalence: 30,
+              focusPrevalence: 22,
+              change: -8,
+            },
+          ],
+          declines: [
+            {
+              kodeBps: "1102",
+              kabupatenKota: "Bravo",
+              provinsi: "Aceh",
+              priorPrevalence: 20,
+              focusPrevalence: 21,
+              change: 1,
+            },
+          ],
+        }}
+      />,
+    );
+    expect(
+      screen.getByText(DASHBOARD_MOVERS.improvedTitle),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(DASHBOARD_MOVERS.worsenedTitle),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Alpha")).toBeInTheDocument();
+    expect(screen.getByText("-8.0 poin")).toBeInTheDocument();
+  });
+
+  it("renders nothing without movers", () => {
+    const { container } = render(<MoversLeaderboard movers={undefined} />);
+    expect(container).toBeEmptyDOMElement();
   });
 });
 

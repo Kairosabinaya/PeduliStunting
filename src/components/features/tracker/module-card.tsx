@@ -89,7 +89,9 @@ export function ModuleCard({
         <CardDescription className="text-xs">{description}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-1 flex-col justify-between gap-3">
-        <p className="text-sm text-foreground">{statusLine ?? "—"}</p>
+        <p className="text-base font-semibold text-foreground">
+          {statusLine ?? "—"}
+        </p>
         {cta ? (
           <Link
             href={disabled ? "#" : cta.href}

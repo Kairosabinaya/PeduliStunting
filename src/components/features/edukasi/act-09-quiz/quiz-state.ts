@@ -8,12 +8,10 @@
  *  - `question` — showing question N; either unanswered or answered.
  *  - `result`   — all questions consumed, computing the tier.
  *
- * The intro stage is back per user feedback: a prominent start gate
- * frames the quiz as a deliberate moment, and the question card animates
- * in to overlap the section heading once the user opts in.
- *
- * Answers are stored as an array of correctness booleans (length =
- * question count) so we can compute the result purely from state.
+ * Answers are kept in a fixed-length array (one slot per question, `null`
+ * until answered) so the reader can move freely backward/forward and each
+ * question keeps the answer it was given. Once a slot is filled it locks —
+ * re-answering the same question is a no-op.
  */
 
 import {
@@ -34,22 +32,25 @@ export interface QuizState {
   readonly stage: QuizStage;
   /** Current question index. Only meaningful in stage `question`. */
   readonly index: number;
-  readonly answers: readonly QuizAnsweredEntry[];
-  /** When non-null while in `question`, the question is locked and waiting for the user to click "next". */
-  readonly currentChoice: QuizAnsweredEntry | null;
+  /**
+   * One slot per question, `null` until answered. Fixed length so backward
+   * navigation retains earlier answers and the result is computed purely from
+   * state.
+   */
+  readonly answers: readonly (QuizAnsweredEntry | null)[];
 }
 
 export const INITIAL_QUIZ_STATE: QuizState = {
   stage: "intro",
   index: 0,
-  answers: [],
-  currentChoice: null,
+  answers: QUIZ_QUESTIONS.map(() => null),
 };
 
 export type QuizAction =
   | { type: "start" }
   | { type: "answer"; choice: QuizAnswer }
   | { type: "next" }
+  | { type: "prev" }
   | { type: "reset" };
 
 /**
@@ -62,10 +63,11 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
       // `start` is only meaningful from intro. From other stages it is a
       // no-op so the reducer remains idempotent under accidental dispatch.
       if (state.stage !== "intro") return state;
-      return { ...state, stage: "question" };
+      return { ...state, stage: "question", index: 0 };
     case "answer": {
       if (state.stage !== "question") return state;
-      if (state.currentChoice !== null) return state;
+      // Locked once answered — the slot does not change on re-answer.
+      if (state.answers[state.index] != null) return state;
       const question = QUIZ_QUESTIONS[state.index];
       if (!question) return state;
       const entry: QuizAnsweredEntry = {
@@ -73,28 +75,24 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
         choice: action.choice,
         correct: question.correctAnswer === action.choice,
       };
-      return { ...state, currentChoice: entry };
+      const answers = state.answers.map((existing, i) =>
+        i === state.index ? entry : existing,
+      );
+      return { ...state, answers };
     }
     case "next": {
       if (state.stage !== "question") return state;
-      if (state.currentChoice === null) return state;
-      const nextAnswers = [...state.answers, state.currentChoice];
-      const nextIndex = state.index + 1;
-      if (nextIndex >= QUIZ_QUESTIONS.length) {
-        return {
-          ...state,
-          stage: "result",
-          index: nextIndex,
-          answers: nextAnswers,
-          currentChoice: null,
-        };
+      // Must answer the current question before advancing.
+      if (state.answers[state.index] == null) return state;
+      if (state.index >= QUIZ_QUESTIONS.length - 1) {
+        return { ...state, stage: "result" };
       }
-      return {
-        ...state,
-        index: nextIndex,
-        answers: nextAnswers,
-        currentChoice: null,
-      };
+      return { ...state, index: state.index + 1 };
+    }
+    case "prev": {
+      if (state.stage !== "question") return state;
+      if (state.index <= 0) return state;
+      return { ...state, index: state.index - 1 };
     }
     case "reset":
       return INITIAL_QUIZ_STATE;
@@ -105,9 +103,11 @@ export function quizReducer(state: QuizState, action: QuizAction): QuizState {
   }
 }
 
-/** Number of correct answers among the entries already committed. */
-export function countCorrect(answers: readonly QuizAnsweredEntry[]): number {
-  return answers.reduce((n, entry) => (entry.correct ? n + 1 : n), 0);
+/** Number of correct answers among the slots already filled. */
+export function countCorrect(
+  answers: readonly (QuizAnsweredEntry | null)[],
+): number {
+  return answers.reduce((n, entry) => (entry?.correct ? n + 1 : n), 0);
 }
 
 /** Resolve the active question for stage `question`. Null otherwise. */

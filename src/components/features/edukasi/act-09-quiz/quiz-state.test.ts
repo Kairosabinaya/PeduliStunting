@@ -7,15 +7,18 @@ import {
   countCorrect,
   currentQuestion,
   quizReducer,
+  type QuizState,
 } from "./quiz-state";
 
 describe("quizReducer", () => {
   describe("initial state", () => {
-    it("starts on the intro stage with no answers committed", () => {
+    it("starts on intro with one empty answer slot per question", () => {
       expect(INITIAL_QUIZ_STATE.stage).toBe("intro");
       expect(INITIAL_QUIZ_STATE.index).toBe(0);
-      expect(INITIAL_QUIZ_STATE.answers).toHaveLength(0);
-      expect(INITIAL_QUIZ_STATE.currentChoice).toBeNull();
+      expect(INITIAL_QUIZ_STATE.answers).toHaveLength(QUIZ_QUESTIONS.length);
+      expect(INITIAL_QUIZ_STATE.answers.every((entry) => entry === null)).toBe(
+        true,
+      );
     });
   });
 
@@ -24,8 +27,6 @@ describe("quizReducer", () => {
       const next = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
       expect(next.stage).toBe("question");
       expect(next.index).toBe(0);
-      expect(next.answers).toHaveLength(0);
-      expect(next.currentChoice).toBeNull();
     });
 
     it("is a no-op when dispatched from a non-intro stage", () => {
@@ -36,7 +37,7 @@ describe("quizReducer", () => {
   });
 
   describe("answer action", () => {
-    it("captures the user's choice without advancing the index", () => {
+    it("fills the current slot without advancing the index", () => {
       const started = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
       const expectedCorrectness = QUIZ_QUESTIONS[0]?.correctAnswer === "mitos";
       const answered = quizReducer(started, {
@@ -44,14 +45,14 @@ describe("quizReducer", () => {
         choice: "mitos",
       });
       expect(answered.index).toBe(0);
-      expect(answered.currentChoice).toEqual({
+      expect(answered.answers[0]).toEqual({
         questionId: QUIZ_QUESTIONS[0]?.id,
         choice: "mitos",
         correct: expectedCorrectness,
       });
     });
 
-    it("ignores subsequent answer actions for the same question", () => {
+    it("locks the slot — a second answer for the same question is ignored", () => {
       const started = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
       const answered = quizReducer(started, {
         type: "answer",
@@ -66,7 +67,7 @@ describe("quizReducer", () => {
   });
 
   describe("next action", () => {
-    it("advances to the next question and accumulates the committed answer", () => {
+    it("advances to the next question, keeping prior answers", () => {
       const started = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
       const answered = quizReducer(started, {
         type: "answer",
@@ -75,24 +76,43 @@ describe("quizReducer", () => {
       const advanced = quizReducer(answered, { type: "next" });
       expect(advanced.stage).toBe("question");
       expect(advanced.index).toBe(1);
-      expect(advanced.answers).toHaveLength(1);
-      expect(advanced.currentChoice).toBeNull();
+      expect(advanced.answers[0]).not.toBeNull();
     });
 
     it("transitions to the result stage after the last question", () => {
-      let state = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
+      let state: QuizState = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
       for (let i = 0; i < QUIZ_QUESTIONS.length; i += 1) {
         state = quizReducer(state, { type: "answer", choice: "fakta" });
         state = quizReducer(state, { type: "next" });
       }
       expect(state.stage).toBe("result");
-      expect(state.answers).toHaveLength(QUIZ_QUESTIONS.length);
+      expect(state.answers.every((entry) => entry !== null)).toBe(true);
     });
 
-    it("is a no-op if next is dispatched before an answer", () => {
+    it("is a no-op if next is dispatched before answering", () => {
       const started = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
       const pretended = quizReducer(started, { type: "next" });
       expect(pretended).toBe(started);
+    });
+  });
+
+  describe("prev action", () => {
+    it("steps back one question and retains the earlier answer", () => {
+      const started = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
+      const answered = quizReducer(started, {
+        type: "answer",
+        choice: "mitos",
+      });
+      const advanced = quizReducer(answered, { type: "next" });
+      const back = quizReducer(advanced, { type: "prev" });
+      expect(back.index).toBe(0);
+      expect(back.answers[0]).not.toBeNull();
+    });
+
+    it("is a no-op at the first question", () => {
+      const started = quizReducer(INITIAL_QUIZ_STATE, { type: "start" });
+      const back = quizReducer(started, { type: "prev" });
+      expect(back).toBe(started);
     });
   });
 
@@ -123,11 +143,12 @@ describe("currentQuestion", () => {
 });
 
 describe("countCorrect", () => {
-  it("sums entries flagged as correct", () => {
+  it("sums entries flagged correct and ignores empty slots", () => {
     const entries = [
       { questionId: 1, choice: "fakta" as const, correct: true },
-      { questionId: 2, choice: "mitos" as const, correct: false },
+      null,
       { questionId: 3, choice: "fakta" as const, correct: true },
+      { questionId: 4, choice: "mitos" as const, correct: false },
     ];
     expect(countCorrect(entries)).toBe(2);
   });

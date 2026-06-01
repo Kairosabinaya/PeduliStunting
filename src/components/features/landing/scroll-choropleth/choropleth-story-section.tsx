@@ -17,6 +17,8 @@ import { ActSection } from "@/components/features/edukasi/primitives/act-section
 import { FootnoteRef } from "@/components/features/edukasi/primitives/footnote-ref";
 import { HighlightWord } from "@/components/features/edukasi/primitives/highlight-word";
 
+import { FadeInView } from "@/components/features/edukasi/primitives/fade-in-view";
+
 import { ChoroplethMap } from "./choropleth-map";
 import { ScrollChoropleth } from "./scroll-choropleth";
 
@@ -46,17 +48,19 @@ export function ChoroplethStorySection() {
       dark
       maxWidth="wide"
     >
-      <h2 className="section-headline text-balance">
-        {CHOROPLETH_COPY.headlinePre}{" "}
-        <HighlightWord variant="white">
-          {CHOROPLETH_COPY.headlineHighlight}
-        </HighlightWord>{" "}
-        {CHOROPLETH_COPY.headlinePost}
-      </h2>
-      <p className="lead-paragraph mt-5 text-white/80">
-        {CHOROPLETH_COPY.body}
-        <FootnoteRef id={CHOROPLETH_COPY.bodyFootnoteId} />
-      </p>
+      <FadeInView as="div">
+        <h2 className="section-headline text-balance">
+          {CHOROPLETH_COPY.headlinePre}{" "}
+          <HighlightWord variant="white">
+            {CHOROPLETH_COPY.headlineHighlight}
+          </HighlightWord>{" "}
+          {CHOROPLETH_COPY.headlinePost}
+        </h2>
+        <p className="lead-paragraph mt-5 text-white/80">
+          {CHOROPLETH_COPY.body}
+          <FootnoteRef id={CHOROPLETH_COPY.bodyFootnoteId} />
+        </p>
+      </FadeInView>
 
       <div className="mt-10">
         <ScrollChoropleth
@@ -80,11 +84,11 @@ export function ChoroplethStorySection() {
           {LEGEND_ITEMS.map((item) => (
             <li
               key={item.key}
-              className="flex items-center gap-2 text-sm text-white/80"
+              className="group flex items-center gap-2 text-sm text-white/80"
             >
               <span
                 aria-hidden
-                className={`inline-block h-3 w-3 rounded-sm ${item.swatch}`}
+                className={`inline-block h-3 w-3 rounded-sm transition-transform duration-fast group-hover:scale-150 motion-reduce:transition-none ${item.swatch}`}
               />
               {item.label}
             </li>

@@ -112,6 +112,7 @@ pnpm import:all
 
 ```
 /
+├── docs/               STATE.md, GLOSSARY.md, DESIGN.md (kontrak desain), adr/
 ├── public/brand/       Logo & icon
 ├── scripts/            Skrip impor data (TypeScript + helper Python/R)
 ├── src/

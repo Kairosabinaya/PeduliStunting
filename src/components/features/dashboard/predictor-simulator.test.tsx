@@ -5,15 +5,20 @@ import type { RegionFitDto } from "@/application/model/dtos";
 import type { IndicatorDefinitionDto } from "@/application/region/dtos";
 import type { PredictorModelMeta } from "@/domain/region/entities/indicator-definition";
 
-import { loadRegionFit } from "@/app/(public)/dashboard/actions";
+import { loadRegionFit } from "@/app/(public)/prediksi/actions";
 
 import {
   PredictorSimulator,
   type SimulatorRegionOption,
 } from "./predictor-simulator";
 
-vi.mock("@/app/(public)/dashboard/actions", () => ({
+vi.mock("@/app/(public)/prediksi/actions", () => ({
   loadRegionFit: vi.fn(),
+}));
+
+// The equation card dynamic-imports KaTeX; keep it cheap in tests.
+vi.mock("katex", () => ({
+  default: { renderToString: (tex: string) => `<span>${tex}</span>` },
 }));
 
 const loadRegionFitMock = vi.mocked(loadRegionFit);
@@ -97,6 +102,10 @@ const INITIAL_FIT: RegionFitDto = {
 function renderSimulator() {
   return render(
     <PredictorSimulator
+      eyebrow="Simulasi"
+      title="Simulasi prediksi stunting"
+      description="Geser indikator wilayah, lihat prediksinya berubah."
+      generalEquation={<span>persamaan umum</span>}
       predictors={PREDICTORS}
       etaSign={1}
       regions={REGIONS}
@@ -128,7 +137,7 @@ describe("PredictorSimulator", () => {
     renderSimulator();
     const inactive = screen.getByRole("slider", { name: /Sekolah/ });
     expect(inactive).toBeDisabled();
-    expect(screen.getByText(/Tidak berpengaruh/)).toBeInTheDocument();
+    expect(screen.getByText(/Tidak dipakai/)).toBeInTheDocument();
   });
 
   it("resets slider values to the region defaults", () => {

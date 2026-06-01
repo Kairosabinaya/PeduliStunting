@@ -20,6 +20,12 @@ describe("TIMELINE_FRAMES", () => {
     expect(TIMELINE_FRAMES[0]?.startDay).toBe(0);
   });
 
+  it("every frame references a non-empty illustration asset", () => {
+    TIMELINE_FRAMES.forEach((frame) => {
+      expect(frame.image.trim().length).toBeGreaterThan(0);
+    });
+  });
+
   it("last frame's exclusive end is past TIMELINE_TOTAL_DAYS so day 1000 selects it", () => {
     const last = TIMELINE_FRAMES[TIMELINE_FRAMES.length - 1];
     expect(last?.endDayExclusive).toBeGreaterThan(TIMELINE_TOTAL_DAYS);

@@ -1,84 +1,92 @@
 import type { ModelMetadataDto } from "@/application/model/dtos";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/primitives/card";
+import { Card } from "@/components/primitives/card";
 import { EmptyState } from "@/components/primitives/empty-state";
-import { DASHBOARD_MODEL, DASHBOARD_SECTIONS } from "@/config/dashboard";
+import { DASHBOARD_MODEL } from "@/config/dashboard";
+import type { ReactNode } from "react";
 
 import { BaselinesComparison } from "./baselines-comparison";
-import { DashboardSection } from "./dashboard-section";
 import { ModelComponents } from "./model-components";
-import { ModelEquation } from "./model-equation";
 import { ModelPerformance } from "./model-performance";
 
 export interface ModelSectionProps {
   readonly model: ModelMetadataDto | null;
 }
 
+/** Collapsible card with a chevron affordance (no extra prose). */
+function Disclosure({
+  title,
+  children,
+}: {
+  readonly title: string;
+  readonly children: ReactNode;
+}) {
+  return (
+    <Card elevation="sm" padding="md">
+      <details className="group">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-base font-semibold text-foreground marker:hidden">
+          <span>{title}</span>
+          <svg
+            aria-hidden
+            viewBox="0 0 20 20"
+            className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+          >
+            <path
+              d="M5 8l5 5 5-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </summary>
+        <div className="mt-4">{children}</div>
+      </details>
+    </Card>
+  );
+}
+
 /**
- * Section 2 — model explanation: the equation, a plain-language anatomy of the
- * prediction, out-of-sample performance, and the baseline comparison.
+ * Model explanation block: a visual four-step anatomy + out-of-sample
+ * performance always visible, with the baseline comparison and the formal
+ * equation (+ the local-model caveat) tucked behind disclosures so the
+ * reading-averse user never has to scroll prose to use the simulator above.
  */
 export function ModelSection({ model }: ModelSectionProps) {
+  if (model === null) {
+    return (
+      <EmptyState
+        title={DASHBOARD_MODEL.performanceEmptyTitle}
+        description={DASHBOARD_MODEL.performanceEmptyDescription}
+      />
+    );
+  }
   return (
-    <DashboardSection description={DASHBOARD_SECTIONS.model.description}>
-      {model === null ? (
-        <EmptyState
-          title={DASHBOARD_MODEL.performanceEmptyTitle}
-          description={DASHBOARD_MODEL.performanceEmptyDescription}
-        />
-      ) : (
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>{DASHBOARD_MODEL.stepsTitle}</CardTitle>
-              <CardDescription>{DASHBOARD_MODEL.stepsLead}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ModelComponents />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>{DASHBOARD_MODEL.performanceTitle}</CardTitle>
-              <CardDescription>
-                {DASHBOARD_MODEL.performanceDescription}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ModelPerformance metrics={model.metrics} />
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>{DASHBOARD_MODEL.baselinesTitle}</CardTitle>
-              <CardDescription>
-                {DASHBOARD_MODEL.baselinesDescription}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <BaselinesComparison metrics={model.metrics} />
-            </CardContent>
-          </Card>
-          <Card padding="md">
-            <details className="group">
-              <summary className="cursor-pointer list-none text-base font-semibold text-foreground marker:hidden">
-                {DASHBOARD_MODEL.equationTitle}
-                <span className="ml-2 text-sm font-normal text-muted-foreground group-open:hidden">
-                  (untuk penguji)
-                </span>
-              </summary>
-              <div className="mt-4">
-                <ModelEquation />
-              </div>
-            </details>
-          </Card>
-        </div>
-      )}
-    </DashboardSection>
+    <div className="space-y-5">
+      <Card elevation="sm" padding="md" className="space-y-4">
+        <header>
+          <h2 className="text-base font-semibold text-foreground">
+            {DASHBOARD_MODEL.stepsTitle}
+          </h2>
+        </header>
+        <ModelComponents />
+      </Card>
+
+      <Card elevation="sm" padding="md" className="space-y-4">
+        <header>
+          <h2 className="text-base font-semibold text-foreground">
+            {DASHBOARD_MODEL.performanceTitle}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {DASHBOARD_MODEL.performanceDescription}
+          </p>
+        </header>
+        <ModelPerformance metrics={model.metrics} />
+      </Card>
+
+      <Disclosure title={DASHBOARD_MODEL.baselinesTitle}>
+        <BaselinesComparison metrics={model.metrics} />
+      </Disclosure>
+    </div>
   );
 }

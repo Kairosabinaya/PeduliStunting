@@ -6,7 +6,9 @@ import type { Child } from "@/domain/tracking/entities/child";
 import type {
   ChildRepository,
   NewChildInput,
+  UpdateChildInput,
 } from "@/domain/tracking/ports/child-repository";
+import { AppErrors } from "@/domain/errors/app-error";
 import { mapChildRow } from "@/schemas/tracking";
 import {
   mapPostgrestError,
@@ -88,6 +90,36 @@ export class SupabaseChildRepository implements ChildRepository {
       return ok(mapped.value);
     } catch (cause) {
       return err(mapUnknownInfrastructureError(cause, "children.create"));
+    }
+  }
+
+  async update(input: UpdateChildInput): Promise<Result<Child, AppError>> {
+    try {
+      const { data, error } = await this.client
+        .from("children")
+        .update({
+          name: input.name,
+          sex: input.sex,
+          birth_date: input.birthDate,
+          birth_weight_kg: input.birthWeightKg,
+          birth_length_cm: input.birthLengthCm,
+          gestational_age_weeks: input.gestationalAgeWeeks,
+          notes: input.notes,
+        })
+        .eq("user_id", input.userId)
+        .eq("id", input.childId)
+        .is("deleted_at", null)
+        .select(SELECT_COLUMNS)
+        .maybeSingle();
+      if (error) return err(mapPostgrestError(error, "children"));
+      if (data === null) {
+        return err(AppErrors.notFound("Anak tidak ditemukan.", "child"));
+      }
+      const mapped = mapChildRow(data);
+      if (!mapped.ok) return err(mapped.error);
+      return ok(mapped.value);
+    } catch (cause) {
+      return err(mapUnknownInfrastructureError(cause, "children.update"));
     }
   }
 

@@ -28,16 +28,16 @@ export const QUIZ_QUESTIONS: readonly QuizQuestion[] = [
     statement: "Stunting hanya terjadi pada anak yang kurang makan.",
     correctAnswer: "mitos",
     explanation:
-      "Stunting disebabkan banyak faktor: gizi kronis ibu hamil, pola asuh, ASI, MPASI, sanitasi, akses kesehatan, dan kondisi sosial-ekonomi. Bukan sekadar 'kurang makan'.",
+      "Stunting dipengaruhi banyak hal, mulai dari gizi ibu saat hamil, pola asuh, ASI, MPASI, sanitasi, akses layanan kesehatan, hingga kondisi sosial-ekonomi. Jadi, penyebabnya bukan hanya kurang makan.",
     sourceLabel: "Buku KIA 2024, hal. 4",
   },
   {
     id: 2,
     statement:
-      "ASI eksklusif diberikan sampai bayi berusia 6 bulan — tanpa air putih, madu, atau apa pun.",
+      "ASI eksklusif diberikan sampai bayi berusia 6 bulan, tanpa air putih, madu, atau makanan lain.",
     correctAnswer: "fakta",
     explanation:
-      "ASI mencukupi cairan dan gizi bayi sampai usia 6 bulan. Memberi air, madu, atau makanan apa pun sebelum 6 bulan dapat memicu masalah gizi termasuk stunting.",
+      "ASI sudah mencukupi kebutuhan cairan dan gizi bayi sampai usia 6 bulan. Air, madu, makanan, atau minuman lain tidak perlu diberikan kecuali atas anjuran tenaga kesehatan.",
     sourceLabel: "Buku KIA 2024, hal. 38",
   },
   {
@@ -45,24 +45,25 @@ export const QUIZ_QUESTIONS: readonly QuizQuestion[] = [
     statement: "Bayi gemuk tidak mungkin mengalami stunting.",
     correctAnswer: "mitos",
     explanation:
-      "Stunting diukur dari tinggi/panjang badan terhadap usia, bukan berat. Anak bisa berat cukup atau lebih namun tetap stunting bila tinggi di bawah standar WHO.",
+      "Stunting dilihat dari panjang atau tinggi badan anak terhadap usianya, bukan hanya dari berat badan. Anak dengan berat cukup pun tetap bisa stunting jika tinggi badannya berada di bawah standar.",
     sourceLabel: "Buku KIA 2024, hal. 4",
   },
   {
     id: 4,
-    statement: "MPASI sebaiknya kaya protein hewani — telur, ikan, daging.",
+    statement:
+      "MPASI sebaiknya kaya protein hewani, seperti telur, ikan, dan daging.",
     correctAnswer: "fakta",
     explanation:
-      "Protein hewani membawa asam amino esensial yang penting untuk pertumbuhan otak dan tubuh. Diprioritaskan dalam MPASI.",
+      "Protein hewani penting dalam MPASI karena membantu mendukung pertumbuhan tubuh dan perkembangan otak anak. Contohnya telur, ikan, daging, ayam, dan sumber protein hewani lainnya.",
     sourceLabel: "Buku KIA 2024, hal. 56–57",
   },
   {
     id: 5,
     statement:
-      "Stunting bisa dipulihkan sepenuhnya bahkan setelah anak berusia 5 tahun.",
+      "Stunting bisa dipulihkan sepenuhnya kapan saja, bahkan setelah anak berusia 5 tahun.",
     correctAnswer: "mitos",
     explanation:
-      "Jendela emas adalah 1.000 hari pertama (konsepsi hingga 2 tahun). Setelah periode ini, dampak stunting pada perkembangan otak dan tinggi badan sulit dikejar.",
+      "Pencegahan paling penting dilakukan pada 1.000 hari pertama kehidupan, sejak kehamilan hingga anak berusia 2 tahun. Setelah masa ini, dampaknya pada tumbuh kembang anak lebih sulit dikejar.",
     sourceLabel: "Buku KIA 2024, hal. 4",
   },
   {
@@ -71,16 +72,16 @@ export const QUIZ_QUESTIONS: readonly QuizQuestion[] = [
       "Pemeriksaan kehamilan minimal 6 kali ke tenaga kesehatan adalah bagian dari pencegahan stunting.",
     correctAnswer: "fakta",
     explanation:
-      "Pemeriksaan rutin memastikan ibu mendapat TTD, deteksi dini masalah, dan kondisi cukup untuk melahirkan bayi dengan berat dan panjang normal.",
+      "Pemeriksaan rutin membantu memantau kondisi ibu dan janin, mendeteksi masalah sejak dini, serta memastikan ibu mendapat layanan penting seperti TTD, pemeriksaan gizi, dan edukasi kesehatan.",
     sourceLabel: "Buku KIA 2024, hal. 5",
   },
   {
     id: 7,
     statement:
-      "Inisiasi Menyusu Dini (IMD) harus dilakukan dalam 24 jam pertama setelah bayi lahir.",
+      "Inisiasi Menyusu Dini atau IMD cukup dilakukan dalam 24 jam pertama setelah bayi lahir.",
     correctAnswer: "mitos",
     explanation:
-      "IMD harus dilakukan dalam 1 jam pertama setelah kelahiran, dengan kontak kulit ke kulit selama 1 jam. Manfaatnya termasuk stimulasi produksi ASI dan kandungan kolostrum yang protektif.",
+      "IMD sebaiknya dilakukan dalam 1 jam pertama setelah bayi lahir melalui kontak kulit ke kulit. Proses ini membantu merangsang produksi ASI dan mendukung pemberian kolostrum.",
     sourceLabel: "Buku KIA 2024, hal. 25",
   },
   {
@@ -88,25 +89,25 @@ export const QUIZ_QUESTIONS: readonly QuizQuestion[] = [
     statement: "Anak yang pendek pasti stunting.",
     correctAnswer: "mitos",
     explanation:
-      "Tidak semua anak pendek adalah stunting — faktor genetik juga berperan. Diagnosis stunting harus berdasarkan pengukuran tenaga kesehatan dengan standar WHO sesuai usia.",
+      "Tidak semua anak pendek mengalami stunting. Faktor genetik juga bisa berpengaruh. Status stunting perlu ditentukan melalui pengukuran oleh tenaga kesehatan dengan standar yang sesuai usia.",
     sourceLabel: "Buku KIA 2024, hal. 4",
   },
   {
     id: 9,
     statement:
-      "Penggunaan gawai pada bayi di bawah 18 bulan boleh-boleh saja asal sebentar.",
+      "Bayi di bawah 18 bulan boleh menggunakan gawai asal hanya sebentar.",
     correctAnswer: "mitos",
     explanation:
-      "Bayi/anak di bawah 18 bulan tidak dianjurkan menggunakan gawai, kecuali untuk video call dengan pendampingan. Penggunaan berlebih dikaitkan dengan keterlambatan bicara dan gangguan kognitif.",
+      "Bayi di bawah 18 bulan tidak dianjurkan menggunakan gawai, kecuali untuk video call dengan pendampingan. Pada usia ini, interaksi langsung dengan orang tua jauh lebih penting.",
     sourceLabel: "Buku KIA 2024, hal. 49",
   },
   {
     id: 10,
     statement:
-      "Periode usia 12–24 bulan adalah periode paling rawan stunting di Indonesia.",
+      "Usia 12 sampai 24 bulan merupakan salah satu masa paling rawan stunting.",
     correctAnswer: "fakta",
     explanation:
-      "Buku KIA mencatat 'stunting paling banyak terjadi di kelompok usia 12–24 bulan'. Karena itu pemantauan rutin di posyandu sangat krusial di rentang ini.",
+      "Pada usia 12 sampai 24 bulan, pertumbuhan anak perlu dipantau lebih serius. Karena itu, berat dan tinggi badan anak sebaiknya dicek rutin di posyandu setiap bulan.",
     sourceLabel: "Buku KIA 2024, hal. 65",
   },
 ] as const;

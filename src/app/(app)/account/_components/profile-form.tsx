@@ -88,8 +88,7 @@ function toFormValues(profile: UserProfileDto): FormValues {
 function isDirty(initial: FormValues, current: FormValues): boolean {
   return (
     initial.displayName.trim() !== current.displayName.trim() ||
-    initial.themePreference !== current.themePreference ||
-    initial.locale !== current.locale
+    initial.themePreference !== current.themePreference
   );
 }
 
@@ -107,13 +106,13 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   >(updateProfile, INITIAL_UPDATE_PROFILE_STATE);
 
   const [values, setValues] = useState<FormValues>(initial);
-  const [seenState, setSeenState] =
-    useState<UpdateProfileFormState | null>(state);
+  const [seenState, setSeenState] = useState<UpdateProfileFormState | null>(
+    state,
+  );
   const { setTheme } = useTheme();
 
   const displayNameId = useId();
   const themeId = useId();
-  const localeId = useId();
 
   // Storing-information-from-previous-renders pattern: when a new action
   // result arrives, snap local values to the persisted profile so the form
@@ -150,7 +149,9 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   return (
     <form action={action} className="space-y-5" noValidate>
       <div className="space-y-2">
-        <Label htmlFor={displayNameId}>{ACCOUNT_FORM_COPY.displayNameLabel}</Label>
+        <Label htmlFor={displayNameId}>
+          {ACCOUNT_FORM_COPY.displayNameLabel}
+        </Label>
         <Input
           id={displayNameId}
           name="displayName"
@@ -168,54 +169,32 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         />
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor={themeId}>{ACCOUNT_FORM_COPY.themeLabel}</Label>
-          <Select
-            id={themeId}
-            name="themePreference"
-            hint={ACCOUNT_FORM_COPY.themeHint}
-            errorMessage={fieldError(state, "themePreference")}
-            value={values.themePreference}
-            onChange={(e) =>
-              setValues((v) => ({
-                ...v,
-                themePreference: e.target.value as ThemePreference,
-              }))
-            }
-          >
-            {THEME_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor={localeId}>{ACCOUNT_FORM_COPY.localeLabel}</Label>
-          <Select
-            id={localeId}
-            name="locale"
-            hint={ACCOUNT_FORM_COPY.localeHint}
-            errorMessage={fieldError(state, "locale")}
-            value={values.locale}
-            disabled={LOCALE_OPTIONS.length <= 1}
-            onChange={(e) =>
-              setValues((v) => ({
-                ...v,
-                locale: e.target.value as SupportedLocale,
-              }))
-            }
-          >
-            {LOCALE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </Select>
-        </div>
+      <div className="space-y-2">
+        <Label htmlFor={themeId}>{ACCOUNT_FORM_COPY.themeLabel}</Label>
+        <Select
+          id={themeId}
+          name="themePreference"
+          hint={ACCOUNT_FORM_COPY.themeHint}
+          errorMessage={fieldError(state, "themePreference")}
+          value={values.themePreference}
+          onChange={(e) =>
+            setValues((v) => ({
+              ...v,
+              themePreference: e.target.value as ThemePreference,
+            }))
+          }
+        >
+          {THEME_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </Select>
       </div>
+
+      {/* Locale is fixed to the single supported value; submitted hidden so
+          the strict action schema keeps a complete preferences payload. */}
+      <input type="hidden" name="locale" value={values.locale} />
 
       {generalError ? (
         <FeedbackBanner tone="error">{generalError}</FeedbackBanner>

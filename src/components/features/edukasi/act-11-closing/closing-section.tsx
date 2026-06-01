@@ -134,7 +134,7 @@ function ClosingContent() {
             </Link>
           </div>
           <p className="mt-10 text-xs uppercase tracking-wider text-white/55">
-            Scroll lagi sedikit untuk membuka sumber &amp; catatan ↓
+            Lihat sumber dan catatan ↓
           </p>
         </div>
       </div>

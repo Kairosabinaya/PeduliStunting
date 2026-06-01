@@ -2,9 +2,10 @@ import type { RegionFitDto } from "@/application/model/dtos";
 import type { IndicatorDefinitionDto } from "@/application/region/dtos";
 import { Card } from "@/components/primitives/card";
 import { EmptyState } from "@/components/primitives/empty-state";
-import { DASHBOARD_SECTIONS, DASHBOARD_SIMULATOR } from "@/config/dashboard";
+import { PageHeader } from "@/components/primitives/page-header";
+import { DASHBOARD_SIMULATOR, PREDIKSI_HEADER } from "@/config/dashboard";
 
-import { DashboardSection } from "./dashboard-section";
+import { ModelEquation } from "./model-equation";
 import {
   PredictorSimulator,
   type SimulatorRegionOption,
@@ -22,10 +23,10 @@ export interface SimulatorSectionProps {
 }
 
 /**
- * Section 3 — the interactive predictor. Server component: it renders the
- * empty state when no fitted region is available, otherwise mounts the client
- * {@link PredictorSimulator} with a pre-loaded initial region so there is no
- * loading flash on first paint.
+ * The interactive predictor simulator and its page header. When a fitted region
+ * is available the client {@link PredictorSimulator} renders the header (with the
+ * region/year controls in the actions slot) and its own focal card; otherwise an
+ * empty-state card is shown under a plain header.
  */
 export function SimulatorSection({
   predictors,
@@ -33,24 +34,33 @@ export function SimulatorSection({
   etaSign,
   initial,
 }: SimulatorSectionProps) {
-  const ready = predictors.length > 0 && regions.length > 0 && initial !== null;
+  if (predictors.length > 0 && regions.length > 0 && initial !== null) {
+    return (
+      <PredictorSimulator
+        eyebrow={PREDIKSI_HEADER.eyebrow}
+        title={PREDIKSI_HEADER.title}
+        description={PREDIKSI_HEADER.description}
+        generalEquation={<ModelEquation />}
+        predictors={predictors}
+        etaSign={etaSign}
+        regions={regions}
+        initial={initial}
+      />
+    );
+  }
   return (
-    <DashboardSection description={DASHBOARD_SECTIONS.simulator.description}>
+    <div>
+      <PageHeader
+        eyebrow={PREDIKSI_HEADER.eyebrow}
+        title={PREDIKSI_HEADER.title}
+        description={PREDIKSI_HEADER.description}
+      />
       <Card padding="lg">
-        {ready ? (
-          <PredictorSimulator
-            predictors={predictors}
-            etaSign={etaSign}
-            regions={regions}
-            initial={initial}
-          />
-        ) : (
-          <EmptyState
-            title={DASHBOARD_SIMULATOR.noFitTitle}
-            description={DASHBOARD_SIMULATOR.noFitDescription}
-          />
-        )}
+        <EmptyState
+          title={DASHBOARD_SIMULATOR.noFitTitle}
+          description={DASHBOARD_SIMULATOR.noFitDescription}
+        />
       </Card>
-    </DashboardSection>
+    </div>
   );
 }

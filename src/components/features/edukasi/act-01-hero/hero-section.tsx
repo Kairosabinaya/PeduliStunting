@@ -1,15 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import { useRef } from "react";
 import { motion } from "motion/react";
 
-import { HERO_COPY } from "@/config/edukasi";
+import { HERO_COPY, HERO_ILLUSTRATION } from "@/config/edukasi";
 
+import { FadeInView } from "../primitives/fade-in-view";
 import { LandingOrb } from "../primitives/landing-orb";
 import { ParallaxLayer } from "../primitives/parallax-layer";
+import { PointerTilt } from "../primitives/pointer-tilt";
 import { ScrollPrompt } from "../primitives/scroll-prompt";
 import { HeroHeadline } from "./hero-headline";
-import { HeroIllustration } from "./hero-illustration";
 import { HeroLead } from "./hero-lead";
 
 /**
@@ -62,15 +64,30 @@ export function HeroSection() {
             {HERO_COPY.eyebrow}
           </p>
           <HeroHeadline />
-          <HeroLead />
-          <p className="mt-10 max-w-prose text-sm text-muted-foreground">
-            {HERO_COPY.factLine}
-          </p>
+          {/* Lead + fact line reveal together just after the headline's
+              per-word stagger settles. */}
+          <FadeInView as="div" delayMs={200}>
+            <HeroLead />
+            <p className="mt-10 max-w-prose text-sm text-muted-foreground">
+              {HERO_COPY.factLine}
+            </p>
+          </FadeInView>
         </div>
-        <div className="relative mx-auto w-full max-w-sm lg:max-w-none">
-          <div className="aspect-square">
-            <HeroIllustration alt={HERO_COPY.illustrationAlt} />
-          </div>
+        <div className="edu-hero-art relative mx-auto w-full">
+          {/* Square raster illustration rendered straight, no backing panel —
+              each PNG carries its own coloured blob so it reads on both themes.
+              `object-contain` fills the square box without cropping the art.
+              Tilts toward the cursor on mouse devices via PointerTilt. */}
+          <PointerTilt className="relative aspect-square">
+            <Image
+              src={HERO_ILLUSTRATION.src}
+              alt={HERO_COPY.illustrationAlt}
+              fill
+              sizes="(max-width: 1024px) 70vw, 38vw"
+              priority
+              className="object-contain"
+            />
+          </PointerTilt>
         </div>
       </div>
 

@@ -7,9 +7,10 @@ export const GUIDE_COPY = {
   eyebrow: "Panduan lengkap",
   headlineLead: "Apa yang perlu",
   headlineHighlight: { value: "dilakukan", variant: "primary" as const },
-  headlineMid: ", kapan.",
-  body: "Pilih fase usia untuk membuka panduan ringkas dari Buku KIA 2024 — gabungan praktik harian, jadwal pemeriksaan, dan tanda bahaya yang penting diingat.",
+  headlineMid: "? Kapan?",
+  body: "Pilih fase usia anak untuk melihat panduan ringkas dari Buku KIA 2024, mulai dari kebiasaan harian, jadwal pemeriksaan, hingga tanda bahaya yang perlu diwaspadai.",
   tabSelectLabel: "Pilih fase usia",
   sourceLabel: "Sumber",
   tablistAriaLabel: "Tab panduan per fase usia",
+  categorySelectLabel: "Pilih kategori panduan",
 } as const;

@@ -15,10 +15,19 @@ const SCRIPT = `(() => {
 /**
  * Inline script that runs before React hydration so the correct theme is
  * applied to `<html>` on first paint and the user does not see a flash of
- * the wrong palette. The browser executes it as it parses the SSR'd HTML;
- * React never re-executes scripts on subsequent client renders, which is
- * fine because the document already carries the resolved theme by then.
+ * the wrong palette.
+ *
+ * In React 19 / Next.js 16, scripts rendered inside components are SSR-only
+ * (React does not execute them on the client). The `suppressHydrationWarning`
+ * prop tells React to skip the attribute mismatch check on this element so
+ * the no-flash script can live in the server HTML without producing hydration
+ * warnings. No `type` trickery is needed; React 19 handles this correctly.
  */
 export function ThemeScript() {
-  return <script dangerouslySetInnerHTML={{ __html: SCRIPT }} />;
+  return (
+    <script
+      suppressHydrationWarning
+      dangerouslySetInnerHTML={{ __html: SCRIPT }}
+    />
+  );
 }

@@ -49,9 +49,12 @@ import { ListPredictionsByRegionUseCase } from "@/application/model/use-cases/li
 import { GetRegionFitUseCase } from "@/application/model/use-cases/get-region-fit";
 import { ListFittedRegionYearsUseCase } from "@/application/model/use-cases/list-fitted-region-years";
 import { GetDashboardInsightsUseCase } from "@/application/region/use-cases/get-dashboard-insights";
+import { GetDashboardDatasetUseCase } from "@/application/region/use-cases/get-dashboard-dataset";
 import { ListChildrenByOwnerUseCase } from "@/application/tracking/use-cases/list-children-by-owner";
 import { GetChildByIdUseCase } from "@/application/tracking/use-cases/get-child-by-id";
 import { CreateChildUseCase } from "@/application/tracking/use-cases/create-child";
+import { UpdateChildUseCase } from "@/application/tracking/use-cases/update-child";
+import { SoftDeleteChildUseCase } from "@/application/tracking/use-cases/soft-delete-child";
 import { ListMeasurementsByChildUseCase } from "@/application/tracking/use-cases/list-measurements-by-child";
 import { AddMeasurementUseCase } from "@/application/tracking/use-cases/add-measurement";
 import { ComputeQuickScreeningUseCase } from "@/application/tracking/use-cases/compute-quick-screening";
@@ -111,10 +114,13 @@ export interface UseCases {
   readonly getRegionFit: GetRegionFitUseCase;
   readonly listFittedRegionYears: ListFittedRegionYearsUseCase;
   readonly getDashboardInsights: GetDashboardInsightsUseCase;
+  readonly getDashboardDataset: GetDashboardDatasetUseCase;
   // tracking
   readonly listChildrenByOwner: ListChildrenByOwnerUseCase;
   readonly getChildById: GetChildByIdUseCase;
   readonly createChild: CreateChildUseCase;
+  readonly updateChild: UpdateChildUseCase;
+  readonly softDeleteChild: SoftDeleteChildUseCase;
   readonly listMeasurementsByChild: ListMeasurementsByChildUseCase;
   readonly addMeasurement: AddMeasurementUseCase;
   readonly computeQuickScreening: ComputeQuickScreeningUseCase;
@@ -221,9 +227,16 @@ export function makeUseCases(client: TypedSupabaseClient): UseCases {
       regionRepo,
       regionIndicatorsRepo,
     ),
+    getDashboardDataset: new GetDashboardDatasetUseCase(
+      regionRepo,
+      regionIndicatorsRepo,
+      indicatorDictionaryRepo,
+    ),
     listChildrenByOwner: new ListChildrenByOwnerUseCase(childRepo),
     getChildById: new GetChildByIdUseCase(childRepo),
     createChild: new CreateChildUseCase(childRepo),
+    updateChild: new UpdateChildUseCase(childRepo),
+    softDeleteChild: new SoftDeleteChildUseCase(childRepo),
     listMeasurementsByChild: new ListMeasurementsByChildUseCase(
       measurementRepo,
     ),

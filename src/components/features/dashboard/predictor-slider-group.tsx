@@ -1,4 +1,5 @@
 import { Badge } from "@/components/primitives/badge";
+import { Card } from "@/components/primitives/card";
 import { Slider } from "@/components/primitives/slider";
 import { DASHBOARD_SIMULATOR } from "@/config/dashboard";
 import { cn } from "@/lib/cn";
@@ -12,6 +13,8 @@ export interface SimulatorSlider {
   readonly min: number;
   readonly max: number;
   readonly step: number;
+  /** The region's original (default) value, shown as a reference dot. */
+  readonly defaultValue: number;
   /** True when the local coefficient is zero (selected out). */
   readonly inactive: boolean;
 }
@@ -22,6 +25,11 @@ export interface PredictorSliderGroupProps {
   readonly values: readonly number[];
   readonly onValueChange: (index: number, value: number) => void;
   readonly formatValue: (value: number, unit: string | null) => string;
+  /**
+   * Widen the gap between sliders. Used to grow the right column so both
+   * simulator columns end at roughly the same height.
+   */
+  readonly roomy?: boolean;
 }
 
 /**
@@ -35,43 +43,48 @@ export function PredictorSliderGroup({
   values,
   onValueChange,
   formatValue,
+  roomy = false,
 }: PredictorSliderGroupProps) {
   if (sliders.length === 0) return null;
   return (
-    <fieldset className="space-y-4">
-      <legend className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <span className="h-4 w-1 rounded-full bg-primary" aria-hidden />
-        {title}
-      </legend>
-      <div className="grid gap-x-8 gap-y-5 sm:grid-cols-2">
-        {sliders.map((slider) => (
-          <div
-            key={slider.code}
-            className={cn("space-y-1", slider.inactive && "opacity-60")}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <span className="text-sm font-medium leading-snug text-foreground">
-                {slider.name}
-              </span>
-              {slider.inactive ? (
-                <Badge tone="neutral" title={DASHBOARD_SIMULATOR.inactiveHint}>
-                  {DASHBOARD_SIMULATOR.inactiveBadge}
-                </Badge>
-              ) : null}
+    <Card elevation="sm" padding="md">
+      <fieldset className="space-y-4">
+        <legend className="flex items-center gap-2 text-base font-semibold text-foreground">
+          <span className="h-5 w-1.5 rounded-full bg-primary" aria-hidden />
+          {title}
+        </legend>
+        <div className={cn(roomy ? "space-y-8" : "space-y-5")}>
+          {sliders.map((slider) => (
+            <div
+              key={slider.code}
+              className={cn("space-y-1", slider.inactive && "opacity-70")}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <span className="text-sm font-medium leading-snug text-foreground">
+                  {slider.name}
+                </span>
+                {slider.inactive ? (
+                  <Badge tone="neutral">
+                    {DASHBOARD_SIMULATOR.inactiveBadge}
+                  </Badge>
+                ) : null}
+              </div>
+              <Slider
+                value={values[slider.index] ?? slider.min}
+                min={slider.min}
+                max={slider.max}
+                step={slider.step}
+                marker={slider.defaultValue}
+                markerLabel={DASHBOARD_SIMULATOR.baselineMarkerLabel}
+                disabled={slider.inactive}
+                onChange={(value) => onValueChange(slider.index, value)}
+                formatValue={(value) => formatValue(value, slider.unit)}
+                ariaLabel={slider.name}
+              />
             </div>
-            <Slider
-              value={values[slider.index] ?? slider.min}
-              min={slider.min}
-              max={slider.max}
-              step={slider.step}
-              disabled={slider.inactive}
-              onChange={(value) => onValueChange(slider.index, value)}
-              formatValue={(value) => formatValue(value, slider.unit)}
-              ariaLabel={slider.name}
-            />
-          </div>
-        ))}
-      </div>
-    </fieldset>
+          ))}
+        </div>
+      </fieldset>
+    </Card>
   );
 }

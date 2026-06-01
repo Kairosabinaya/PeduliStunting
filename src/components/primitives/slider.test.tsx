@@ -3,7 +3,9 @@ import { describe, expect, it, vi } from "vitest";
 
 import { Slider } from "./slider";
 
-function renderSlider(overrides: Partial<React.ComponentProps<typeof Slider>> = {}) {
+function renderSlider(
+  overrides: Partial<React.ComponentProps<typeof Slider>> = {},
+) {
   const onChange = vi.fn();
   const utils = render(
     <Slider
@@ -66,5 +68,34 @@ describe("Slider", () => {
   it("renders the hint paragraph when supplied", () => {
     renderSlider({ hint: "Geser untuk mengubah" });
     expect(screen.getByText("Geser untuk mengubah")).toBeInTheDocument();
+  });
+
+  it("renders a reference dot labelled by markerLabel", () => {
+    renderSlider({ marker: 0, markerLabel: "Nilai asli" });
+    expect(screen.getByTitle("Nilai asli")).toBeInTheDocument();
+  });
+
+  it("snaps onto the marker while dragging with a pointer", () => {
+    // min -3, max 3 -> snap zone = 6 * 0.02 = 0.12; 0.05 is inside it.
+    const { onChange } = renderSlider({ marker: 0 });
+    const slider = screen.getByRole("slider");
+    fireEvent.pointerDown(slider);
+    fireEvent.change(slider, { target: { value: "0.05" } });
+    expect(onChange).toHaveBeenCalledWith(0);
+  });
+
+  it("does not snap on keyboard changes with no active pointer", () => {
+    const { onChange } = renderSlider({ marker: 0 });
+    const slider = screen.getByRole("slider");
+    fireEvent.change(slider, { target: { value: "0.05" } });
+    expect(onChange).toHaveBeenCalledWith(0.05);
+  });
+
+  it("does not snap when the value is outside the magnetic zone", () => {
+    const { onChange } = renderSlider({ marker: 0 });
+    const slider = screen.getByRole("slider");
+    fireEvent.pointerDown(slider);
+    fireEvent.change(slider, { target: { value: "1" } });
+    expect(onChange).toHaveBeenCalledWith(1);
   });
 });

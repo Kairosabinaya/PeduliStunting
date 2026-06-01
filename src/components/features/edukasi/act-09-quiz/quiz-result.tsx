@@ -16,10 +16,15 @@ export interface QuizResultProps {
   readonly onReset: () => void;
 }
 
+// The pill sits on the always-dark `edu-night` band. Text uses a tone token
+// that is light/bright in BOTH themes so it never sinks into the dark band:
+// `brand-300` (the brand ladder never re-themes), `accent` (stable green), and
+// `edu-warm` (bright amber). The earlier `text-foreground` went near-black in
+// light theme and vanished — the bug in the user's screenshot.
 const TONE_TO_CLASS: Record<QuizTier["tone"], string> = {
-  primary: "bg-primary-soft/20 text-primary-foreground border-primary-soft/40",
-  success: "bg-accent/20 text-accent-foreground border-accent/40",
-  warm: "bg-edu-warm/25 text-foreground border-edu-warm/50",
+  primary: "bg-brand-300/15 text-brand-300 border-brand-300/40",
+  success: "bg-accent/15 text-accent border-accent/40",
+  warm: "bg-edu-warm/15 text-edu-warm border-edu-warm/45",
 };
 
 export function QuizResult({ correct, onReset }: QuizResultProps) {

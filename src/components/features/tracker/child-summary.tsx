@@ -1,17 +1,7 @@
 import type { GrowthMeasurementDto } from "@/application/tracking/dtos";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/primitives/card";
+import { Card } from "@/components/primitives/card";
 import { EmptyState } from "@/components/primitives/empty-state";
-import {
-  CHILD_DETAIL_COPY,
-  GROWTH_INDICATOR_LABEL,
-  GROWTH_INDICATOR_SHORT,
-} from "@/config/tracker";
+import { CHILD_DETAIL_COPY, GROWTH_INDICATOR_LABEL } from "@/config/tracker";
 import {
   GROWTH_INDICATORS,
   type GrowthIndicator,
@@ -75,54 +65,48 @@ export function ChildSummary({ measurements }: ChildSummaryProps) {
   const summaries = buildSummaries(measurements);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{CHILD_DETAIL_COPY.summaryCardTitle}</CardTitle>
-        <CardDescription>
+    <Card elevation="sm" padding="md" className="flex h-full flex-col gap-3">
+      <header>
+        <h2 className="text-base font-semibold text-foreground">
+          {CHILD_DETAIL_COPY.summaryCardTitle}
+        </h2>
+        <p className="text-sm text-muted-foreground">
           {CHILD_DETAIL_COPY.summaryCardDescription}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {summaries.length === 0 ? (
-          <EmptyState
-            title={CHILD_DETAIL_COPY.noMeasurementYet}
-            description={CHILD_DETAIL_COPY.chartEmpty}
-          />
-        ) : (
-          <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            {summaries.map((summary) => (
-              <li
-                key={summary.indicator}
-                className="space-y-2 rounded-lg border border-border bg-surface-muted p-4"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    {GROWTH_INDICATOR_SHORT[summary.indicator]}
-                  </span>
-                  <SdClassBadge sdClass={summary.sdClass} />
-                </div>
-                <p className="text-sm font-medium text-foreground">
+        </p>
+      </header>
+      {summaries.length === 0 ? (
+        <EmptyState
+          title={CHILD_DETAIL_COPY.noMeasurementYet}
+          description={CHILD_DETAIL_COPY.chartEmpty}
+        />
+      ) : (
+        <ul className="space-y-2">
+          {summaries.map((summary) => (
+            <li
+              key={summary.indicator}
+              className="rounded-lg border border-border bg-surface-muted p-3"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-medium text-foreground">
                   {GROWTH_INDICATOR_LABEL[summary.indicator]}
-                </p>
-                <dl className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                  <div>
-                    <dt>Z-score</dt>
-                    <dd className="text-foreground">
-                      {summary.zScore.toFixed(2)}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Diukur</dt>
-                    <dd className="text-foreground">
-                      {formatDate(summary.measurement.measuredAt)}
-                    </dd>
-                  </div>
-                </dl>
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
+                </span>
+                <SdClassBadge sdClass={summary.sdClass} />
+              </div>
+              <p className="mt-1 flex items-baseline gap-1.5 text-xs text-muted-foreground">
+                <span className="sr-only">Z-score</span>
+                <span className="font-mono tabular-nums text-foreground">
+                  {summary.zScore.toFixed(2)}
+                </span>
+                <span aria-hidden>·</span>
+                <span>
+                  <span className="sr-only">Diukur </span>
+                  {formatDate(summary.measurement.measuredAt)}
+                </span>
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
     </Card>
   );
 }

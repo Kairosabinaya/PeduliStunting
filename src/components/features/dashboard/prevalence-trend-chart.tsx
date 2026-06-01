@@ -30,16 +30,46 @@ export interface TrendPoint {
   readonly national: number | null;
 }
 
+/** One year of the selected region's prevalence, overlaid on the trend. */
+export interface RegionTrendPoint {
+  readonly tahun: number;
+  readonly prevalence: number | null;
+}
+
 export interface PrevalenceTrendChartProps {
   readonly points: readonly TrendPoint[];
+  /** When set, a solid line for the selected region is overlaid. */
+  readonly regionSeries?: readonly RegionTrendPoint[];
+  /** Region label for the overlaid line's legend entry. */
+  readonly regionLabel?: string;
+  /** When set, a vertical marker highlights the active year. */
+  readonly activeYear?: number;
 }
 
 const GRID_COLOR = "rgb(var(--color-border))";
 const TICK_COLOR = "rgb(var(--color-muted-foreground))";
 
-export function PrevalenceTrendChart({ points }: PrevalenceTrendChartProps) {
+export function PrevalenceTrendChart({
+  points,
+  regionSeries,
+  regionLabel,
+  activeYear,
+}: PrevalenceTrendChartProps) {
   const reduceMotion = useReducedMotion();
   const animate = reduceMotion !== true;
+
+  const regionByYear = new Map<number, number | null>();
+  for (const point of regionSeries ?? []) {
+    regionByYear.set(point.tahun, point.prevalence);
+  }
+  const hasRegion =
+    regionSeries !== undefined &&
+    regionSeries.some((point) => point.prevalence !== null);
+  const data = points.map((point) => ({
+    tahun: point.tahun,
+    crossRegion: point.crossRegion,
+    region: regionByYear.get(point.tahun) ?? null,
+  }));
 
   return (
     <div
@@ -49,19 +79,19 @@ export function PrevalenceTrendChart({ points }: PrevalenceTrendChartProps) {
     >
       <ResponsiveContainer width="100%" height={340} minHeight={260}>
         <ComposedChart
-          data={[...points]}
-          margin={{ top: 12, right: 18, bottom: 4, left: -8 }}
+          data={data}
+          margin={{ top: 12, right: 18, bottom: 4, left: 0 }}
         >
           <defs>
             <linearGradient id="trendArea" x1="0" y1="0" x2="0" y2="1">
               <stop
                 offset="0%"
-                stopColor="rgb(var(--color-primary))"
+                stopColor="rgb(var(--color-accent))"
                 stopOpacity={0.35}
               />
               <stop
                 offset="100%"
-                stopColor="rgb(var(--color-primary))"
+                stopColor="rgb(var(--color-accent))"
                 stopOpacity={0.02}
               />
             </linearGradient>
@@ -83,32 +113,32 @@ export function PrevalenceTrendChart({ points }: PrevalenceTrendChartProps) {
             tick={{ fill: TICK_COLOR, fontSize: 12 }}
             domain={[0, 35]}
             tickMargin={6}
-            width={40}
+            width={48}
             unit="%"
           />
           <Tooltip
             content={<DashboardTooltip unit="%" />}
-            cursor={{ stroke: "rgb(var(--color-primary))", strokeWidth: 1 }}
+            cursor={{ stroke: "rgb(var(--color-accent))", strokeWidth: 1 }}
           />
           <ReferenceLine
             y={NATIONAL_CONTEXT.whoThresholdVeryHigh}
-            stroke="rgb(var(--color-ordinal-tinggi))"
+            stroke="rgb(var(--color-border-strong))"
             strokeDasharray="5 5"
             label={{
               value: DASHBOARD_TREND.whoVeryHighLabel,
               position: "insideTopRight",
-              fill: "rgb(var(--color-ordinal-tinggi))",
+              fill: "rgb(var(--color-muted-foreground))",
               fontSize: 10,
             }}
           />
           <ReferenceLine
             y={NATIONAL_CONTEXT.whoThresholdHigh}
-            stroke="rgb(var(--color-ordinal-sedang))"
+            stroke="rgb(var(--color-border-strong))"
             strokeDasharray="5 5"
             label={{
               value: DASHBOARD_TREND.whoHighLabel,
               position: "insideTopRight",
-              fill: "rgb(var(--color-ordinal-sedang-foreground))",
+              fill: "rgb(var(--color-muted-foreground))",
               fontSize: 10,
             }}
           />
@@ -119,7 +149,7 @@ export function PrevalenceTrendChart({ points }: PrevalenceTrendChartProps) {
             label={{
               value: DASHBOARD_TREND.targetLabel,
               position: "insideBottomRight",
-              fill: "rgb(var(--color-accent-foreground))",
+              fill: "rgb(var(--color-accent-ink))",
               fontSize: 10,
             }}
           />
@@ -127,31 +157,46 @@ export function PrevalenceTrendChart({ points }: PrevalenceTrendChartProps) {
             type="monotone"
             dataKey="crossRegion"
             name={DASHBOARD_TREND.crossRegionLabel}
-            stroke="rgb(var(--color-primary))"
+            stroke="rgb(var(--color-accent))"
             strokeWidth={3}
             fill="url(#trendArea)"
-            dot={{ r: 4, strokeWidth: 0, fill: "rgb(var(--color-primary))" }}
+            dot={{ r: 4, strokeWidth: 0, fill: "rgb(var(--color-accent))" }}
             activeDot={{
               r: 6,
               fill: "rgb(var(--color-surface))",
-              stroke: "rgb(var(--color-primary))",
+              stroke: "rgb(var(--color-accent))",
               strokeWidth: 2,
             }}
             isAnimationActive={animate}
             animationDuration={700}
           />
-          <Line
-            type="monotone"
-            dataKey="national"
-            name={DASHBOARD_TREND.nationalLabel}
-            stroke="rgb(var(--color-primary-soft))"
-            strokeWidth={2.5}
-            strokeDasharray="6 4"
-            dot={{ r: 3, fill: "rgb(var(--color-primary-soft))" }}
-            isAnimationActive={animate}
-            animationDuration={700}
-            connectNulls
-          />
+          {activeYear !== undefined ? (
+            <ReferenceLine
+              x={activeYear}
+              stroke="rgb(var(--color-primary))"
+              strokeOpacity={0.35}
+              strokeWidth={1.5}
+            />
+          ) : null}
+          {hasRegion ? (
+            <Line
+              type="monotone"
+              dataKey="region"
+              name={regionLabel ?? DASHBOARD_TREND.regionLineLabel}
+              stroke="rgb(var(--color-primary))"
+              strokeWidth={3}
+              dot={{ r: 4, strokeWidth: 0, fill: "rgb(var(--color-primary))" }}
+              activeDot={{
+                r: 6,
+                fill: "rgb(var(--color-surface))",
+                stroke: "rgb(var(--color-primary))",
+                strokeWidth: 2,
+              }}
+              isAnimationActive={animate}
+              animationDuration={700}
+              connectNulls
+            />
+          ) : null}
           <Legend
             wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
             iconType="plainline"

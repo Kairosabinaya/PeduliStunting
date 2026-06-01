@@ -51,6 +51,13 @@ export const AUTH_BRAND_PANEL: AuthBrandPanel = {
   source: "Sumber data: BPS, Susenas, dan Kemenkes RI.",
 };
 
+/** Toast copy shown on the sign-in page right after a successful sign-out. */
+export const SIGN_OUT_NOTICE_COPY = {
+  toastTitle: "Anda telah keluar",
+  toastDescription:
+    "Sampai jumpa lagi. Masuk kembali kapan saja untuk melanjutkan.",
+} as const;
+
 export const SIGN_IN_COPY: AuthPageCopy = {
   metaTitle: "Masuk",
   eyebrow: "Selamat datang kembali",
@@ -64,7 +71,7 @@ export const SIGN_UP_COPY: AuthPageCopy = {
   metaTitle: "Daftar",
   eyebrow: "Buat akun baru",
   title: "Mulai dengan satu langkah",
-  description: `Bergabung gratis dengan ${APP_NAME}. Data Anda terenkripsi dan hanya bisa diakses oleh akun keluarga.`,
+  description: `Bergabung gratis dengan ${APP_NAME}.`,
   footerPrompt: "Sudah memiliki akun?",
   footerLink: { href: "/auth/sign-in", label: "Masuk" },
 };
@@ -132,6 +139,8 @@ export const AUTH_LABELS = {
   displayName: "Nama tampilan",
   emailPlaceholder: "anda@email.com",
   displayNamePlaceholder: "Nama lengkap atau panggilan",
+  passwordPlaceholder: "Masukkan kata sandi",
+  confirmPasswordPlaceholder: "Ulangi kata sandi",
   passwordHint: "Minimal 8 karakter, kombinasi huruf dan angka.",
   showPassword: "Tampilkan kata sandi",
   hidePassword: "Sembunyikan kata sandi",

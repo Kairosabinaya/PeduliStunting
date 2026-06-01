@@ -110,6 +110,7 @@ export function SignUpForm({ redirectTo }: SignUpFormProps) {
               name="password"
               autoComplete="new-password"
               required
+              placeholder={AUTH_LABELS.passwordPlaceholder}
               errorMessage={fieldError(state, "password")}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -126,6 +127,7 @@ export function SignUpForm({ redirectTo }: SignUpFormProps) {
               name="confirmPassword"
               autoComplete="new-password"
               required
+              placeholder={AUTH_LABELS.confirmPasswordPlaceholder}
               errorMessage={
                 fieldError(state, "confirmPassword") ?? liveMismatch
               }

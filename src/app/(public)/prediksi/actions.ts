@@ -25,7 +25,7 @@ const inputSchema = z.object({
 
 /**
  * Load one region-year's local fit for the what-if simulator. Public action —
- * no auth required (the dashboard is a public surface backed by anon-readable
+ * no auth required (`/prediksi` is a public surface backed by anon-readable
  * reference tables). The default model version is resolved server-side rather
  * than trusted from the client.
  */

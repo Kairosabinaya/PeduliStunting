@@ -15,9 +15,7 @@ import type { TypedSupabaseClient } from "../server-client";
 const SELECT_COLUMNS =
   "kode_bps, tahun, y_category, y1_prevalence, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, id, created_at, updated_at";
 
-export class SupabaseRegionIndicatorsRepository
-  implements RegionIndicatorsRepository
-{
+export class SupabaseRegionIndicatorsRepository implements RegionIndicatorsRepository {
   constructor(private readonly client: TypedSupabaseClient) {}
 
   async listByYear(
@@ -94,20 +92,27 @@ export class SupabaseRegionIndicatorsRepository
   }
 
   async listAvailableYears(): Promise<Result<readonly Year[], AppError>> {
+    // PostgREST caps a single response at the project "Max rows" limit (1000).
+    // `region_indicators` holds 514 rows/year, so an unbounded select only ever
+    // sees the first ~2 years and silently drops the rest. Page through the
+    // `tahun` column (one cheap int) and dedupe so every year surfaces.
+    const PAGE = 1000;
+    const seen = new Set<number>();
     try {
-      const { data, error } = await this.client
-        .from("region_indicators")
-        .select("tahun")
-        .order("tahun", { ascending: true });
-      if (error) return err(mapPostgrestError(error, "region_indicators"));
+      for (let offset = 0; ; offset += PAGE) {
+        const { data, error } = await this.client
+          .from("region_indicators")
+          .select("tahun")
+          .order("tahun", { ascending: true })
+          .range(offset, offset + PAGE - 1);
+        if (error) return err(mapPostgrestError(error, "region_indicators"));
 
-      const seen = new Set<number>();
-      const out: Year[] = [];
-      for (const row of data ?? []) {
-        if (seen.has(row.tahun)) continue;
-        seen.add(row.tahun);
-        out.push(asYear(row.tahun));
+        const rows = data ?? [];
+        for (const row of rows) seen.add(row.tahun);
+        if (rows.length < PAGE) break;
       }
+
+      const out = [...seen].sort((a, b) => a - b).map((y) => asYear(y));
       return ok(out);
     } catch (cause) {
       return err(

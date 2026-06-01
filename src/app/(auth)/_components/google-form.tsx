@@ -11,15 +11,19 @@ interface GoogleFormProps {
 
 function GoogleSubmit({ label }: GoogleFormProps) {
   const status = useFormStatus();
+  // While pending the Button swaps in its own spinner, so the Google mark is
+  // omitted to avoid a cramped spinner-plus-logo-plus-label row. The label
+  // alone keeps the loading state clean and consistent with the other buttons.
   return (
-    <Button
-      type="submit"
-      variant="outline"
-      loading={status.pending}
-      fullWidth
-    >
-      <GoogleMark />
-      <span>{label}</span>
+    <Button type="submit" variant="outline" loading={status.pending} fullWidth>
+      {status.pending ? (
+        label
+      ) : (
+        <>
+          <GoogleMark />
+          <span>{label}</span>
+        </>
+      )}
     </Button>
   );
 }

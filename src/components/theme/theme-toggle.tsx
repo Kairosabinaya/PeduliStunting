@@ -1,24 +1,52 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
+
 import { Button } from "@/components/primitives/button";
 import { cn } from "@/lib/cn";
 
-import { useTheme } from "./theme-provider";
+import {
+  getStoredTheme,
+  getSystemTheme,
+  getSystemThemeServerSnapshot,
+  setStoredTheme,
+  subscribeStoredTheme,
+  subscribeSystemTheme,
+} from "./theme-store";
 
 interface ThemeToggleProps {
   readonly className?: string;
 }
 
 /**
- * Icon-sized button that flips between light and dark. When the active
- * theme is `system`, the first click resolves to the opposite of the
- * current OS preference. Pair with {@link useTheme} for fuller controls
- * (light / dark / system).
+ * Icon-sized button that flips between light and dark. Reads the resolved
+ * theme directly from the store (not from ThemeProvider context) so it
+ * works anywhere in the component tree — including layouts where
+ * ThemeProvider context is not propagated (React 19 Server Component
+ * composition). The store is the same source of truth ThemeProvider uses.
  */
 export function ThemeToggle({ className }: ThemeToggleProps) {
-  const { resolvedTheme, toggle } = useTheme();
+  const theme = useSyncExternalStore(
+    subscribeStoredTheme,
+    () => getStoredTheme("system"),
+    () => "system" as const,
+  );
+  const systemTheme = useSyncExternalStore(
+    subscribeSystemTheme,
+    getSystemTheme,
+    getSystemThemeServerSnapshot,
+  );
+
+  const resolvedTheme = theme === "system" ? systemTheme : theme;
   const isDark = resolvedTheme === "dark";
   const label = isDark ? "Aktifkan tema terang" : "Aktifkan tema gelap";
+
+  function toggle(): void {
+    const current = getStoredTheme("system");
+    const resolved: typeof systemTheme =
+      current === "system" ? getSystemTheme() : current;
+    setStoredTheme(resolved === "dark" ? "light" : "dark");
+  }
 
   return (
     <Button

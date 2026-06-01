@@ -15,6 +15,12 @@ export interface PosyanduService {
   readonly icon: PosyanduServiceIcon;
   readonly title: string;
   readonly description: string;
+  /**
+   * Optional illustration asset. When unset the card shows an icon placeholder
+   * on a light backing panel; drop a path here (e.g. `/edukasi/posyandu-1.png`)
+   * to swap in real artwork without touching the component.
+   */
+  readonly image?: string;
 }
 
 export const POSYANDU_SERVICES: readonly PosyanduService[] = [
@@ -23,28 +29,28 @@ export const POSYANDU_SERVICES: readonly PosyanduService[] = [
     icon: "measure",
     title: "Pemantauan pertumbuhan",
     description:
-      "Berat & panjang/tinggi badan diukur setiap bulan. LiLA dipakai untuk skrining gizi: <11,5 cm gizi buruk, 11,5–12,4 cm gizi kurang, ≥12,4 cm gizi baik.",
+      "Berat dan tinggi anak dipantau setiap bulan agar risiko gangguan gizi bisa terdeteksi dini.",
   },
   {
     id: "immunization",
     icon: "syringe",
     title: "Imunisasi dasar & lanjutan",
     description:
-      "BCG, Polio, DPT-HB-Hib, PCV, RV, Campak-Rubela — semua gratis sesuai jadwal IDL 2024.",
+      "Imunisasi melindungi anak dari infeksi yang dapat mengganggu tumbuh kembang.",
   },
   {
     id: "nutrition-education",
     icon: "spoon",
     title: "Edukasi gizi & MPASI",
     description:
-      "Kelas Ibu Hamil, Kelas Ibu Balita, dan konsultasi kader untuk MPASI, ASI, sanitasi, serta pola asuh.",
+      "Keluarga mendapat panduan tentang ASI, MPASI, gizi seimbang, sanitasi, dan pola asuh.",
   },
   {
     id: "supplements",
     icon: "pill",
     title: "Vitamin A & obat cacing",
     description:
-      "Vitamin A biru (6–11 bln, 1×/tahun) atau merah (12–60 bln, 2×/tahun: Februari & Agustus). Obat cacing 2×/tahun untuk anak 1–6 tahun.",
+      "Vitamin A dan obat cacing diberikan sesuai usia untuk mendukung daya tahan tubuh dan pertumbuhan anak.",
   },
 ] as const;
 

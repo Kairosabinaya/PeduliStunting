@@ -14,7 +14,11 @@ export {
   edukasiFootnoteHref,
 } from "./tokens";
 
-export { HERO_COPY, type HeroHeadlineWord } from "./copy/hero";
+export {
+  HERO_COPY,
+  HERO_ILLUSTRATION,
+  type HeroHeadlineWord,
+} from "./copy/hero";
 export {
   STAKES_COPY,
   BRAIN_DEVELOPMENT_TILES,

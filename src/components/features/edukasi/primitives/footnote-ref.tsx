@@ -9,14 +9,17 @@ export interface FootnoteRefProps {
 }
 
 /**
- * Superscript link to a footnote. Renders the display number derived from
- * footnote array order so authors never type literal "1" / "2" — they
- * reference the stable id. Includes ARIA metadata so screen readers
- * announce "footnote N, link" rather than just the digit.
+ * Superscript link to a footnote. Renders a uniform asterisk marker so the
+ * reference reads as a discreet footnote cue rather than a large digit that
+ * could be misread as part of the adjacent statistic. The destination entry
+ * in {@link FootnoteList} stays numbered and lights up on navigation, so the
+ * reader can still tell which source the marker pointed to. The ARIA label
+ * keeps the derived number so screen readers announce "Catatan kaki N, link"
+ * rather than just an asterisk.
  *
- * Falls back to an empty string when the id is unknown so a missing
- * footnote does not crash the page (rendering nothing makes the
- * regression obvious in the lint pass while keeping the page readable).
+ * Falls back to nothing when the id is unknown so a missing footnote does
+ * not crash the page (rendering nothing makes the regression obvious in the
+ * lint pass while keeping the page readable).
  *
  * @example In headline
  * ```tsx
@@ -33,7 +36,7 @@ export function FootnoteRef({ id, className }: FootnoteRefProps) {
         className={className ?? "fn-ref"}
         aria-label={`Catatan kaki ${number}`}
       >
-        {number}
+        <span aria-hidden="true">*</span>
       </a>
     </sup>
   );

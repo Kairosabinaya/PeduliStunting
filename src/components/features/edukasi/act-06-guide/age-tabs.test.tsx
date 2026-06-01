@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
+import { GUIDE_COPY } from "@/config/edukasi";
 import { GUIDE_TABS } from "@/data/edukasi/guide-content";
 
 import { AgeTabs } from "./age-tabs";
@@ -52,5 +53,26 @@ describe("AgeTabs", () => {
     expect(
       screen.getByRole("tab", { name: new RegExp(second.label, "i") }),
     ).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("switches the active mobile category column when its segment is clicked", async () => {
+    const user = userEvent.setup();
+    render(<AgeTabs />);
+    const phase = GUIDE_TABS[0];
+    if (!phase) throw new Error("expected at least one phase");
+    const categoryList = screen.getByRole("tablist", {
+      name: GUIDE_COPY.categorySelectLabel,
+    });
+    const within = (heading: string) =>
+      screen.getByRole("tab", { name: new RegExp(heading, "i") });
+    // First category is active by default.
+    const firstCategory = phase.columns[0].heading;
+    const secondCategory = phase.columns[1].heading;
+    expect(categoryList).toBeInTheDocument();
+    expect(within(firstCategory)).toHaveAttribute("aria-selected", "true");
+    expect(within(secondCategory)).toHaveAttribute("aria-selected", "false");
+    await user.click(within(secondCategory));
+    expect(within(secondCategory)).toHaveAttribute("aria-selected", "true");
+    expect(within(firstCategory)).toHaveAttribute("aria-selected", "false");
   });
 });

@@ -4,15 +4,23 @@
 // answer feedback, and result tier card. State logic lives in
 // `./quiz-state.ts` so it can be unit-tested without the DOM.
 
-import { useReducer } from "react";
+import { useReducer, type Dispatch } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowRight, Check, X } from "lucide-react";
+import { ArrowRight, Check, ChevronRight, X } from "lucide-react";
+
+// `AnimatePresence` is still used for the outer intro/question/result stage
+// swap; the inner prompt/answered swap uses a plain keyed motion.div.
 
 import { QUIZ_COPY } from "@/config/edukasi";
 import { Button } from "@/components/primitives/button";
 import { cn } from "@/lib/cn";
-import { QUIZ_TOTAL, type QuizAnswer } from "@/data/edukasi/quiz-questions";
+import {
+  QUIZ_TOTAL,
+  type QuizAnswer,
+  type QuizQuestion,
+} from "@/data/edukasi/quiz-questions";
 
+import { QuizNavButton } from "./quiz-nav";
 import { QuizProgress } from "./quiz-progress";
 import { QuizResult } from "./quiz-result";
 import {
@@ -20,6 +28,7 @@ import {
   countCorrect,
   currentQuestion,
   quizReducer,
+  type QuizAction,
   type QuizState,
 } from "./quiz-state";
 
@@ -32,12 +41,9 @@ const OPTIONS: readonly { readonly key: QuizAnswer; readonly label: string }[] =
 export function QuizWidget() {
   const [state, dispatch] = useReducer(quizReducer, INITIAL_QUIZ_STATE);
   const reduceMotion = useReducedMotion();
-  // 360ms transition gives the question card a clear "rise + overlap"
-  // feel against the heading while staying responsive. Reduced-motion
-  // users skip the choreography entirely (duration 0).
   const transitionConfig = reduceMotion
     ? { duration: 0 }
-    : { duration: 0.36, ease: [0.2, 0, 0, 1] as const };
+    : { duration: 0.28, ease: [0.2, 0, 0, 1] as const };
 
   return (
     <div className="relative w-full">
@@ -57,14 +63,10 @@ export function QuizWidget() {
         {state.stage === "question" ? (
           <motion.div
             key="question"
-            // Rises from below (y=80) up to y=-80 — the negative end-state
-            // pulls the card's top edge over the section's heading text,
-            // delivering the "overlap teks utama" the user asked for.
-            // Reduced-motion fallback: y=0 (no overlap, no animation).
-            initial={{ opacity: 0, y: reduceMotion ? 0 : 80 }}
-            animate={{ opacity: 1, y: reduceMotion ? 0 : -80 }}
+            initial={{ opacity: 0, y: reduceMotion ? 0 : 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.98 }}
             transition={transitionConfig}
-            className="relative z-10"
           >
             <QuestionCard
               state={state}
@@ -94,8 +96,6 @@ export function QuizWidget() {
 
 /**
  * Intro panel — short hook copy + a deliberately prominent CTA button.
- * The CTA wears a soft primary glow (blurred clone behind it) so it reads
- * as "the thing to press" without resorting to gimmicky animation.
  */
 function IntroPanel({ onStart }: { readonly onStart: () => void }) {
   return (
@@ -108,8 +108,6 @@ function IntroPanel({ onStart }: { readonly onStart: () => void }) {
         onClick={onStart}
         className="group relative inline-flex items-center gap-3 rounded-full bg-primary px-8 py-4 text-base font-bold text-primary-foreground shadow-2xl shadow-primary/40 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-4 focus-visible:ring-offset-edu-night active:translate-y-0 sm:text-lg"
       >
-        {/* Glow halo behind the button — clipped behind via -z-10 so it
-            only paints around the pill, never over the label. */}
         <span
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-primary opacity-60 blur-2xl transition-opacity duration-300 group-hover:opacity-90"
@@ -126,128 +124,199 @@ function IntroPanel({ onStart }: { readonly onStart: () => void }) {
 
 interface QuestionCardProps {
   readonly state: QuizState;
-  readonly dispatch: (
-    action: { type: "answer"; choice: QuizAnswer } | { type: "next" },
-  ) => void;
+  readonly dispatch: Dispatch<QuizAction>;
   readonly reduceMotion: boolean | null;
 }
 
 function QuestionCard({ state, dispatch, reduceMotion }: QuestionCardProps) {
   const question = currentQuestion(state);
   if (!question) return null;
-  const choice = state.currentChoice;
-  const answered = choice !== null;
+  const entry = state.answers[state.index] ?? null;
+  const answered = entry !== null;
+  const isCorrect = entry?.correct === true;
   const currentNumber = state.index + 1;
+  const isLast = state.index >= QUIZ_TOTAL - 1;
+  const canPrev = state.index > 0;
+  const canNext = entry !== null;
+  const swapTransition = reduceMotion
+    ? { duration: 0 }
+    : { duration: 0.22, ease: [0.2, 0, 0, 1] as const };
 
   return (
-    // Card surface: dense bluish-black with a soft inner ring + backdrop
-    // blur so heading text peeks through behind the rounded edge. The
-    // shadow + ring give the card depth so the overlap reads as a
-    // physical pane resting over the heading, not a flat swap.
-    <div className="relative mx-auto flex min-h-[38rem] max-w-2xl flex-col rounded-3xl border border-white/15 bg-edu-night/85 p-6 shadow-2xl shadow-black/40 backdrop-blur-xl sm:p-8">
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-sm font-medium uppercase tracking-wider text-white/70">
-          {QUIZ_COPY.progressTemplate(currentNumber, QUIZ_TOTAL)}
-        </p>
-        <QuizProgress
-          current={currentNumber}
-          total={QUIZ_TOTAL}
-          ariaLabel={QUIZ_COPY.progressTemplate(currentNumber, QUIZ_TOTAL)}
-        />
+    // Arrows flank the card on every breakpoint (kiri/kanan), so a single set
+    // is rendered — no mobile/desktop duplication. The card flexes to fill the
+    // space between them.
+    <div className="mx-auto flex w-full items-center justify-center gap-2 sm:gap-4">
+      <QuizNavButton
+        direction="prev"
+        label={QUIZ_COPY.prevQuestionLabel}
+        onClick={() => dispatch({ type: "prev" })}
+        disabled={!canPrev}
+      />
+
+      {/* Once answered, the whole card takes on a soft green (correct) or red
+          (wrong) wash. The tint is an overlay above the dark base but below the
+          content, so the panel keeps its depth and the white text stays
+          readable; the border picks up the matching hue. */}
+      <div
+        className={cn(
+          "relative flex min-w-0 flex-1 flex-col gap-6 rounded-3xl border bg-edu-night/85 p-6 shadow-2xl shadow-black/40 backdrop-blur-xl transition-colors sm:p-8",
+          !answered && "border-white/15",
+          answered && isCorrect && "border-accent/45",
+          answered && !isCorrect && "border-edu-flag/45",
+        )}
+      >
+        {answered ? (
+          <span
+            aria-hidden="true"
+            className={cn(
+              "pointer-events-none absolute inset-0 rounded-3xl",
+              isCorrect ? "bg-accent/15" : "bg-edu-flag/15",
+            )}
+          />
+        ) : null}
+        <div className="relative flex items-center justify-between gap-4">
+          <p className="text-sm font-medium uppercase tracking-wider text-white/70">
+            {QUIZ_COPY.progressTemplate(currentNumber, QUIZ_TOTAL)}
+          </p>
+          <QuizProgress
+            current={currentNumber}
+            total={QUIZ_TOTAL}
+            ariaLabel={QUIZ_COPY.progressTemplate(currentNumber, QUIZ_TOTAL)}
+          />
+        </div>
+
+        {/* Body swaps between prompt and answered. A single keyed motion.div
+            (no AnimatePresence/exit) means the outgoing block unmounts
+            instantly while the incoming one plays an enter fade — keeping the
+            swap deterministic (no lingering exit nodes) across prompt↔answered
+            and index changes. */}
+        <motion.div
+          key={`${state.index}-${entry !== null ? "answered" : "prompt"}`}
+          initial={{ opacity: 0, y: reduceMotion ? 0 : 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={swapTransition}
+          className={
+            entry !== null
+              ? "relative flex flex-col gap-4"
+              : "relative flex flex-col gap-8"
+          }
+        >
+          {entry !== null ? (
+            <>
+              {/* Statement stays visible above the explanation, now at normal
+                  body size. */}
+              <p className="text-base font-medium leading-relaxed text-white">
+                “{question.statement}”
+              </p>
+              {/* The whole explanation is the advance affordance — clicking it
+                  moves to the next question (or the result on the last one). */}
+              <button
+                type="button"
+                onClick={() => dispatch({ type: "next" })}
+                aria-label={
+                  isLast
+                    ? QUIZ_COPY.viewResultLabel
+                    : QUIZ_COPY.tapToContinueHint
+                }
+                className="block w-full rounded-2xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-edu-night"
+              >
+                <AnswerResult question={question} correct={entry.correct} />
+                <span className="mt-3 flex items-center justify-end gap-1 text-xs font-medium uppercase tracking-wider text-white/60">
+                  {isLast
+                    ? QUIZ_COPY.viewResultLabel
+                    : QUIZ_COPY.tapToContinueHint}
+                  <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                </span>
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-balance text-2xl font-semibold leading-snug text-white sm:text-3xl">
+                “{question.statement}”
+              </p>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                {OPTIONS.map((option) => (
+                  <Button
+                    key={option.key}
+                    variant="secondary"
+                    fullWidth
+                    onClick={() =>
+                      dispatch({ type: "answer", choice: option.key })
+                    }
+                    className="border-2 border-white/30 bg-white text-foreground transition-colors hover:bg-white/90"
+                  >
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            </>
+          )}
+        </motion.div>
       </div>
 
-      <AnimatePresence initial={false} mode="wait">
-        <motion.div
-          key={question.id}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -4 }}
-          transition={
-            reduceMotion
-              ? { duration: 0 }
-              : { duration: 0.18, ease: [0.2, 0, 0, 1] }
+      <QuizNavButton
+        direction="next"
+        label={isLast ? QUIZ_COPY.viewResultLabel : QUIZ_COPY.nextQuestionLabel}
+        onClick={() => dispatch({ type: "next" })}
+        disabled={!canNext}
+      />
+    </div>
+  );
+}
+
+/**
+ * Result panel shown after the user answers — the verdict + explanation for
+ * the current question. `aria-live="polite"` announces the outcome to
+ * assistive tech as it mounts.
+ */
+function AnswerResult({
+  question,
+  correct,
+}: {
+  readonly question: QuizQuestion;
+  readonly correct: boolean;
+}) {
+  const correctAnswerLabel =
+    question.correctAnswer === "mitos"
+      ? QUIZ_COPY.optionMitos
+      : QUIZ_COPY.optionFakta;
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="rounded-2xl border border-white/15 bg-white/10 p-5 text-sm leading-relaxed text-white"
+    >
+      <div className="flex items-center gap-2">
+        <span
+          className={
+            correct
+              ? "inline-flex h-7 w-7 items-center justify-center rounded-full bg-accent text-accent-foreground"
+              : "inline-flex h-7 w-7 items-center justify-center rounded-full bg-edu-flag text-white"
           }
-          className="flex flex-1 flex-col justify-between"
         >
-          <p className="mt-8 text-balance text-2xl font-semibold leading-snug text-white sm:text-3xl">
-            “{question.statement}”
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            {OPTIONS.map((option) => {
-              const isPicked = answered && choice.choice === option.key;
-              const isCorrect = question.correctAnswer === option.key;
-              const showResult = answered;
-              const tone = (() => {
-                if (!showResult) return "interactive";
-                if (isCorrect) return "correct";
-                if (isPicked) return "wrong";
-                return "neutral";
-              })();
-              return (
-                <Button
-                  key={option.key}
-                  variant="secondary"
-                  fullWidth
-                  onClick={() =>
-                    dispatch({ type: "answer", choice: option.key })
-                  }
-                  disabled={answered}
-                  aria-pressed={isPicked}
-                  className={cn(
-                    "border-2 transition-colors disabled:opacity-100",
-                    tone === "interactive" &&
-                      "border-white/30 bg-white text-foreground hover:bg-white/90",
-                    tone === "correct" &&
-                      "border-accent bg-accent text-accent-foreground",
-                    tone === "wrong" &&
-                      "border-edu-flag bg-edu-flag text-white",
-                    tone === "neutral" &&
-                      "border-white/15 bg-white/5 text-white/70",
-                  )}
-                >
-                  <span className="flex items-center gap-2">
-                    {tone === "correct" ? (
-                      <Check className="h-4 w-4" aria-hidden="true" />
-                    ) : null}
-                    {tone === "wrong" ? (
-                      <X className="h-4 w-4" aria-hidden="true" />
-                    ) : null}
-                    <span>{option.label}</span>
-                  </span>
-                </Button>
-              );
-            })}
-          </div>
-
-          <div role="status" aria-live="polite" className="mt-6 min-h-[8rem]">
-            {answered ? (
-              <div className="rounded-2xl border border-white/15 bg-white/10 p-4 text-sm leading-relaxed text-white">
-                <p className="text-xs font-semibold uppercase tracking-wider">
-                  {choice.correct
-                    ? QUIZ_COPY.feedbackCorrectLabel
-                    : QUIZ_COPY.feedbackWrongLabel}
-                </p>
-                <p className="mt-2 text-white/90">{question.explanation}</p>
-                <p className="mt-3 text-xs text-white/60">
-                  {QUIZ_COPY.feedbackSourceLabel}: {question.sourceLabel}
-                </p>
-              </div>
-            ) : null}
-          </div>
-
-          <div className="mt-8 flex justify-end">
-            <Button
-              variant="primary"
-              onClick={() => dispatch({ type: "next" })}
-              disabled={!answered}
-            >
-              {currentNumber === QUIZ_TOTAL
-                ? QUIZ_COPY.finishCta
-                : QUIZ_COPY.nextQuestionCta}
-            </Button>
-          </div>
-        </motion.div>
-      </AnimatePresence>
+          {correct ? (
+            <Check className="h-4 w-4" aria-hidden="true" />
+          ) : (
+            <X className="h-4 w-4" aria-hidden="true" />
+          )}
+        </span>
+        <p className="text-sm font-semibold uppercase tracking-wider">
+          {correct
+            ? QUIZ_COPY.feedbackCorrectLabel
+            : QUIZ_COPY.feedbackWrongLabel}
+        </p>
+      </div>
+      <p className="mt-4 text-white/90">{question.explanation}</p>
+      <p className="mt-4 text-xs uppercase tracking-wider text-white/60">
+        {QUIZ_COPY.correctAnswerLabel}:{" "}
+        <span className="font-semibold normal-case text-white/90">
+          {correctAnswerLabel}
+        </span>
+      </p>
+      <p className="mt-1 text-xs text-white/60">
+        {QUIZ_COPY.feedbackSourceLabel}: {question.sourceLabel}
+      </p>
     </div>
   );
 }

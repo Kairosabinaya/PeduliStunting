@@ -13,8 +13,8 @@ export const HISTORY_COPY = {
   ],
   headlineTail: "sejak 2013.",
   body: [
-    "Dari 37,2% pada 2013 menjadi 19,8% pada 2024 — sekitar 357.000 anak terhindar dari stunting hanya di tahun 2024.",
-    "Tapi target 14,2% di 2029 menuntut kerja yang masih jauh dari selesai.",
+    "Dari 37,2% pada 2013 menjadi 19,8% pada 2024. Artinya, sekitar 357.000 anak terhindar dari stunting pada tahun 2024.",
+    "Namun, target 14,2% pada 2029 menunjukkan bahwa pekerjaan ini belum selesai.",
   ],
   bodyFootnoteIds: ["fn-rpjmn"] as const,
   chartTitle:

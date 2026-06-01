@@ -16,6 +16,10 @@ export function trackerChildRoute(childId: string): string {
   return `/tracker/anak/${childId}`;
 }
 
+export function trackerChildEditRoute(childId: string): string {
+  return `/tracker/anak/${childId}/edit`;
+}
+
 /** Tracker dashboard URL focused on a specific child via the `?anak=` param. */
 export function trackerSelectChildRoute(childId: string): string {
   return `${TRACKER_ROUTE}?anak=${childId}`;
@@ -89,9 +93,27 @@ export const ADD_CHILD_COPY = {
     "Tidak bisa menyimpan profil anak. Coba lagi atau muat ulang halaman.",
 } as const;
 
+export const EDIT_CHILD_COPY = {
+  metaTitle: "Edit anak — Tracker",
+  eyebrow: "Tracker",
+  title: "Edit profil anak",
+  description:
+    "Perbaiki data anak bila ada yang salah input. Perubahan langsung tersimpan ke profil.",
+  submit: "Simpan perubahan",
+  cancel: "Batal",
+  notFoundTitle: "Anak tidak ditemukan",
+  notFoundDescription:
+    "Profil anak yang ingin diedit tidak ada atau bukan milik akun ini.",
+  invalidId: "Anak tidak valid. Muat ulang halaman lalu coba lagi.",
+  genericError:
+    "Tidak bisa menyimpan perubahan. Coba lagi atau muat ulang halaman.",
+} as const;
+
 export const CHILD_DETAIL_COPY = {
   metaTitleSuffix: "Tracker",
   backToList: "Semua anak",
+  editLabel: "Edit data",
+  editAriaLabel: (name: string) => `Edit data anak ${name}`,
   navOverview: "Ringkasan",
   navMeasurements: "Pengukuran",
   navImmunizations: "Imunisasi",
@@ -115,10 +137,25 @@ export const CHILD_DETAIL_COPY = {
     "Bandingkan z-score anak Anda dengan rentang acuan WHO ±2 SD dan ±3 SD.",
   chartIndicatorLabel: "Indikator",
   chartEmptyTitle: "Kurva belum tersedia",
-  chartEmpty:
-    "Belum ada pengukuran untuk indikator ini. Tambahkan pengukuran untuk melihat kurva.",
+  chartEmpty: "Tambahkan pengukuran untuk melihat kurva.",
   chartDotAriaLabel: (date: string, z: string) =>
     `Pengukuran ${date}, z-score ${z}. Aktifkan untuk melihat detail.`,
+} as const;
+
+export const DELETE_CHILD_COPY = {
+  trigger: "Hapus anak",
+  triggerAriaLabel: (name: string) => `Hapus data anak ${name}`,
+  title: "Hapus data anak?",
+  description:
+    "Profil anak beserta seluruh riwayatnya akan dihapus dari akun Anda.",
+  confirmBody: (name: string) =>
+    `Data ${name} — termasuk pengukuran, imunisasi, dan perkembangan — tidak akan tampil lagi di akun ini. Tindakan ini tidak dapat dibatalkan dari aplikasi.`,
+  cancel: "Batal",
+  confirm: "Ya, hapus",
+  pending: "Menghapus...",
+  invalidId: "ID anak tidak valid.",
+  genericError:
+    "Tidak bisa menghapus data anak. Coba lagi atau muat ulang halaman.",
 } as const;
 
 export const MEASUREMENTS_COPY = {
@@ -634,7 +671,7 @@ export const MODULE_CARD_COPY = {
   },
   immunization: {
     title: "Imunisasi",
-    description: "Progress vaksinasi sesuai jadwal Buku KIA.",
+    description: "Jadwal vaksinasi sesuai Buku KIA.",
     cta: "Buka jadwal imunisasi",
     emptyStatus: "Belum ada catatan imunisasi.",
     statusFormat: (done: number, total: number) =>

@@ -91,11 +91,11 @@ export function AvatarEditor({ profile, email }: AvatarEditorProps) {
   return (
     <section
       aria-labelledby="account-avatar-heading"
-      className="rounded-2xl border border-border bg-surface p-5 shadow-xs"
+      className="rounded-xl border border-border bg-surface p-6 shadow-sm md:p-8"
     >
       <h2
         id="account-avatar-heading"
-        className="text-sm font-semibold text-foreground"
+        className="text-lg font-semibold leading-tight text-foreground"
       >
         {AUTH_LABELS.avatar.label}
       </h2>
@@ -115,11 +115,7 @@ export function AvatarEditor({ profile, email }: AvatarEditorProps) {
           </p>
 
           <div className="flex flex-wrap gap-2">
-            <form
-              ref={replaceFormRef}
-              action={action}
-              encType="multipart/form-data"
-            >
+            <form ref={replaceFormRef} action={action}>
               <input
                 ref={inputRef}
                 type="file"

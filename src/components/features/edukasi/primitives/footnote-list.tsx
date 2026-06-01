@@ -33,8 +33,17 @@ export function FootnoteList() {
               <li
                 key={entry.id}
                 id={entry.id}
-                className="grid scroll-mt-32 grid-cols-[auto_1fr] gap-x-4 py-2 pl-3"
+                className="relative grid scroll-mt-32 grid-cols-[auto_1fr] gap-x-4 py-2 pl-3"
               >
+                {/* Transient cue revealed by the `li:target` rule in
+                    globals.css. With inline markers reduced to a uniform
+                    asterisk, this tells the reader which entry they just
+                    jumped to. Decorative for sighted users — the `:target`
+                    focus + numbered list already serve assistive tech. */}
+                <span aria-hidden="true" className="footnote-target-flag">
+                  <span aria-hidden="true">↩</span>
+                  {CLOSING_COPY.footnoteTargetFlag}
+                </span>
                 <span
                   aria-hidden="true"
                   className="font-semibold tabular-nums text-primary"

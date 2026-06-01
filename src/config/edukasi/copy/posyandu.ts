@@ -4,11 +4,11 @@
  */
 
 export const POSYANDU_COPY = {
-  eyebrow: "Bawa ke lapangan",
+  eyebrow: "TEMPAT PENCEGAHAN DIMULAI",
   headlineLead: "Posyandu adalah",
   headlineHighlight: { value: "ujung tombak", variant: "success" as const },
   headlineTail: "pencegahan stunting.",
-  body: "Lebih dari 300.000 posyandu di seluruh Indonesia bekerja setiap bulan untuk menimbang, mengukur, dan mengedukasi keluarga. Kunjungan rutin adalah cara paling sederhana untuk memastikan tumbuh kembang anak di jalur yang tepat.",
+  body: "Lebih dari 300.000 posyandu di seluruh Indonesia hadir setiap bulan untuk menimbang, mengukur, dan mendampingi keluarga. Lewat kunjungan rutin, pertumbuhan anak bisa dipantau sejak dini dan masalah dapat ditangani lebih cepat.",
   scheduleCta: "Lihat jadwal imunisasi dasar",
   scheduleAriaLabel: "Buka modal jadwal imunisasi dasar 0–24 bulan",
   modalTitle: "Jadwal imunisasi dasar 0–24 bulan",

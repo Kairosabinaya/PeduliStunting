@@ -2,13 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { NutritionTabs } from "@/components/features/tracker/nutrition-tabs";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/primitives/card";
+import { Card } from "@/components/primitives/card";
 import { ErrorState } from "@/components/primitives/error-state";
 import { NUTRITION_PAGE_COPY } from "@/config/tracker";
 import { monthsBetween } from "@/domain/shared/age-months";
@@ -70,18 +64,20 @@ export default async function NutritionPage({ params }: NutritionPageProps) {
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{NUTRITION_PAGE_COPY.title}</CardTitle>
-        <CardDescription>{NUTRITION_PAGE_COPY.description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <NutritionTabs
-          childId={childId}
-          childAgeMonths={childAgeMonths}
-          events={events}
-        />
-      </CardContent>
+    <Card elevation="sm" padding="md" className="space-y-4">
+      <header>
+        <h2 className="text-base font-semibold text-foreground">
+          {NUTRITION_PAGE_COPY.title}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {NUTRITION_PAGE_COPY.description}
+        </p>
+      </header>
+      <NutritionTabs
+        childId={childId}
+        childAgeMonths={childAgeMonths}
+        events={events}
+      />
     </Card>
   );
 }

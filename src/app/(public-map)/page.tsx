@@ -1,4 +1,7 @@
+import { Suspense } from "react";
+
 import { LandingShell } from "@/components/features/landing/landing-shell";
+import { SignedOutToast } from "@/components/navigation/signed-out-toast";
 
 /**
  * Root route `/` — the universal home. Renders the landing scroll story for
@@ -14,5 +17,12 @@ import { LandingShell } from "@/components/features/landing/landing-shell";
  * (project guidelines §7).
  */
 export default function HomePage() {
-  return <LandingShell />;
+  return (
+    <>
+      <Suspense fallback={null}>
+        <SignedOutToast />
+      </Suspense>
+      <LandingShell />
+    </>
+  );
 }

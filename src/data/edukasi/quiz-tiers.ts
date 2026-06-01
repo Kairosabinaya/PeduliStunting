@@ -25,27 +25,27 @@ export const QUIZ_TIERS: readonly QuizTier[] = [
     id: "pemula",
     min: 0,
     max: 4,
-    title: "Pemula Semangat",
+    title: "Kurang Paham",
     description:
-      "Wawasan Anda baru di permulaan, dan itu langkah yang bagus. Mulai dari konsep 1.000 HPK lalu kunjungi posyandu terdekat untuk pendampingan.",
+      "Tidak apa-apa, ini langkah awal yang baik. Mulai dari memahami 1.000 hari pertama kehidupan, lalu gunakan posyandu sebagai tempat bertanya dan memantau tumbuh kembang anak.",
     tone: "warm",
   },
   {
     id: "pembelajar",
     min: 5,
     max: 7,
-    title: "Pembelajar Aktif",
+    title: "Cukup Paham",
     description:
-      "Anda sudah paham banyak hal. Tinggal beberapa miskonsepsi yang perlu diluruskan — pelajari kembali Mitos vs Fakta untuk melengkapinya.",
+      "Kamu sudah memahami banyak hal penting tentang pencegahan stunting. Tinggal beberapa miskonsepsi yang perlu diluruskan agar keputusan sehari-hari makin tepat.",
     tone: "primary",
   },
   {
     id: "pejuang",
     min: 8,
     max: QUIZ_TOTAL,
-    title: "Pejuang Gizi",
+    title: "Sangat Paham",
     description:
-      "Anda sangat memahami pencegahan stunting. Bagikan pengetahuan ini ke keluarga, tetangga, dan komunitas — itulah cara mengubah angka prevalensi di daerah Anda.",
+      "Pemahamanmu sudah kuat. Pengetahuan ini bisa membantu keluarga, tetangga, dan komunitas mengambil langkah kecil yang berdampak besar bagi tumbuh kembang anak.",
     tone: "success",
   },
 ] as const;

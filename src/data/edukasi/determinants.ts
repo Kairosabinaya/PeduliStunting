@@ -4,8 +4,7 @@
  * (inti). Setiap layer punya konten side panel berisi paragraf
  * penjelasan + callout bukti riset/data.
  *
- * Sumber narasi: Stewart et al. (2013) Maternal & Child Nutrition, dan
- * SSGI 2024 untuk angka quintile.
+ * Sumber narasi: Stewart et al. (2013) Maternal & Child Nutrition.
  */
 
 export interface DeterminantLayer {
@@ -27,116 +26,78 @@ export interface DeterminantLayer {
    * evidence body so users can jump to the source.
    */
   readonly evidenceFootnoteId?: string;
-  /** Tone preset for the ring + panel accent. */
-  readonly tone: "primary" | "secondary" | "success" | "warm" | "danger";
+  /**
+   * Tone preset for the badge + panel accent. All five are drawn from the
+   * project's blue/green palette and arranged as an outer-blue → inner-green
+   * ramp (L5 deep blue → L1 bright green), matching "distal context →
+   * proximal child". No warm/red tones (off-palette).
+   */
+  readonly tone:
+    | "secondary"
+    | "primary"
+    | "primary-soft"
+    | "success"
+    | "accent";
 }
 
 export const DETERMINANT_LAYERS: readonly DeterminantLayer[] = [
   {
     id: "layer-5-context",
     level: 5,
-    label: "Konteks sosial-ekonomi & politik",
+    label: "Kondisi sosial-ekonomi",
     description:
-      "Kebijakan ekonomi, distribusi sumber daya, akses ke layanan kesehatan dasar, dan ketahanan pangan tingkat nasional menentukan lantai dasar peluang setiap anak Indonesia.",
+      "Kemiskinan, akses layanan kesehatan, dan kebijakan publik ikut menentukan peluang anak untuk tumbuh sehat sejak awal kehidupan.",
     evidenceTitle: "Disparitas ekonomi",
     evidenceBody:
-      "Kelompok ekonomi quintile 1 (termiskin) mencatat prevalensi stunting 29,8% — sekitar 50% lebih tinggi dari rata-rata nasional 19,8% per SSGI 2024.",
+      "Anak dari keluarga miskin memiliki risiko stunting lebih tinggi. Pada kelompok ini, prevalensinya mencapai sekitar 29,8%.",
     evidenceFootnoteId: "fn-prevalence",
-    tone: "secondary",
+    tone: "secondary", // L5 — deep blue (outermost context)
   },
   {
     id: "layer-4-community",
     level: 4,
     label: "Komunitas & lingkungan",
     description:
-      "Akses air bersih, jamban layak, pengelolaan limbah, dan kedekatan dengan fasilitas kesehatan + posyandu aktif menentukan risiko infeksi berulang yang memicu stunting.",
+      "Air bersih, jamban layak, pengelolaan limbah, dan akses ke posyandu membantu melindungi anak dari infeksi berulang yang dapat memicu stunting.",
     evidenceTitle: "Sanitasi & air",
     evidenceBody:
-      "Kombinasi jamban tidak layak + air minum tidak diolah meningkatkan risiko stunting secara signifikan dalam literatur Indonesia.",
+      "Jamban tidak layak dan air minum tidak aman dapat meningkatkan risiko infeksi berulang pada anak.",
     evidenceFootnoteId: "fn-cameron-2016",
-    tone: "warm",
+    tone: "primary", // L4 — blue
   },
   {
     id: "layer-3-household",
     level: 3,
     label: "Rumah tangga",
     description:
-      "Pendapatan keluarga, pendidikan ibu, jumlah anak, dukungan ayah, dan ketahanan pangan rumah tangga menentukan kualitas asupan harian dan kemampuan keluarga merespons sakit.",
+      "Pendapatan keluarga, pendidikan ibu, jumlah anak, dukungan ayah, dan ketahanan pangan memengaruhi kualitas asupan serta perawatan anak di rumah.",
     evidenceTitle: "Pendidikan ibu",
     evidenceBody:
-      "Pendidikan ibu yang rendah adalah salah satu prediktor stunting paling konsisten dalam literatur Indonesia.",
+      "Pendidikan ibu yang rendah sering dikaitkan dengan risiko stunting yang lebih tinggi pada anak.",
     evidenceFootnoteId: "fn-beal-2018",
-    tone: "primary",
+    tone: "primary-soft", // L3 — light/sky blue (bridges blue → green)
   },
   {
     id: "layer-2-care",
     level: 2,
-    label: "Praktik pengasuhan & pemberian makan",
+    label: "Pola asuh & makan",
     description:
-      "Inisiasi Menyusu Dini, ASI eksklusif 0–6 bulan, MPASI kaya protein hewani, frekuensi makan yang tepat, dan kebersihan makanan adalah praktik harian dengan dampak paling langsung.",
+      "IMD, ASI eksklusif, MPASI bergizi, frekuensi makan, dan kebersihan makanan adalah bagian dari kebiasaan harian yang langsung memengaruhi tumbuh kembang anak.",
     evidenceTitle: "ASI eksklusif",
     evidenceBody:
-      "Tidak ASI eksklusif selama 6 bulan pertama termasuk determinant paling konsisten dalam literatur Indonesia.",
+      "Tidak mendapat ASI eksklusif selama 6 bulan pertama dapat meningkatkan risiko stunting.",
     evidenceFootnoteId: "fn-beal-2018",
-    tone: "success",
+    tone: "success", // L2 — green
   },
   {
     id: "layer-1-health",
     level: 1,
-    label: "Status kesehatan & gizi ibu + anak",
+    label: "Kesehatan ibu dan anak",
     description:
-      "Status gizi ibu sebelum hamil, anemia ibu hamil (Tablet Tambah Darah), berat lahir bayi, imunisasi lengkap, infeksi berulang (diare, ISPA), dan perawatan saat sakit adalah lapisan paling dekat dengan tubuh anak.",
+      "Gizi ibu sebelum dan selama hamil, berat lahir bayi, imunisasi, serta penanganan saat anak sakit berperan besar dalam mencegah stunting.",
     evidenceTitle: "Imunisasi & stunting",
     evidenceBody:
-      "Bayi yang tidak mendapat imunisasi dasar lengkap berisiko lebih tinggi stunting karena infeksi berulang mengganggu penyerapan gizi.",
-    tone: "danger",
+      "Imunisasi yang tidak lengkap dapat membuat anak lebih rentan terhadap infeksi berulang yang mengganggu penyerapan gizi.",
+    tone: "accent", // L1 — bright green (innermost: the child)
   },
 ] as const;
-
-export interface IncomeQuintilePoint {
-  readonly id: string;
-  readonly label: string;
-  readonly prevalencePct: number;
-  readonly note: string;
-}
-
-/**
- * SSGI 2024 menyebut quintile 1 (29,8%) dan rata-rata nasional (19,8%)
- * secara eksplisit. Q2-Q5 di-interpolasi sebagai estimasi monoton
- * (selisih kecil ke arah Q5) — angka exact menunggu rilis SSGI detail
- * BKPK. Ditandai sebagai estimasi di tooltip chart.
- */
-export const INCOME_QUINTILES: readonly IncomeQuintilePoint[] = [
-  {
-    id: "q1",
-    label: "Q1 (termiskin)",
-    prevalencePct: 29.8,
-    note: "Hampir 50% lebih tinggi dari rata-rata nasional",
-  },
-  {
-    id: "q2",
-    label: "Q2 (bawah)",
-    prevalencePct: 24.5,
-    note: "Estimasi monoton — angka detail menunggu rilis BKPK",
-  },
-  {
-    id: "q3",
-    label: "Q3 (menengah)",
-    prevalencePct: 19.8,
-    note: "Setara rata-rata nasional",
-  },
-  {
-    id: "q4",
-    label: "Q4 (atas)",
-    prevalencePct: 16.5,
-    note: "Estimasi monoton",
-  },
-  {
-    id: "q5",
-    label: "Q5 (terkaya)",
-    prevalencePct: 12.2,
-    note: "Estimasi monoton",
-  },
-] as const;
-
-export const INCOME_QUINTILE_NATIONAL = 19.8;

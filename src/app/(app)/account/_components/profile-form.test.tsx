@@ -65,9 +65,15 @@ describe("ProfileForm", () => {
     expect(screen.getByLabelText(ACCOUNT_FORM_COPY.themeLabel)).toHaveValue(
       "system",
     );
-    expect(screen.getByLabelText(ACCOUNT_FORM_COPY.localeLabel)).toHaveValue(
-      "id-ID",
+  });
+
+  it("submits the locale as a hidden field even though it is not editable", () => {
+    const { container } = render(<ProfileForm profile={baseProfile} />);
+    const hidden = container.querySelector<HTMLInputElement>(
+      'input[name="locale"][type="hidden"]',
     );
+    expect(hidden).not.toBeNull();
+    expect(hidden).toHaveValue("id-ID");
   });
 
   it("disables the submit button while the form is pristine", () => {

@@ -3,14 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
-import { signOut } from "@/app/(auth)/actions";
-import { PRIMARY_NAV } from "@/config/navigation";
+import { HEADER_HOVER_CLOSE_DELAY_MS, PRIMARY_NAV } from "@/config/navigation";
 import { APP_NAME } from "@/config/app";
 import { SIGN_IN_ROUTE } from "@/config/routes";
 import { Avatar } from "@/components/primitives/avatar";
 import { Button, buttonVariants } from "@/components/primitives/button";
+import { SignOutConfirmModal } from "@/components/navigation/sign-out-confirm-modal";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { cn } from "@/lib/cn";
 
@@ -125,143 +131,154 @@ export function FloatingHeader({ session }: FloatingHeaderProps) {
   return (
     <header
       className={cn(
-        "pt-safe-3 safe-x pointer-events-none fixed inset-x-0 top-0 z-header flex justify-center px-3 transition-transform duration-300 ease-emphasized md:px-6",
+        "pt-safe-4 safe-x pointer-events-none fixed inset-x-0 top-0 z-header px-3 transition-transform duration-300 ease-emphasized md:px-6",
         isHidden && "-translate-y-full",
       )}
     >
-      <div className="glass-panel pointer-events-auto flex w-fit max-w-full items-center gap-3 rounded-2xl px-3 py-2 md:px-4 md:py-2">
-        <Link
-          href="/map"
-          aria-label={`${APP_NAME} – beranda`}
-          className="flex items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+      {/* Centered wrapper holding a fixed-width pill so the header width is
+          identical to the `/map` MapHeader on every page (the brief: one
+          consistent pill width site-wide, minus the search affordance which
+          this header never had). The pill owns its width via an inline
+          `min(44rem, 100%)` — `w-fit` would size to content and drift per
+          page. */}
+      <div className="pointer-events-auto mx-auto flex w-full flex-col items-center gap-2">
+        <div
+          style={{ width: "min(44rem, 100%)" }}
+          className="glass-panel relative flex w-full items-center gap-3 rounded-full p-2"
         >
-          {/*
-            Brand wordmark. Two `<Image>` variants are mounted simultaneously
-            with theme-based visibility so the swap is instant on theme
-            toggle (no flash). Heights are explicit to avoid layout shift
-            during font / image load.
-          */}
-          <Image
-            src="/brand/logo-horizontal-color.png"
-            alt={APP_NAME}
-            width={160}
-            height={40}
-            priority
-            // Inline `width: auto` silences the Next/Image intrinsic-size
-            // warning — Tailwind locks the *height* via className so width
-            // must be left to scale from the aspect ratio. The previous
-            // `height: auto` inline was overriding the class entirely and
-            // rendering the wordmark at intrinsic 40 px.
-            style={{ width: "auto" }}
-            className="block h-6 dark:hidden"
-          />
-          <Image
-            src="/brand/logo-horizontal-white.png"
-            alt={APP_NAME}
-            width={160}
-            height={40}
-            priority
-            style={{ width: "auto" }}
-            className="hidden h-6 dark:block"
-          />
-        </Link>
-
-        <nav
-          aria-label="Navigasi utama"
-          className="hidden items-center justify-center gap-1 md:flex"
-        >
-          {PRIMARY_NAV.map((item) => {
-            const active = isActive(pathname, item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
-                  active
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                )}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="flex items-center gap-1">
-          <ThemeToggle />
-          {session ? (
-            <AvatarMenu
-              displayName={session.displayName}
-              email={session.email}
-              avatarUrl={session.avatarUrl}
-              isAdmin={session.isAdmin}
-            />
-          ) : (
-            <UnauthenticatedActions />
-          )}
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}
-            aria-expanded={mobileOpen}
-            aria-controls="floating-header-mobile-nav"
-            onClick={() => setMobileOpen((value) => !value)}
-            className="md:hidden"
+          <Link
+            href="/"
+            aria-label={`${APP_NAME} – beranda`}
+            className="flex shrink-0 items-center rounded-md pl-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
           >
-            <svg
-              aria-hidden
-              viewBox="0 0 24 24"
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.6}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              {mobileOpen ? (
-                <path d="M6 6l12 12M18 6L6 18" />
-              ) : (
-                <path d="M4 7h16M4 12h16M4 17h16" />
-              )}
-            </svg>
-          </Button>
-        </div>
-      </div>
+            {/*
+              Brand wordmark. Two `<Image>` variants are mounted simultaneously
+              with theme-based visibility so the swap is instant on theme
+              toggle (no flash). Heights are explicit to avoid layout shift
+              during font / image load.
+            */}
+            <Image
+              src="/brand/logo-horizontal-color.png"
+              alt={APP_NAME}
+              width={160}
+              height={40}
+              priority
+              // Inline `width: auto` silences the Next/Image intrinsic-size
+              // warning — Tailwind locks the *height* via className so width
+              // must be left to scale from the aspect ratio. The previous
+              // `height: auto` inline was overriding the class entirely and
+              // rendering the wordmark at intrinsic 40 px.
+              style={{ width: "auto" }}
+              className="block h-10 dark:hidden"
+            />
+            <Image
+              src="/brand/logo-horizontal-white.png"
+              alt={APP_NAME}
+              width={160}
+              height={40}
+              priority
+              style={{ width: "auto" }}
+              className="hidden h-10 dark:block"
+            />
+          </Link>
 
-      {mobileOpen ? (
-        <nav
-          id="floating-header-mobile-nav"
-          aria-label="Navigasi utama"
-          className="glass-panel pointer-events-auto mx-auto mt-2 flex w-full max-w-md flex-col gap-1 rounded-2xl p-2 md:hidden"
-        >
-          {PRIMARY_NAV.map((item) => {
-            const active = isActive(pathname, item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  "flex min-h-11 flex-col justify-center gap-0.5 rounded-lg px-3 py-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
-                  active
-                    ? "bg-primary/10 text-primary"
-                    : "text-foreground hover:bg-muted",
-                )}
+          <nav
+            aria-label="Navigasi utama"
+            className="hidden flex-1 items-center justify-center gap-1 md:flex"
+          >
+            {PRIMARY_NAV.map((item) => {
+              const active = isActive(pathname, item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "inline-flex min-h-11 items-center rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+                    active
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="ml-auto flex items-center gap-1">
+            <ThemeToggle />
+            {session ? (
+              <AvatarMenu
+                displayName={session.displayName}
+                email={session.email}
+                avatarUrl={session.avatarUrl}
+                isAdmin={session.isAdmin}
+              />
+            ) : (
+              <UnauthenticatedActions />
+            )}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label={mobileOpen ? "Tutup menu" : "Buka menu"}
+              aria-expanded={mobileOpen}
+              aria-controls="floating-header-mobile-nav"
+              onClick={() => setMobileOpen((value) => !value)}
+              className="md:hidden"
+            >
+              <svg
+                aria-hidden
+                viewBox="0 0 24 24"
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.6}
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <span>{item.label}</span>
-                <span className="text-xs font-normal text-muted-foreground">
-                  {item.description}
-                </span>
-              </Link>
-            );
-          })}
-        </nav>
-      ) : null}
+                {mobileOpen ? (
+                  <path d="M6 6l12 12M18 6L6 18" />
+                ) : (
+                  <path d="M4 7h16M4 12h16M4 17h16" />
+                )}
+              </svg>
+            </Button>
+          </div>
+        </div>
+
+        {mobileOpen ? (
+          <nav
+            id="floating-header-mobile-nav"
+            aria-label="Navigasi utama"
+            className="glass-panel pointer-events-auto flex w-full max-w-md flex-col gap-1 rounded-2xl p-2 md:hidden"
+          >
+            {PRIMARY_NAV.map((item) => {
+              const active = isActive(pathname, item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  onClick={() => setMobileOpen(false)}
+                  className={cn(
+                    "flex min-h-11 flex-col justify-center gap-0.5 rounded-lg px-3 py-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
+                    active
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground hover:bg-muted",
+                  )}
+                >
+                  <span>{item.label}</span>
+                  <span className="text-xs font-normal text-muted-foreground">
+                    {item.description}
+                  </span>
+                </Link>
+              );
+            })}
+          </nav>
+        ) : null}
+      </div>
     </header>
   );
 }
@@ -298,10 +315,11 @@ function UnauthenticatedActions() {
  * Circular avatar that opens a small dropdown with the user's name + email
  * and shortcuts to the profile page / sign-out action.
  *
- * Click-only by design — hover-to-open is unreliable on hybrid devices
- * (Surface, iPad with trackpad) and confusing on touch. Keyboard users
- * focus + Enter/Space. A document-level click-outside listener closes the
- * menu so it never gets stuck open after navigation.
+ * Opens on click OR on hover (with a short close-delay so the pointer can
+ * travel from the avatar to the menu without it snapping shut), mirroring the
+ * `/map` header so the account affordance behaves identically everywhere.
+ * Keyboard users focus + Enter/Space. A document-level click-outside listener
+ * plus Escape close the menu so it never gets stuck open after navigation.
  */
 function AvatarMenu({
   displayName,
@@ -315,7 +333,26 @@ function AvatarMenu({
   readonly isAdmin: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const closeTimerRef = useRef<number | null>(null);
+
+  const cancelCloseTimer = useCallback(() => {
+    if (closeTimerRef.current !== null) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleClose = useCallback(() => {
+    cancelCloseTimer();
+    closeTimerRef.current = window.setTimeout(() => {
+      setOpen(false);
+      closeTimerRef.current = null;
+    }, HEADER_HOVER_CLOSE_DELAY_MS);
+  }, [cancelCloseTimer]);
+
+  useEffect(() => () => cancelCloseTimer(), [cancelCloseTimer]);
 
   useEffect(() => {
     if (!open) return;
@@ -337,7 +374,15 @@ function AvatarMenu({
   }, [open]);
 
   return (
-    <div ref={wrapperRef} className="relative">
+    <div
+      ref={wrapperRef}
+      className="relative"
+      onMouseEnter={() => {
+        cancelCloseTimer();
+        setOpen(true);
+      }}
+      onMouseLeave={scheduleClose}
+    >
       <button
         type="button"
         aria-label={displayName ?? email ?? "Akun pengguna"}
@@ -393,17 +438,23 @@ function AvatarMenu({
               Kelola pengguna
             </Link>
           ) : null}
-          <form action={signOut}>
-            <button
-              type="submit"
-              role="menuitem"
-              className="flex min-h-11 w-full items-center rounded-lg px-3 text-left text-sm font-medium text-danger hover:bg-danger/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-            >
-              Keluar
-            </button>
-          </form>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              setConfirmOpen(true);
+            }}
+            className="flex min-h-11 w-full items-center rounded-lg px-3 text-left text-sm font-medium text-danger hover:bg-danger/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+          >
+            Keluar
+          </button>
         </div>
       ) : null}
+      <SignOutConfirmModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+      />
     </div>
   );
 }

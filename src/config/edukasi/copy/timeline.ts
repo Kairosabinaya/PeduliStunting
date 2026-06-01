@@ -8,10 +8,10 @@ export const TIMELINE_COPY = {
   eyebrow: "1.000 hari",
   headlineLead: "270 hari di rahim,",
   headlineHighlight: {
-    value: "730 hari setelahnya",
+    value: "730 hari setelahnya.",
     variant: "primary" as const,
   },
-  headlineTail: "— periode yang menentukan masa depan.",
+  headlineTail: "Masa penting yang membentuk masa depan anak.",
   helper:
     "Gulir untuk mengikuti perjalanan dari konsepsi hingga ulang tahun kedua. Setiap fase menampilkan apa yang terjadi dan apa yang perlu dilakukan keluarga.",
   dayLabel: "Hari ke-",

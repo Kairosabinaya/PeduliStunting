@@ -1,235 +1,147 @@
 "use client";
 
 /**
- * ACT 4 — Interactive WHO determinant framework. Refactored into a
- * `PinnedSection` (framesCount=10) so the section now spotlights one ring
- * at a time (L5 → L1, scrolling outward → inward, mirroring how stunting
- * causation flows from distal to proximal factors), then sweeps Q1 → Q5
- * across the quintile chart.
+ * ACT 4 — WHO determinant framework as a scroll-jacked horizontal carousel.
+ * A `PinnedSection` holds the viewport still while vertical scroll progress
+ * (0 → 1) translates a horizontal track of five layer cards from L5 (distal
+ * socio-economic context) to L1 (proximal child-level factors), mirroring how
+ * stunting causation flows. Progress dots track position.
  *
- * Scroll progress mapping:
- *   - 0.00 → 0.45  : ring sweep (5 rings × 0.09 progress segments,
- *                    rounded — L5 → L1)
- *   - 0.45 → 0.50  : crossover frame (rings + quintile both visible,
- *                    panel content transitions)
- *   - 0.50 → 1.00  : quintile sweep (5 bars × 0.10 progress segments,
- *                    Q1 → Q5)
- *
- * Reduced-motion users get the legacy click-based layout with rings,
- * panel, button selector, and quintile chart all visible at once. The
- * `useReducedMotion` hook is hydration-safe.
+ * Reduced-motion users get a normal section with the same cards in a native
+ * horizontal swipe row (no scroll hijack). `useReducedMotion` is
+ * hydration-safe.
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  AnimatePresence,
   motion,
   useMotionValueEvent,
   useReducedMotion,
   useTransform,
 } from "motion/react";
 
-import { Button } from "@/components/primitives/button";
 import { DETERMINANT_COPY } from "@/config/edukasi";
-import {
-  DETERMINANT_LAYERS,
-  INCOME_QUINTILES,
-  type DeterminantLayer,
-} from "@/data/edukasi/determinants";
+import { DETERMINANT_LAYERS } from "@/data/edukasi/determinants";
+import { cn } from "@/lib/cn";
 
 import { ActSection } from "../primitives/act-section";
 import { FadeInView } from "../primitives/fade-in-view";
 import { FootnoteRef } from "../primitives/footnote-ref";
 import { HighlightWord } from "../primitives/highlight-word";
 import { PinnedSection, usePinnedProgress } from "../primitives/pinned-section";
+import { PointerTilt } from "../primitives/pointer-tilt";
 
-import { ConcentricRings } from "./concentric-rings";
-import { QuintileChart } from "./quintile-chart";
+import { DeterminantCard } from "./determinant-card";
 
-const PANEL_TONE_CLASS: Record<DeterminantLayer["tone"], string> = {
-  primary: "border-primary/40 bg-primary/5",
-  secondary: "border-primary-soft/50 bg-primary-soft/8",
-  success: "border-accent/50 bg-accent/8",
-  warm: "border-edu-warm/55 bg-edu-warm/12",
-  danger: "border-edu-flag/50 bg-edu-flag/8",
-};
-
-// Layers sorted L5 → L1 so scroll-driven sweep matches user expectation
-// "L5 ke L4 ke L3 ke L2 ke L1".
+// L5 → L1 so the sweep goes outer context inward to the child.
 const LAYERS_OUTER_TO_INNER = [...DETERMINANT_LAYERS].sort(
   (a, b) => b.level - a.level,
 );
 
-const RING_SWEEP_END = 0.45;
-const QUINTILE_SWEEP_START = 0.55;
+// Pinned scroll length = CAROUSEL_FRAMES * 100vh. Tuned below the layer count
+// (5) so the cards traverse with noticeably less scroll — a 1:1 mapping felt
+// too slow to shift. ~300vh covers all five cards.
+const CAROUSEL_FRAMES = 3;
+
+function DeterminantHeader() {
+  return (
+    <FadeInView as="header" className="mb-8 max-w-3xl">
+      <p className="eyebrow">{DETERMINANT_COPY.eyebrow}</p>
+      <h2 className="section-headline mt-3 text-balance text-foreground">
+        <span>{DETERMINANT_COPY.headlineLead}</span>{" "}
+        <HighlightWord variant={DETERMINANT_COPY.headlineHighlight.variant}>
+          {DETERMINANT_COPY.headlineHighlight.value}
+        </HighlightWord>
+        .
+      </h2>
+      <p className="mt-4 max-w-prose text-base text-muted-foreground sm:text-lg">
+        <span>{DETERMINANT_COPY.body}</span>
+        <FootnoteRef id={DETERMINANT_COPY.bodyFootnoteId} />
+      </p>
+    </FadeInView>
+  );
+}
 
 function DeterminantInner() {
   const progress = usePinnedProgress();
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLUListElement>(null);
+  const [maxShift, setMaxShift] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  // Map [0, RING_SWEEP_END] → ring index 0..4 (outer to inner).
-  const ringIndex = useTransform(progress, (latest) => {
-    if (latest >= RING_SWEEP_END) return LAYERS_OUTER_TO_INNER.length - 1;
-    const idx = Math.floor(
-      (latest / RING_SWEEP_END) * LAYERS_OUTER_TO_INNER.length,
-    );
-    return Math.min(idx, LAYERS_OUTER_TO_INNER.length - 1);
+  // Measure how far the track must slide so the last card ends flush with the
+  // viewport's right edge. Recomputed on resize so the travel stays correct
+  // across breakpoints / orientation changes.
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    if (!viewport || !track) return;
+    const measure = () => {
+      const shift = track.scrollWidth - viewport.clientWidth;
+      setMaxShift(shift > 0 ? shift : 0);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(viewport);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, []);
+
+  const x = useTransform(progress, [0, 1], [0, -maxShift]);
+
+  useMotionValueEvent(progress, "change", (latest) => {
+    const last = LAYERS_OUTER_TO_INNER.length - 1;
+    const idx = Math.min(Math.max(Math.round(latest * last), 0), last);
+    if (idx !== activeIndex) setActiveIndex(idx);
   });
-
-  // Map [QUINTILE_SWEEP_START, 1] → quintile index 0..4 (Q1 to Q5).
-  const quintileIndex = useTransform(progress, (latest) => {
-    if (latest < QUINTILE_SWEEP_START) return -1;
-    const adjusted =
-      (latest - QUINTILE_SWEEP_START) / (1 - QUINTILE_SWEEP_START);
-    const idx = Math.floor(adjusted * INCOME_QUINTILES.length);
-    return Math.min(idx, INCOME_QUINTILES.length - 1);
-  });
-
-  const fallbackLayer = LAYERS_OUTER_TO_INNER[0];
-  const fallbackQuintile = INCOME_QUINTILES[0];
-
-  const [activeLayer, setActiveLayer] = useState<DeterminantLayer | undefined>(
-    fallbackLayer,
-  );
-  const [activeQuintileIdx, setActiveQuintileIdx] = useState<number>(-1);
-
-  useMotionValueEvent(ringIndex, "change", (idx) => {
-    const layer = LAYERS_OUTER_TO_INNER[idx];
-    if (layer && layer.id !== activeLayer?.id) {
-      setActiveLayer(layer);
-    }
-  });
-  useMotionValueEvent(quintileIndex, "change", (idx) => {
-    if (idx !== activeQuintileIdx) setActiveQuintileIdx(idx);
-  });
-
-  const activeLevel = activeLayer?.level ?? null;
-  const activeQuintile =
-    activeQuintileIdx >= 0 ? INCOME_QUINTILES[activeQuintileIdx] : null;
-
-  const showRings = activeQuintileIdx < 0;
-  const showQuintile = activeQuintileIdx >= 0;
-
-  if (!fallbackLayer || !fallbackQuintile) return null;
-  const displayLayer = activeLayer ?? fallbackLayer;
 
   return (
     <div className="container relative mx-auto w-full max-w-6xl px-4 sm:px-6">
-      <header className="mb-6 max-w-3xl">
-        <p className="eyebrow">{DETERMINANT_COPY.eyebrow}</p>
-        <h2 className="section-headline mt-3 text-balance text-foreground">
-          <span>{DETERMINANT_COPY.headlineLead}</span>{" "}
-          <HighlightWord variant={DETERMINANT_COPY.headlineHighlight.variant}>
-            {DETERMINANT_COPY.headlineHighlight.value}
-          </HighlightWord>
-          .
-        </h2>
-      </header>
+      <DeterminantHeader />
 
-      <div className="relative grid items-center gap-8 lg:grid-cols-[5fr_4fr] lg:gap-12">
-        {/* Rings + active panel (visible during the ring sweep) */}
-        <AnimatePresence mode="wait">
-          {showRings ? (
-            <motion.div
-              key="rings"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="relative aspect-square w-full max-w-md justify-self-center"
+      <div ref={viewportRef} className="relative overflow-hidden">
+        <motion.ul
+          ref={trackRef}
+          style={{ x }}
+          className="flex gap-5 sm:gap-6"
+          aria-label={DETERMINANT_COPY.layerSelectLabel}
+        >
+          {LAYERS_OUTER_TO_INNER.map((layer, index) => (
+            <li
+              key={layer.id}
+              className="edu-determinant-card shrink-0 list-none"
             >
-              <ConcentricRings activeLevel={activeLevel} />
-            </motion.div>
-          ) : null}
-          {showQuintile ? (
-            <motion.div
-              key="quintile"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <QuintileChart activeIndex={activeQuintileIdx} />
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
+              <PointerTilt wrapperClassName="h-full" className="h-full">
+                <DeterminantCard layer={layer} active={index === activeIndex} />
+              </PointerTilt>
+            </li>
+          ))}
+        </motion.ul>
+      </div>
 
-        {/* Side panel — switches between layer detail and quintile detail */}
-        <div>
-          <AnimatePresence mode="wait" initial={false}>
-            {showRings ? (
-              <motion.article
-                key={`layer-${displayLayer.id}`}
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -8 }}
-                transition={{ duration: 0.3 }}
-                className={`flex min-h-[20rem] flex-col rounded-2xl border p-6 sm:p-7 ${PANEL_TONE_CLASS[displayLayer.tone]}`}
-              >
-                <p className="eyebrow">Lapisan {displayLayer.level}</p>
-                <h3 className="mt-2 text-xl font-bold text-foreground sm:text-2xl">
-                  {displayLayer.label}
-                </h3>
-                <p className="mt-4 text-base leading-relaxed text-foreground/85">
-                  {displayLayer.description}
-                </p>
-                <aside className="mt-6 rounded-xl border border-border bg-surface p-4 shadow-xs">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-                    {DETERMINANT_COPY.evidenceLabel} ·{" "}
-                    {displayLayer.evidenceTitle}
-                  </p>
-                  <p className="mt-2 text-sm leading-relaxed text-foreground/85">
-                    <span>{displayLayer.evidenceBody}</span>
-                    {displayLayer.evidenceFootnoteId ? (
-                      <FootnoteRef id={displayLayer.evidenceFootnoteId} />
-                    ) : null}
-                  </p>
-                </aside>
-              </motion.article>
-            ) : null}
-            {showQuintile && activeQuintile ? (
-              <motion.article
-                key={`quintile-${activeQuintile.id}`}
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -8 }}
-                transition={{ duration: 0.3 }}
-                className="flex min-h-[20rem] flex-col rounded-2xl border border-primary/30 bg-primary/5 p-6 sm:p-7"
-              >
-                <p className="eyebrow">{activeQuintile.label}</p>
-                <h3 className="mt-2 text-xl font-bold text-foreground sm:text-2xl">
-                  {activeQuintile.prevalencePct.toLocaleString("id-ID", {
-                    minimumFractionDigits: 1,
-                    maximumFractionDigits: 1,
-                  })}
-                  % prevalensi stunting
-                </h3>
-                <p className="mt-4 text-base leading-relaxed text-foreground/85">
-                  {activeQuintile.note}
-                </p>
-              </motion.article>
-            ) : null}
-          </AnimatePresence>
-        </div>
+      <div
+        className="mt-6 flex items-center justify-center gap-2"
+        aria-hidden="true"
+      >
+        {LAYERS_OUTER_TO_INNER.map((layer, index) => (
+          <span
+            key={layer.id}
+            className={cn(
+              "h-2 rounded-full transition-all",
+              index === activeIndex ? "w-6 bg-primary" : "w-2 bg-foreground/25",
+            )}
+          />
+        ))}
       </div>
     </div>
   );
 }
 
 /**
- * Reduced-motion fallback: classic click-driven layout with rings, panel,
- * button selector, and quintile chart all visible at once. No PinnedSection.
+ * Reduced-motion fallback: a normal section with the same cards in a native
+ * horizontal swipe row — no scroll hijack.
  */
 function ReducedMotionDeterminant() {
-  const firstLayer = DETERMINANT_LAYERS[0];
-  const [activeId, setActiveId] = useState<string | null>(
-    firstLayer?.id ?? null,
-  );
-  const activeLayer = useMemo(
-    () => DETERMINANT_LAYERS.find((l) => l.id === activeId) ?? firstLayer,
-    [activeId, firstLayer],
-  );
-  if (!activeLayer) return null;
-
   return (
     <ActSection id="act-4" eyebrow={DETERMINANT_COPY.eyebrow} maxWidth="wide">
       <FadeInView as="div" className="max-w-prose">
@@ -249,66 +161,19 @@ function ReducedMotionDeterminant() {
         </p>
       </FadeInView>
 
-      <div className="mt-12 grid items-start gap-10 lg:grid-cols-[5fr_4fr] lg:gap-16">
-        <div>
-          <div className="mx-auto aspect-square w-full max-w-md">
-            <ConcentricRings activeId={activeId} onSelect={setActiveId} />
-          </div>
-          <fieldset
-            className="mt-4 flex flex-wrap justify-center gap-2"
-            aria-label={DETERMINANT_COPY.layerSelectLabel}
+      <ul
+        className="scrollbar-hide mt-10 flex snap-x snap-mandatory gap-5 overflow-x-auto pb-4 sm:gap-6"
+        aria-label={DETERMINANT_COPY.layerSelectLabel}
+      >
+        {LAYERS_OUTER_TO_INNER.map((layer) => (
+          <li
+            key={layer.id}
+            className="edu-determinant-card shrink-0 snap-start list-none"
           >
-            <legend className="sr-only">
-              {DETERMINANT_COPY.layerSelectLabel}
-            </legend>
-            {DETERMINANT_LAYERS.map((layer) => {
-              const active = activeId === layer.id;
-              return (
-                <Button
-                  key={layer.id}
-                  size="sm"
-                  variant={active ? "primary" : "secondary"}
-                  onClick={() => setActiveId(layer.id)}
-                  aria-pressed={active}
-                >
-                  L{layer.level} · {layer.label.split(" ")[0]}
-                </Button>
-              );
-            })}
-          </fieldset>
-        </div>
-
-        <div>
-          <article
-            className={`rounded-2xl border p-6 sm:p-7 ${PANEL_TONE_CLASS[activeLayer.tone]}`}
-          >
-            <p className="eyebrow">Lapisan {activeLayer.level}</p>
-            <h3 className="mt-2 text-xl font-bold text-foreground sm:text-2xl">
-              {activeLayer.label}
-            </h3>
-            <p className="mt-4 text-base leading-relaxed text-foreground/85">
-              {activeLayer.description}
-            </p>
-            <aside className="mt-6 rounded-xl border border-border bg-surface p-4 shadow-xs">
-              <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-                {DETERMINANT_COPY.evidenceLabel} · {activeLayer.evidenceTitle}
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-foreground/85">
-                <span>{activeLayer.evidenceBody}</span>
-                {activeLayer.evidenceFootnoteId ? (
-                  <FootnoteRef id={activeLayer.evidenceFootnoteId} />
-                ) : null}
-              </p>
-            </aside>
-          </article>
-        </div>
-      </div>
-
-      <div className="mt-16">
-        <FadeInView as="div">
-          <QuintileChart />
-        </FadeInView>
-      </div>
+            <DeterminantCard layer={layer} />
+          </li>
+        ))}
+      </ul>
     </ActSection>
   );
 }
@@ -319,9 +184,9 @@ export function DeterminantSection() {
   return (
     <PinnedSection
       id="act-4"
-      framesCount={10}
+      framesCount={CAROUSEL_FRAMES}
       tone="default"
-      ariaLabel="Lapisan determinant stunting WHO dan disparitas berdasarkan kelompok ekonomi"
+      ariaLabel="Lima lapisan determinant stunting menurut WHO"
     >
       <DeterminantInner />
     </PinnedSection>

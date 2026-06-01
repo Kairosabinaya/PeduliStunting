@@ -4,13 +4,7 @@ import { notFound } from "next/navigation";
 import { ImmunizationEducationCard } from "@/components/features/tracker/immunization-education-card";
 import { ImmunizationProgress } from "@/components/features/tracker/immunization-progress";
 import { ImmunizationTimeline } from "@/components/features/tracker/immunization-timeline";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/primitives/card";
+import { Card } from "@/components/primitives/card";
 import { ErrorState } from "@/components/primitives/error-state";
 import {
   IMMUNIZATION_COPY,
@@ -99,24 +93,30 @@ export default async function ImmunizationsPage({
   );
 
   return (
-    <div className="space-y-4">
-      <ImmunizationProgress done={progress.done} due={progress.due} />
-      <ImmunizationEducationCard />
-      <Card>
-        <CardHeader>
-          <CardTitle>{IMMUNIZATION_TIMELINE_COPY.title}</CardTitle>
-          <CardDescription>
+    <div className="space-y-5">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-1">
+          <ImmunizationProgress done={progress.done} due={progress.due} />
+        </div>
+        <div className="lg:col-span-2">
+          <ImmunizationEducationCard />
+        </div>
+      </div>
+      <Card elevation="sm" padding="md" className="space-y-4">
+        <header>
+          <h2 className="text-base font-semibold text-foreground">
+            {IMMUNIZATION_TIMELINE_COPY.title}
+          </h2>
+          <p className="text-sm text-muted-foreground">
             {IMMUNIZATION_TIMELINE_COPY.description}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ImmunizationTimeline
-            childId={childId}
-            childAgeMonths={childAgeMonths}
-            schedule={schedule}
-            records={records}
-          />
-        </CardContent>
+          </p>
+        </header>
+        <ImmunizationTimeline
+          childId={childId}
+          childAgeMonths={childAgeMonths}
+          schedule={schedule}
+          records={records}
+        />
       </Card>
     </div>
   );

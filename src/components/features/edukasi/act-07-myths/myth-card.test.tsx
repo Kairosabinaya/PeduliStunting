@@ -1,6 +1,6 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { MythCard } from "./myth-card";
 
@@ -55,5 +55,26 @@ describe("MythCard", () => {
     expect(
       screen.getByText(/stunting punya banyak penyebab/i),
     ).toBeInTheDocument();
+  });
+
+  it("flips to the fact as the card scrolls past the viewport centre", async () => {
+    render(<MythCard card={SAMPLE} />);
+    const button = screen.getByRole("button");
+    expect(button).toHaveAttribute("aria-pressed", "false");
+    // Simulate the card sitting above the viewport centre (top is negative,
+    // so its centre has scrolled past the middle of the screen).
+    vi.spyOn(button, "getBoundingClientRect").mockReturnValue({
+      top: -200,
+      bottom: 100,
+      height: 300,
+      width: 0,
+      left: 0,
+      right: 0,
+      x: 0,
+      y: -200,
+      toJSON: () => ({}),
+    } as DOMRect);
+    fireEvent.scroll(window);
+    await waitFor(() => expect(button).toHaveAttribute("aria-pressed", "true"));
   });
 });

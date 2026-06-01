@@ -52,6 +52,7 @@ export class GetDashboardInsightsUseCase {
       {
         rankingLimit: DASHBOARD_INSIGHTS.rankingLimit,
         provinceLimit: DASHBOARD_INSIGHTS.provinceLimit,
+        moverLimit: DASHBOARD_INSIGHTS.moverLimit,
       },
     );
     return ok(insights);

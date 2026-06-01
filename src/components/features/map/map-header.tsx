@@ -22,13 +22,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { signOut } from "@/app/(auth)/actions";
 import type { RegionDto } from "@/application/region/dtos";
+import { Avatar } from "@/components/primitives/avatar";
 import { Button } from "@/components/primitives/button";
+import { SignOutConfirmModal } from "@/components/navigation/sign-out-confirm-modal";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { APP_NAME } from "@/config/app";
 import { YEAR_RAIL_COPY } from "@/config/map";
-import { PRIMARY_NAV } from "@/config/navigation";
+import { HEADER_HOVER_CLOSE_DELAY_MS, PRIMARY_NAV } from "@/config/navigation";
 import {
   SUPPORTED_YEARS,
   isSupportedYear,
@@ -44,26 +45,14 @@ export interface MapHeaderProps {
   readonly regions: readonly RegionDto[];
   readonly displayName: string | null;
   readonly email: string | null;
+  /** Profile avatar URL. Null falls the avatar back to initials. */
+  readonly avatarUrl: string | null;
   /** Avatar tap handler on mobile — opens the sheet menu. Ignored on desktop. */
   readonly onAccountClick: () => void;
   /** Mirrors the avatar's `aria-expanded` (sheet menu open state on mobile). */
   readonly accountOpen?: boolean;
   /** Hide the horizontal year chip row (desktop hides it; its parent renders its own). */
   readonly hideYearRow?: boolean;
-}
-
-function initialsOf(name: string | null, email: string | null): string {
-  if (name && name.trim().length > 0) {
-    const parts = name.trim().split(/\s+/);
-    const first = parts[0]?.[0] ?? "";
-    const last = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? "") : "";
-    const joined = `${first}${last}`.toUpperCase();
-    if (joined.length > 0) return joined;
-  }
-  if (email && email.length > 0) {
-    return email.slice(0, 2).toUpperCase();
-  }
-  return "PS";
 }
 
 function isActive(pathname: string | null, href: string): boolean {
@@ -76,6 +65,7 @@ export function MapHeader({
   regions,
   displayName,
   email,
+  avatarUrl,
   onAccountClick,
   accountOpen = false,
   hideYearRow = false,
@@ -87,10 +77,6 @@ export function MapHeader({
   // through the listbox.
   const [searchResultsOpen, setSearchResultsOpen] = useState<boolean>(false);
   const headerRef = useRef<HTMLElement | null>(null);
-  const initials = useMemo(
-    () => initialsOf(displayName, email),
-    [displayName, email],
-  );
 
   // Compact = search-bar layout. Mobile always; desktop on user request.
   const isCompact = !isDesktop || searchExpanded;
@@ -157,7 +143,7 @@ export function MapHeader({
               regions={regions}
               displayName={displayName}
               email={email}
-              initials={initials}
+              avatarUrl={avatarUrl}
               accountOpen={accountOpen}
               onAccountClick={onAccountClick}
               onCollapse={isDesktop ? () => setSearchExpanded(false) : null}
@@ -169,7 +155,7 @@ export function MapHeader({
             <DesktopDefaultRow
               displayName={displayName}
               email={email}
-              initials={initials}
+              avatarUrl={avatarUrl}
               onSearchClick={() => setSearchExpanded(true)}
             />
           )}
@@ -189,7 +175,7 @@ interface CompactSearchRowProps {
   readonly regions: readonly RegionDto[];
   readonly displayName: string | null;
   readonly email: string | null;
-  readonly initials: string;
+  readonly avatarUrl: string | null;
   readonly accountOpen: boolean;
   readonly onAccountClick: () => void;
   readonly onCollapse: (() => void) | null;
@@ -202,7 +188,7 @@ function CompactSearchRow({
   regions,
   displayName,
   email,
-  initials,
+  avatarUrl,
   accountOpen,
   onAccountClick,
   onCollapse,
@@ -234,7 +220,7 @@ function CompactSearchRow({
         </button>
       ) : (
         <Link
-          href="/map"
+          href="/"
           aria-label={`${APP_NAME} – beranda`}
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
         >
@@ -268,7 +254,7 @@ function CompactSearchRow({
         <AvatarDropdown
           displayName={displayName}
           email={email}
-          initials={initials}
+          avatarUrl={avatarUrl}
         />
       ) : (
         <button
@@ -277,9 +263,15 @@ function CompactSearchRow({
           aria-haspopup="menu"
           aria-expanded={accountOpen}
           onClick={onAccountClick}
-          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold uppercase tracking-wide text-primary-foreground shadow-sm transition-colors hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-sm transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
-          {initials}
+          <Avatar
+            src={avatarUrl}
+            displayName={displayName}
+            email={email}
+            size="lg"
+            aria-hidden
+          />
         </button>
       )}
     </div>
@@ -289,14 +281,14 @@ function CompactSearchRow({
 interface DesktopDefaultRowProps {
   readonly displayName: string | null;
   readonly email: string | null;
-  readonly initials: string;
+  readonly avatarUrl: string | null;
   readonly onSearchClick: () => void;
 }
 
 function DesktopDefaultRow({
   displayName,
   email,
-  initials,
+  avatarUrl,
   onSearchClick,
 }: DesktopDefaultRowProps) {
   const pathname = usePathname();
@@ -304,7 +296,7 @@ function DesktopDefaultRow({
   return (
     <div className="flex w-full animate-fade-in items-center gap-3 px-2">
       <Link
-        href="/map"
+        href="/"
         aria-label={`${APP_NAME} – beranda`}
         className="flex items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
       >
@@ -376,7 +368,7 @@ function DesktopDefaultRow({
         <AvatarDropdown
           displayName={displayName}
           email={email}
-          initials={initials}
+          avatarUrl={avatarUrl}
         />
       </div>
     </div>
@@ -393,13 +385,16 @@ function DesktopDefaultRow({
 interface AvatarDropdownProps {
   readonly displayName: string | null;
   readonly email: string | null;
-  readonly initials: string;
+  readonly avatarUrl: string | null;
 }
 
-const HOVER_CLOSE_DELAY_MS = 240;
-
-function AvatarDropdown({ displayName, email, initials }: AvatarDropdownProps) {
+function AvatarDropdown({
+  displayName,
+  email,
+  avatarUrl,
+}: AvatarDropdownProps) {
   const [open, setOpen] = useState<boolean>(false);
+  const [confirmOpen, setConfirmOpen] = useState<boolean>(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const closeTimerRef = useRef<number | null>(null);
 
@@ -415,7 +410,7 @@ function AvatarDropdown({ displayName, email, initials }: AvatarDropdownProps) {
     closeTimerRef.current = window.setTimeout(() => {
       setOpen(false);
       closeTimerRef.current = null;
-    }, HOVER_CLOSE_DELAY_MS);
+    }, HEADER_HOVER_CLOSE_DELAY_MS);
   }, [cancelCloseTimer]);
 
   useEffect(() => () => cancelCloseTimer(), [cancelCloseTimer]);
@@ -456,9 +451,15 @@ function AvatarDropdown({ displayName, email, initials }: AvatarDropdownProps) {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
-        className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-primary text-sm font-semibold uppercase tracking-wide text-primary-foreground shadow-sm transition-colors hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+        className="inline-flex h-11 w-11 items-center justify-center rounded-full shadow-sm transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
-        {initials}
+        <Avatar
+          src={avatarUrl}
+          displayName={displayName}
+          email={email}
+          size="lg"
+          aria-hidden
+        />
       </button>
       {open ? (
         <div
@@ -485,17 +486,24 @@ function AvatarDropdown({ displayName, email, initials }: AvatarDropdownProps) {
           >
             Profil
           </Link>
-          <form action={signOut}>
-            <button
-              type="submit"
-              role="menuitem"
-              className="flex min-h-11 w-full items-center rounded-lg px-3 text-left text-sm font-medium text-danger hover:bg-danger/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
-            >
-              Keluar
-            </button>
-          </form>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              cancelCloseTimer();
+              setOpen(false);
+              setConfirmOpen(true);
+            }}
+            className="flex min-h-11 w-full items-center rounded-lg px-3 text-left text-sm font-medium text-danger hover:bg-danger/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+          >
+            Keluar
+          </button>
         </div>
       ) : null}
+      <SignOutConfirmModal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+      />
     </div>
   );
 }

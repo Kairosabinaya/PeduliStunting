@@ -10,34 +10,18 @@
  * stored in `model_metadata.metrics` and `model_metadata.moran_per_year`.
  */
 
-/** Page-level header copy. */
-export const DASHBOARD_HEADER = {
-  eyebrow: "Data, model & simulasi",
-  title: "Mengenal stunting di Indonesia",
-  description:
-    "Lihat sebaran stunting di 514 kabupaten/kota, pahami cara model memperkirakannya, lalu coba sendiri: ubah indikator sebuah wilayah dan saksikan perkiraannya berubah.",
+/** Header copy for the `/data` route (Potret Stunting). */
+export const DATA_HEADER = {
+  eyebrow: "Potret stunting",
+  title: "Stunting Indonesia dalam angka",
+  description: "Sebaran, tren, dan indikator di 514 kabupaten/kota, 2021-2024.",
 } as const;
 
-/** Short tab title + friendly intro for each of the three dashboard sections. */
-export const DASHBOARD_SECTIONS = {
-  insight: {
-    eyebrow: "Bagian 1",
-    title: "Potret Stunting",
-    description:
-      "Lihat di mana stunting paling tinggi, bagaimana trennya sejak 2021, dan indikator apa yang paling berhubungan dengannya.",
-  },
-  model: {
-    eyebrow: "Bagian 2",
-    title: "Cara Kerja Model",
-    description:
-      "Bagaimana model memperkirakan tingkat stunting sebuah wilayah, seberapa akurat, dan mengapa lebih baik daripada cara yang lebih sederhana.",
-  },
-  simulator: {
-    eyebrow: "Bagian 3",
-    title: "Coba Prediksinya",
-    description:
-      "Pilih satu wilayah, lalu ubah indikatornya dan lihat langsung bagaimana perkiraan tingkat stuntingnya berubah.",
-  },
+/** Header copy for the `/prediksi` route (simulator + model). */
+export const PREDIKSI_HEADER = {
+  eyebrow: "Coba sendiri",
+  title: "Simulasi prediksi stunting",
+  description: "Geser indikator wilayah, lihat prediksinya berubah.",
 } as const;
 
 /** Headline KPI tiles for the insight section. */
@@ -48,35 +32,74 @@ export const DASHBOARD_KPI = {
     "Data indikator wilayah belum dimuat. Jalankan kembali impor data dashboard.",
   meanLabel: "Rata-rata stunting",
   meanHint: "Rata-rata seluruh kabupaten/kota (tiap wilayah dihitung setara).",
-  changeLabel: "Dibanding tahun lalu",
-  highCountLabel: "Wilayah berisiko tinggi",
-  highCountHint: "Stunting 30% ke atas — kategori “sangat tinggi” menurut WHO.",
-  targetLabel: "Jarak ke target nasional",
-  targetHint: "Target pemerintah (RPJMN) 2029: 14,2%.",
+  tinggiShareLabel: "Wilayah stunting tinggi",
+  tinggiShareHint: "Stunting ≥ 30% (kategori Tinggi).",
+  sedangShareLabel: "Wilayah stunting sedang",
+  sedangShareHint: "Stunting 20–29,9% (kategori Sedang).",
+  rendahShareLabel: "Wilayah stunting rendah",
+  rendahShareHint: "Stunting di bawah 20% (kategori Rendah).",
   unitPercent: "%",
   unitPoint: " poin",
+} as const;
+
+/** Global cross-filter bar copy (year + region). */
+export const DASHBOARD_FILTERS = {
+  yearLabel: "Tahun",
+  yearAriaLabel: "Pilih tahun observasi",
+  searchPlaceholder: "Cari kabupaten/kota…",
+  searchAriaLabel: "Cari wilayah untuk menyaring dashboard",
+  resultsAriaLabel: "Hasil pencarian wilayah",
+  searchEmpty: "Wilayah tidak ditemukan",
+  allRegionsLabel: "Semua wilayah",
+  clearRegionLabel: "Hapus filter wilayah",
+} as const;
+
+/** Selected-region spotlight card copy. */
+export const DASHBOARD_SPOTLIGHT = {
+  eyebrow: "Wilayah terpilih",
+  prevalenceLabel: "Stunting",
+  rankLabel: "Peringkat nasional",
+  rankUnit: "dari",
+  categoryLabel: "Kategori",
+  trendLabel: "Tren wilayah ini",
+  closeLabel: "Tutup sorotan wilayah",
+  noPrevalence: "Data tahun ini belum tersedia untuk wilayah ini.",
 } as const;
 
 /** Trend chart copy. */
 export const DASHBOARD_TREND = {
   title: "Tren stunting 2021-2024",
-  description:
-    "Garis biru tegas = rata-rata wilayah pada dashboard ini. Garis putus-putus = angka nasional resmi (dihitung berdasarkan jumlah penduduk). Keduanya wajar berbeda karena cara menghitungnya berbeda — bukan karena salah satu keliru.",
+  description: "Rata-rata stunting seluruh kabupaten/kota.",
   crossRegionLabel: "Rata-rata wilayah",
-  nationalLabel: "Angka nasional",
+  regionLineLabel: "Wilayah terpilih",
+  selectRegionHint:
+    "Pilih wilayah pada peta untuk membandingkan trennya dengan rata-rata wilayah.",
   targetLabel: "Target 2029",
   whoHighLabel: "Batas tinggi (WHO)",
   whoVeryHighLabel: "Batas sangat tinggi",
   axisYear: "Tahun",
   axisPrevalence: "Stunting (%)",
   errorTitle: "Belum bisa menampilkan tren",
+  trendDownLabel: "Menurun sejak {tahun}",
+  trendUpLabel: "Naik sejak {tahun}",
+  trendFlatLabel: "Stabil sejak {tahun}",
+} as const;
+
+/** Trend chart series filter (Semua / Kabupaten / Kota). */
+export const DASHBOARD_TREND_FILTER = {
+  ariaLabel: "Saring tren menurut tipe wilayah",
+  all: "Semua",
+  kabupaten: "Kabupaten",
+  kota: "Kota",
 } as const;
 
 /** Region & province ranking copy. */
 export const DASHBOARD_RANKINGS = {
   title: "Wilayah terbaik & terberat",
-  description:
-    "Sepuluh kabupaten/kota dengan stunting terendah dan tertinggi di tahun terbaru, beserta provinsi terbaik dan terberat.",
+  description: "Stunting terendah dan tertinggi di tahun terbaru.",
+  scopeAriaLabel: "Tampilkan peringkat menurut",
+  regionScope: "Kabupaten/Kota",
+  provinceScope: "Provinsi",
   bestRegionsTitle: "Stunting terendah",
   worstRegionsTitle: "Stunting tertinggi",
   bestProvincesTitle: "Provinsi terendah",
@@ -89,26 +112,57 @@ export const DASHBOARD_RANKINGS = {
   emptyDescription: "Data stunting tahun terbaru belum dimuat.",
 } as const;
 
-/** Choropleth (build-time SVG) copy. */
+/** Interactive choropleth copy. */
 export const DASHBOARD_CHOROPLETH = {
   title: "Peta sebaran stunting",
-  description:
-    "Tiap wilayah diwarnai sesuai tingkat stuntingnya. Untuk menjelajah lebih jauh — zoom, klik wilayah, bandingkan antar tahun — buka peta interaktif.",
+  description: "Klik sebuah wilayah untuk menyorotnya di seluruh dashboard.",
   openMapLabel: "Buka peta interaktif",
   yearLabel: "Tahun peta",
+  selectHint: "Klik wilayah pada peta untuk menyaring.",
+  ariaLabel: "Peta sebaran kategori stunting kabupaten/kota",
+  noData: "Tidak ada data",
+  summaryPrefix: "Dari",
+  summaryRegions: "wilayah",
+} as const;
+
+/** "How to read the categories" legend copy. */
+export const DASHBOARD_LEGEND = {
+  title: "Cara membaca kategori",
+  description:
+    "Tiga kelas warna ini dipakai di seluruh halaman: peta, peringkat, dan simulator.",
+} as const;
+
+/** Kota vs Kabupaten high-share copy. */
+export const DASHBOARD_TIPE_GAP = {
+  title: "Kategori Tinggi per tipe",
+  description: "Porsi wilayah dengan stunting ≥ 30% (kategori Tinggi)",
+  kabupatenLabel: "Kabupaten",
+  kotaLabel: "Kota",
+  unitRegion: " wilayah",
+  emptyTitle: "Perbandingan belum tersedia",
+} as const;
+
+/** Biggest movers leaderboard copy. */
+export const DASHBOARD_MOVERS = {
+  title: "Perubahan terbesar",
+  description: "Wilayah yang paling banyak berubah, 2023-2024.",
+  improvedTitle: "Paling membaik",
+  worsenedTitle: "Paling memburuk",
+  arrow: "→",
+  unitPoint: " poin",
+  emptyTitle: "Data perubahan belum tersedia",
 } as const;
 
 /** Predictor analysis copy (correlation + selection frequency). */
 export const DASHBOARD_ANALYSIS = {
   title: "Apa yang paling berhubungan dengan stunting?",
-  description:
-    "Dua cara melihat ke-20 indikator: seberapa erat hubungannya dengan angka stunting, dan seberapa sering model benar-benar memakainya untuk memprediksi.",
+  description: "Keeratan tiap indikator dan seberapa sering model memakainya.",
   correlationTitle: "Keeratan dengan stunting",
   correlationHint:
-    "Ke kanan (merah): makin tinggi indikator, makin tinggi stunting. Ke kiri (hijau): makin tinggi indikator, makin rendah stunting. Makin panjang batangnya, makin erat hubungannya.",
+    "Biru (kanan): menaikkan risiko stunting. Hijau (kiri): menurunkan. Makin panjang barnya, makin erat hubungannya.",
   selectionTitle: "Paling sering dipakai model",
   selectionHint:
-    "Persentase wilayah-tahun yang benar-benar memakai indikator ini saat memprediksi. Makin tinggi, makin sering indikator ini menentukan hasil.",
+    "Persentase wilayah-tahun yang memakai indikator ini saat memprediksi.",
   riskLabel: "Menaikkan risiko",
   protectiveLabel: "Menurunkan risiko",
   errorTitle: "Belum bisa menampilkan analisis indikator",
@@ -119,9 +173,12 @@ export const DASHBOARD_ANALYSIS = {
 
 /** Model-explanation section copy. */
 export const DASHBOARD_MODEL = {
+  sectionTitle: "Cara kerja model",
+  sectionDescription:
+    "Bagaimana prediksi di atas dihitung, seberapa akurat, dan mengapa lebih baik.",
   stepsTitle: "Bagaimana model menebak kelas sebuah wilayah?",
   stepsLead:
-    "Empat langkah sederhana. Yang membuat model ini khusus: bobot tiap indikator BERBEDA di setiap wilayah — disesuaikan dengan tetangga geografis dan tahunnya. Jadi rumusnya bersifat lokal, bukan satu rumus untuk seluruh Indonesia.",
+    "Empat langkah. Yang khusus: bobot tiap indikator berbeda di tiap wilayah — disesuaikan tetangga geografis dan tahunnya.",
   components: [
     {
       step: 1,
@@ -151,28 +208,34 @@ export const DASHBOARD_MODEL = {
     "Untuk penguji: secara formal model ini adalah regresi logistik ordinal terboboti geografis-temporal dengan elastic-net (GTWENOLR).",
   symbols: [
     {
-      sym: "skor (η)",
-      desc: "Jumlah seluruh indikator setelah ditimbang untuk wilayah ini.",
+      sym: "expit",
+      desc: "Fungsi logistik yang mengubah skor menjadi peluang 0-100%.",
     },
     {
-      sym: "α₁, α₂",
-      desc: "Dua garis batas yang memisahkan Rendah | Sedang | Tinggi.",
+      sym: "αⱼ(sᵢ)",
+      desc: "Dua ambang lokal (j = 1, 2) yang memisahkan Rendah | Sedang | Tinggi di wilayah sᵢ.",
     },
     {
-      sym: "βₖ",
-      desc: "Bobot indikator ke-k khusus wilayah ini (bisa nol = tidak dipakai).",
+      sym: "βₖ(sᵢ)",
+      desc: "Bobot indikator ke-k khusus wilayah sᵢ (bisa nol = tidak dipakai).",
     },
-    { sym: "σ", desc: "Fungsi yang mengubah skor menjadi peluang 0-100%." },
+    {
+      sym: "(tₖ(xᵢₖ)−μₖ)/sₖ",
+      desc: "Indikator ke-k yang ditransformasi lalu distandardisasi (sₖ = simpangan baku).",
+    },
+    {
+      sym: "sᵢ",
+      desc: "Wilayah/titik fokus lokal; koefisien dihitung ulang untuk tiap wilayah.",
+    },
   ],
   performanceTitle: "Seberapa akurat?",
-  performanceDescription:
-    "Diuji pada data yang tidak dipakai saat melatih model, jadi angkanya jujur.",
+  performanceDescription: "Diuji di luar data pelatihan.",
   performanceEmptyTitle: "Angka performa belum tersedia",
   performanceEmptyDescription:
     "Metrik model belum dimuat. Jalankan kembali impor data dashboard.",
   baselinesTitle: "Dibanding cara yang lebih sederhana",
   baselinesDescription:
-    "Akurasi tiap pendekatan pada data uji. Versi adaptif (yang dipakai di sini) menang karena bobotnya menyesuaikan tiap wilayah. Arahkan kursor untuk detail.",
+    "Akurasi tiap pendekatan pada data uji. Versi adaptif menang.",
   baselinesEmptyTitle: "Perbandingan belum tersedia",
   baselinesEmptyDescription: "Data model pembanding belum dimuat.",
   accuracyLabel: "Akurasi",
@@ -181,11 +244,34 @@ export const DASHBOARD_MODEL = {
   highlightBadge: "Dipakai di sini",
 } as const;
 
+/**
+ * "Persamaan Model" content on /prediksi, merged into the prediction card.
+ * Part A is the single general equation (server-rendered KaTeX from
+ * {@link SIMULATOR_EQUATION.katexGeneral}); Part B is the per-region fitted
+ * regression equation, built and rendered with client KaTeX.
+ */
+export const SIMULATOR_EQUATION = {
+  generalTitle: "Bentuk umum",
+  /** The single cumulative-logit equation, display-mode LaTeX. */
+  katexGeneral:
+    "P(Y_i \\le j \\mid s_i) = \\operatorname{expit}\\!\\left( \\alpha_j(s_i) + \\sum_{k=1}^{20} \\beta_k(s_i)\\, \\frac{t_k(x_{ik}) - \\mu_k}{s_k} \\right),\\quad j = 1, 2",
+  classProbNote:
+    "Peluang tiap kelas = selisih peluang kumulatif: P(Rendah) = P(Y≤1), P(Sedang) = P(Y≤2) − P(Y≤1), P(Tinggi) = 1 − P(Y≤2).",
+  symbolsToggle: "Arti simbol",
+  localTitle: "Bentuk lokal",
+  proportionalOddsNote:
+    "Koefisien β identik di kedua baris (proportional odds); hanya intersep α yang berbeda.",
+  standardizedNote: "Xₖ adalah nilai indikator yang sudah distandardisasi.",
+  nActiveNote: (active: number, total: number): string =>
+    `Model memakai ${active} dari ${total} indikator (sisanya berkoefisien 0).`,
+} as const;
+
 /** Interactive simulator copy. */
 export const DASHBOARD_SIMULATOR = {
   intro:
-    "Pilih sebuah kabupaten/kota dan tahun, lalu geser indikatornya. Kelas stunting dan peluangnya langsung dihitung ulang khusus untuk wilayah itu.",
+    "Pilih wilayah dan tahun, geser indikatornya — kelas dan peluangnya langsung dihitung ulang.",
   regionLabel: "Pilih wilayah",
+  regionShortLabel: "Wilayah",
   regionPlaceholder: "Pilih wilayah",
   yearLabel: "Tahun",
   loadError: "Belum bisa memuat data wilayah ini. Coba lagi sebentar.",
@@ -198,19 +284,49 @@ export const DASHBOARD_SIMULATOR = {
   probabilitiesLabel: "Seberapa yakin model",
   slidersTitle: "Geser indikator wilayah ini",
   slidersHint:
-    "Nilai awal = kondisi asli wilayah. Geser untuk bertanya “seandainya indikator ini berubah, kelasnya jadi apa?”",
-  resetLabel: "Kembalikan ke kondisi asli",
+    "Nilai awal = kondisi asli wilayah. Geser untuk uji “seandainya”.",
+  resetLabel: "Kembalikan",
   resetHint: "Kembalikan semua geseran ke nilai asli wilayah.",
-  inactiveBadge: "Tidak berpengaruh di sini",
+  baselineMarkerLabel: "Nilai asli wilayah",
+  inactiveBadge: "Tidak dipakai",
   inactiveHint:
     "Di wilayah ini model tidak memakai indikator ini, jadi menggesernya tidak mengubah prediksi.",
-  convergedNote:
-    "Catatan teknis: proses penghitungan model untuk wilayah ini belum sepenuhnya stabil, tetapi prediksinya tetap sama dengan yang dilaporkan model.",
-  matchNote:
-    "Pada nilai asli wilayah, prediksi di sini sama dengan keluaran resmi model.",
-  changedNote: "Nilai sudah diubah dari kondisi asli wilayah.",
-  changedFromActual: "(berbeda dari kenyataan)",
+  convergedNote: "Hasil model untuk wilayah ini belum sepenuhnya stabil.",
+  matchNote: "Sama dengan keluaran resmi model.",
+  changedNote: "Nilai diubah.",
+  changedFromActual: "berubah",
 } as const;
+
+/**
+ * Display grouping for the simulator sliders. Maps the model's six dimensions
+ * (verbatim from `MODEL_DIMENSIONS`) into the cards shown on screen — the two
+ * pangan dimensions are merged into one card. `dimensions` values must match
+ * `indicator_dictionary.model_dimension` exactly.
+ */
+export const SIMULATOR_DIMENSION_GROUPS: readonly {
+  readonly title: string;
+  readonly dimensions: readonly string[];
+  /** Which column the card sits in (explicit, so order is deterministic). */
+  readonly column: "left" | "right";
+  /** Wider inter-slider spacing to balance the two columns' total height. */
+  readonly roomy?: boolean;
+}[] = [
+  { title: "Sosial-Ekonomi", dimensions: ["Sosial-Ekonomi"], column: "left" },
+  { title: "Pendidikan", dimensions: ["Pendidikan"], column: "left" },
+  { title: "Gender", dimensions: ["Gender"], column: "left" },
+  {
+    title: "Kesehatan",
+    dimensions: ["Kesehatan"],
+    column: "right",
+    roomy: true,
+  },
+  {
+    title: "Konsumsi dan Ketahanan Pangan",
+    dimensions: ["Konsumsi Pangan", "Ketahanan Pangan"],
+    column: "right",
+    roomy: true,
+  },
+];
 
 /** Route-segment error boundary copy. */
 export const DASHBOARD_ERROR = {
@@ -283,4 +399,5 @@ export const DASHBOARD_METRIC_TILES: readonly MetricTileDefinition[] = [
 export const DASHBOARD_INSIGHTS = {
   rankingLimit: 10,
   provinceLimit: 5,
+  moverLimit: 5,
 } as const;

@@ -2,9 +2,17 @@ import Link from "next/link";
 
 import type { ChildDto } from "@/application/tracking/dtos";
 import { Badge } from "@/components/primitives/badge";
-import { CHILD_DETAIL_COPY, SEX_LABEL, TRACKER_ROUTE } from "@/config/tracker";
+import { buttonVariants } from "@/components/primitives/button";
+import {
+  CHILD_DETAIL_COPY,
+  SEX_LABEL,
+  TRACKER_ROUTE,
+  trackerChildEditRoute,
+} from "@/config/tracker";
 import { asDateOnly, dateOnlyFromDate } from "@/domain/shared/date-only";
 import { monthsBetween } from "@/domain/shared/age-months";
+
+import { DeleteChildButton } from "./delete-child-button";
 
 export interface ChildDetailHeaderProps {
   readonly child: ChildDto;
@@ -53,13 +61,25 @@ export function ChildDetailHeader({
           {CHILD_DETAIL_COPY.backToList}
         </Link>
       ) : null}
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-          {CHILD_DETAIL_COPY.metaTitleSuffix}
-        </p>
-        <h1 className="break-words text-2xl font-semibold text-foreground md:text-3xl">
-          {child.name}
-        </h1>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+            {CHILD_DETAIL_COPY.metaTitleSuffix}
+          </p>
+          <h1 className="break-words text-2xl font-semibold text-foreground md:text-3xl">
+            {child.name}
+          </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href={trackerChildEditRoute(child.id)}
+            aria-label={CHILD_DETAIL_COPY.editAriaLabel(child.name)}
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            {CHILD_DETAIL_COPY.editLabel}
+          </Link>
+          <DeleteChildButton childId={child.id} childName={child.name} />
+        </div>
       </div>
       <dl className="grid gap-3 text-sm md:grid-cols-3">
         <div className="space-y-1">

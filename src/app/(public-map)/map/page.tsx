@@ -46,12 +46,12 @@ export default async function MapPage({ searchParams }: MapPageProps) {
   // it) and `MapShell` still needs the resolved display name + email for the
   // avatar surface. Guests have no profile, so the avatar fields stay null.
   let displayName: string | null = null;
+  let avatarUrl: string | null = null;
   if (session !== null) {
     const profileResult = await fetchCurrentProfile(session.userId);
-    displayName =
-      profileResult.ok && profileResult.value
-        ? profileResult.value.displayName
-        : session.email;
+    const profile = profileResult.ok ? profileResult.value : null;
+    displayName = profile ? profile.displayName : session.email;
+    avatarUrl = profile ? profile.avatarUrl : null;
   }
 
   let regions: Awaited<ReturnType<typeof getCachedRegions>>;
@@ -168,6 +168,7 @@ export default async function MapPage({ searchParams }: MapPageProps) {
         bounds={bounds}
         displayName={displayName}
         email={session?.email ?? null}
+        avatarUrl={avatarUrl}
       />
     </MapStateProvider>
   );

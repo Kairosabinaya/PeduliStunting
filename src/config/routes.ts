@@ -1,10 +1,25 @@
-import { PUBLIC_ROUTES, DEFAULT_AUTHENTICATED_ROUTE } from "./app";
+import {
+  PUBLIC_ROUTES,
+  DEFAULT_AUTHENTICATED_ROUTE,
+  LANDING_ROUTE,
+} from "./app";
 
 /** Path prefixes that are part of the auth flow itself. */
 export const AUTH_ROUTE_PREFIX = "/auth";
 
 /** Where unauthenticated visitors are sent when they try to enter the app. */
 export const SIGN_IN_ROUTE = "/auth/sign-in";
+
+/**
+ * Query flag appended to the landing URL right after an explicit sign-out so
+ * the landing page can surface a confirmation toast. The flag is stripped
+ * client-side once shown, so a refresh never replays the toast.
+ */
+export const SIGNED_OUT_NOTICE_PARAM = "notice";
+export const SIGNED_OUT_NOTICE_VALUE = "signed-out";
+
+/** Landing URL the user lands on after signing out, carrying the notice flag. */
+export const SIGNED_OUT_REDIRECT_ROUTE = `${LANDING_ROUTE}?${SIGNED_OUT_NOTICE_PARAM}=${SIGNED_OUT_NOTICE_VALUE}`;
 
 /** Where the reset-password email lands the user before they can choose a new one. */
 export const UPDATE_PASSWORD_ROUTE = "/auth/update-password";
