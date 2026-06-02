@@ -20,9 +20,8 @@ export const DATA_HEADER = {
 /** Header copy for the `/prediksi` route (simulator + model). */
 export const PREDIKSI_HEADER = {
   eyebrow: "UJI SKENARIO",
-  title: "Simulasikan perubahan risiko stunting",
-  description:
-    "Ubah indikator wilayah untuk melihat bagaimana prediksi model ikut berubah.",
+  title: "Simulasi risiko stunting",
+  description: "Ubah dan geser slider indikator prediktor wilayah.",
 } as const;
 
 /** Canonical route for the prediction simulator. */
