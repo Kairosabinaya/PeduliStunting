@@ -1,5 +1,7 @@
 "use client";
 
+import "katex/dist/katex.min.css";
+
 import { useMemo } from "react";
 
 import { renderChatMarkdown } from "@/lib/markdown-client";
@@ -13,7 +15,7 @@ export function AiMessageMarkdown({ text }: { readonly text: string }) {
   const html = useMemo(() => renderChatMarkdown(text), [text]);
   return (
     <div
-      className="prose prose-sm max-w-none text-sm leading-relaxed dark:prose-invert"
+      className="prose prose-sm max-w-none text-sm leading-relaxed dark:prose-invert [&_.katex-display]:my-2"
       // Sanitized by renderChatMarkdown (DOMPurify allowlist).
       dangerouslySetInnerHTML={{ __html: html }}
     />

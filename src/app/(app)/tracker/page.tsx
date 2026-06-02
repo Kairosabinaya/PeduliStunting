@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 import { AiChatMount } from "@/components/features/ai/ai-chat-mount";
-import { EmptyChildDashboard } from "@/components/features/tracker/empty-child-dashboard";
 import { TrackerChildSection } from "@/components/features/tracker/tracker-child-section";
 import { TrackerModalButton } from "@/components/features/tracker/tracker-modal-button";
 import { EmptyState } from "@/components/primitives/empty-state";
@@ -82,14 +81,11 @@ export default async function TrackerPage({ searchParams }: TrackerPageProps) {
           }
         />
       ) : childrenResult.value.length === 0 ? (
-        <div className="space-y-6">
-          <EmptyState
-            title={TRACKER_LIST_COPY.emptyTitle}
-            description={TRACKER_LIST_COPY.emptyDescription}
-            action={addChildCta}
-          />
-          <EmptyChildDashboard />
-        </div>
+        <EmptyState
+          title={TRACKER_LIST_COPY.emptyTitle}
+          description={TRACKER_LIST_COPY.emptyDescription}
+          action={addChildCta}
+        />
       ) : (
         <TrackerChildSection
           childProfiles={childrenResult.value}

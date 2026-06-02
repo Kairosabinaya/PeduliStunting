@@ -79,10 +79,6 @@ export function ChildConditionCard({
           {card.milestoneAlert.totalInRange} pada rentang usia ini.
         </p>
       ) : null}
-
-      <p className="text-xs text-muted-foreground">
-        Informasi edukasi, bukan pengganti nasihat tenaga kesehatan.
-      </p>
     </div>
   );
 }
