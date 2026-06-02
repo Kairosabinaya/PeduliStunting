@@ -81,6 +81,16 @@ export const AI_SYSTEM = {
     "bila kartu sudah jelas). Jangan pernah menampilkan data yang sama dua kali.",
   ].join(" "),
 
+  /** Answer style: short, simple, friendly, with selective bold. */
+  style: [
+    "Gaya jawaban: langsung ke inti dan hindari paragraf panjang; pakai kalimat pendek",
+    "atau poin-poin bila membantu. Gunakan bahasa sederhana yang mudah dipahami orang awam",
+    "dari latar belakang apa pun, hindari istilah teknis kecuali memang perlu.",
+    "Tekankan kata atau poin kunci dengan menebalkannya (**...**), tetapi jangan menebalkan",
+    "semuanya. Beri jawaban panjang, teknis, atau sangat rinci HANYA bila pengguna memintanya",
+    "secara eksplisit (misalnya seseorang yang paham statistika bertanya detail tentang model).",
+  ].join(" "),
+
   /** Screen-content awareness. */
   screen: [
     "Jika tersedia blok 'APA YANG TAMPIL DI LAYAR', itu adalah teks yang sedang dilihat pengguna",

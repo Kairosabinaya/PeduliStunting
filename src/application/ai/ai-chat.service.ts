@@ -81,6 +81,7 @@ export function buildSystemPrompt(
     AI_SYSTEM.medicalSafety,
     AI_SYSTEM.injectionDefense,
     AI_SYSTEM.brevity,
+    AI_SYSTEM.style,
     AI_SYSTEM.screen,
     AI_PAGE_FRAGMENTS[pageId],
     `${AI_PAGE_CONTEXT_FENCE}\n${contextSummary}`,
