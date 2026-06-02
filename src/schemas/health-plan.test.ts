@@ -95,4 +95,31 @@ describe("upsertChildMilestoneInputSchema", () => {
       );
     }
   });
+
+  it("drops checkedAt when the status is not_checked", () => {
+    const parsed = upsertChildMilestoneInputSchema.parse({
+      childId,
+      milestoneId,
+      status: "not_checked",
+      checkedAt: "2024-05-01",
+      note: null,
+    });
+
+    // A milestone that was never checked must not carry a "date checked".
+    expect(parsed.checkedAt).toBeNull();
+  });
+
+  it("keeps checkedAt for achieved and delayed", () => {
+    for (const status of ["achieved", "delayed"] as const) {
+      const parsed = upsertChildMilestoneInputSchema.parse({
+        childId,
+        milestoneId,
+        status,
+        checkedAt: "2024-05-01",
+        note: null,
+      });
+
+      expect(parsed.checkedAt).toBe("2024-05-01");
+    }
+  });
 });

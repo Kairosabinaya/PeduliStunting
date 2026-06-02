@@ -168,7 +168,7 @@ describe("TrackerDashboardViewModelBuilder", () => {
     ).toBe("kurus");
   });
 
-  it("keeps immunization due, upcoming, and missed status consistent", () => {
+  it("buckets immunizations by their canonical cell status", () => {
     const model = buildModel([
       {
         ...baseMeasurement,
@@ -178,10 +178,12 @@ describe("TrackerDashboardViewModelBuilder", () => {
     ]);
 
     expect(model.immunizationProgress).toEqual({ due: 2, done: 1 });
-    expect(model.immunizationsDue.map((item) => item.code)).toEqual(["DPT-1"]);
+    // DPT-1 (recommended 2mo, child 3mo) is within the +/-1mo window -> "upcoming".
     expect(model.immunizationsUpcoming.map((item) => item.code)).toEqual([
-      "MR",
+      "DPT-1",
     ]);
+    // MR (recommended 9mo, child 3mo) is more than a month away -> "future".
+    expect(model.immunizationsFuture.map((item) => item.code)).toEqual(["MR"]);
     expect(model.immunizationsMissed).toEqual([]);
   });
 

@@ -4,7 +4,6 @@ import { TrendingDown, TrendingUp, Minus, HelpCircle } from "lucide-react";
 
 import { Badge, type BadgeProps } from "@/components/primitives/badge";
 import { TREND_COPY } from "@/config/tracker";
-import { cn } from "@/lib/cn";
 import type {
   GrowthTrend,
   GrowthTrendResult,
@@ -47,11 +46,7 @@ export function GrowthTrendChip({ result }: GrowthTrendChipProps) {
   return (
     <div className="flex flex-wrap items-center gap-2 text-sm">
       <Badge tone={(copy.tone as BadgeProps["tone"]) ?? TONE_FALLBACK}>
-        <Icon
-          size={14}
-          aria-hidden
-          className={cn("shrink-0", result.trend === "monitor" && "rotate-180")}
-        />
+        <Icon size={14} aria-hidden className="shrink-0" />
         <span>{copy.label}</span>
       </Badge>
       {deltaLabel ? (

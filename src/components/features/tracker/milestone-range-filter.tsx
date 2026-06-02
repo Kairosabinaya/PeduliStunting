@@ -13,11 +13,12 @@ export interface MilestoneRangeFilterProps {
 
 /**
  * Toggle dua pilihan untuk membatasi tampilan milestone:
- *   - `current` (default): hanya milestone yang sesuai usia anak saat ini.
- *   - `all`: semua entri katalog (mode review).
+ *   - `current` (default): milestone usia anak saat ini dan yang sudah
+ *     terlewati (agar tonggak lama bisa didata/dicentang), tanpa masa depan.
+ *   - `all`: semua entri katalog termasuk masa depan (mode review).
  *
  * Ditempatkan di atas grid milestone agar orang tua fokus ke "apa yang
- * relevan sekarang" tanpa kewalahan oleh entri 0-72 bulan sekaligus.
+ * relevan sampai sekarang" tanpa kewalahan oleh entri masa depan sekaligus.
  */
 export function MilestoneRangeFilter({
   value,

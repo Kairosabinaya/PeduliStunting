@@ -69,7 +69,6 @@ describe("recordMeasurementFormInputSchema", () => {
     measuredAt: "2024-02-01",
     weightKg: "8.5",
     heightCm: "",
-    measuredLying: "",
     headCircumferenceCm: "",
     muacCm: "",
     note: "",

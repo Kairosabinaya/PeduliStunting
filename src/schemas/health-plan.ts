@@ -131,7 +131,14 @@ export const upsertChildMilestoneInputSchema = z
         message: TRACKER_VALIDATION_COPY.milestoneBeforeBirth,
       });
     }
-  });
+  })
+  // A milestone that was never checked cannot have a "date checked". Normalise
+  // both submission paths (quick toggle and the collapsible note form) so a
+  // stray date can never be persisted alongside a `not_checked` status.
+  .transform((value) => ({
+    ...value,
+    checkedAt: value.status === "not_checked" ? null : value.checkedAt,
+  }));
 
 export type UpsertChildMilestoneInput = z.infer<
   typeof upsertChildMilestoneInputSchema

@@ -7,6 +7,20 @@ import {
 /** Path prefixes that are part of the auth flow itself. */
 export const AUTH_ROUTE_PREFIX = "/auth";
 
+/** Path prefix for Route Handlers (programmatic JSON endpoints). */
+export const API_ROUTE_PREFIX = "/api";
+
+/**
+ * Returns true when `pathname` targets a Route Handler. Used by the proxy to
+ * answer an unauthenticated API request with a JSON 401 instead of an HTML
+ * sign-in redirect that a `fetch().json()` caller cannot parse.
+ */
+export function isApiRoute(pathname: string): boolean {
+  return (
+    pathname === API_ROUTE_PREFIX || pathname.startsWith(`${API_ROUTE_PREFIX}/`)
+  );
+}
+
 /** Where unauthenticated visitors are sent when they try to enter the app. */
 export const SIGN_IN_ROUTE = "/auth/sign-in";
 

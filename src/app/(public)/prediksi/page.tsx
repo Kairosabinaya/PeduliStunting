@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import type { RegionFitDto } from "@/application/model/dtos";
+import { AiChatMount } from "@/components/features/ai/ai-chat-mount";
 import { PrediksiView } from "@/components/features/dashboard/prediksi-view";
 import type { SimulatorRegionOption } from "@/components/features/dashboard/predictor-simulator";
 import {
@@ -75,12 +76,19 @@ export default async function PrediksiPage({
   }
 
   return (
-    <PrediksiView
-      predictors={predictors}
-      regions={regionOptions}
-      etaSign={etaSign}
-      initial={initial}
-      model={defaultModel}
-    />
+    <>
+      <PrediksiView
+        predictors={predictors}
+        regions={regionOptions}
+        etaSign={etaSign}
+        initial={initial}
+        model={defaultModel}
+      />
+      <AiChatMount
+        pageId="prediksi"
+        kodeBps={requestedRegion ?? undefined}
+        tahun={initial?.tahun}
+      />
+    </>
   );
 }

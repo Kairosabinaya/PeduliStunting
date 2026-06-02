@@ -50,4 +50,22 @@ describe("GrowthTrendChip", () => {
     expect(screen.getByText(TREND_COPY.monitor.label)).toBeInTheDocument();
     expect(screen.getByText(/Turun 0\.60 poin/i)).toBeInTheDocument();
   });
+
+  it("keeps the monitor icon pointing down (no 180deg flip)", () => {
+    const { container } = render(
+      <GrowthTrendChip
+        result={{
+          trend: "monitor",
+          deltaZ: -0.6,
+          latestZ: -1.8,
+          previousZ: -1.2,
+        }}
+      />,
+    );
+    const icon = container.querySelector("svg");
+    expect(icon).not.toBeNull();
+    // A declining ("Perlu pantau") trend already uses the TrendingDown glyph;
+    // rotating it 180deg would make the arrow point up and read as improvement.
+    expect(icon?.classList.contains("rotate-180")).toBe(false);
+  });
 });

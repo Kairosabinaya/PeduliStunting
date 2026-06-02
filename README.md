@@ -151,6 +151,22 @@ Variabel publik (browser-safe) selalu `NEXT_PUBLIC_*`. Service-role key
 Supabase hanya dipakai di skrip Node lokal (`/scripts/_lib/`) dan tidak
 pernah di runtime aplikasi.
 
+### Asisten AI (Gemini)
+
+Endpoint `/api/ai/chat` adalah satu-satunya pemanggil Gemini; browser tidak
+pernah menghubungi Gemini langsung. Variabel server-only:
+
+- `GEMINI_API_KEY` — kunci Google Generative Language API. **Mengganti kunci
+  dev (free tier) ke kunci berbayar cukup mengubah nilai ini di env Vercel,
+  tanpa perubahan kode.** Saat pindah ke kunci berbayar (tidak dipakai
+  training), set juga `GEMINI_TRACKER_DATA_TRAINING_RISK_ACCEPTED="false"`
+  (lihat `docs/adr/0021`).
+- `GEMINI_MODEL` (default `gemini-2.5-flash-lite`) dan
+  `GEMINI_MAX_OUTPUT_TOKENS` (default `1024`) — batas biaya per respons.
+- `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` — rate limiting
+  (anon vs login). Bila kosong, rate limiting memakai no-op dev (tidak andal
+  di produksi; isi sebelum rilis).
+
 ---
 
 ## 8. Testing

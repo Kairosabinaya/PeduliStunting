@@ -14,6 +14,10 @@ import type { GrowthIndicator } from "@/domain/tracking/value-objects/growth-ind
 import type { LmsParams } from "@/domain/tracking/value-objects/lms-params";
 import { classify } from "@/domain/tracking/value-objects/sd-classification";
 import { ZScoreCalculator } from "@/domain/tracking/services/z-score-calculator";
+import {
+  WHO_STANDARD_MAX_AGE_MONTHS,
+  isAgeWithinWhoStandards,
+} from "@/domain/tracking/who-standard-range";
 import { toGrowthMeasurementDto, type GrowthMeasurementDto } from "../dtos";
 
 export interface AddMeasurementCommand {
@@ -65,6 +69,14 @@ export class AddMeasurementUseCase {
     }
 
     const ageMonths = monthsBetween(child.birthDate, command.measuredAt);
+
+    if (!isAgeWithinWhoStandards(ageMonths)) {
+      return err(
+        AppErrors.validation(
+          `Skrining pertumbuhan WHO hanya tersedia untuk usia 0-${WHO_STANDARD_MAX_AGE_MONTHS} bulan, sehingga z-score tidak dapat dihitung untuk pengukuran ini.`,
+        ),
+      );
+    }
 
     const zScores: ZScoreMap = {};
     const sdClass: SdClassMap = {};
@@ -143,7 +155,18 @@ export class AddMeasurementUseCase {
       sdClass,
       note: command.note,
     });
-    if (!persisted.ok) return err(persisted.error);
+    if (!persisted.ok) {
+      // A unique-violation on (child_id, measured_at) means a measurement for
+      // this date already exists. Replace the raw Postgres text with guidance.
+      if (persisted.error.kind === "conflict") {
+        return err(
+          AppErrors.conflict(
+            "Sudah ada pengukuran pada tanggal tersebut. Ubah lewat riwayat pengukuran atau pilih tanggal lain.",
+          ),
+        );
+      }
+      return err(persisted.error);
+    }
     return ok(toGrowthMeasurementDto(persisted.value));
   }
 

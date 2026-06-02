@@ -55,8 +55,11 @@ export interface TrackerDashboardViewModel {
   readonly growthStatuses: readonly TrackerGrowthIndicatorStatus[];
   readonly overallRiskLevel: TrackerRiskLevel;
   readonly immunizationProgress: ImmunizationProgressTotals;
-  readonly immunizationsDue: readonly TrackerImmunizationItemStatus[];
+  /** Within the +/-1 month window (canonical cell status `upcoming`). */
   readonly immunizationsUpcoming: readonly TrackerImmunizationItemStatus[];
+  /** More than a month away (canonical cell status `future`). */
+  readonly immunizationsFuture: readonly TrackerImmunizationItemStatus[];
+  /** More than a month overdue (canonical cell status `missed`). */
   readonly immunizationsMissed: readonly TrackerImmunizationItemStatus[];
   readonly milestoneAlert: MilestoneAlertResult;
 }
@@ -146,8 +149,10 @@ export class TrackerDashboardViewModelBuilder {
       growthStatuses,
       overallRiskLevel,
       immunizationProgress: progress,
-      immunizationsDue: immunizationStatuses.filter(isDue),
       immunizationsUpcoming: immunizationStatuses.filter(
+        (item) => item.status === "upcoming",
+      ),
+      immunizationsFuture: immunizationStatuses.filter(
         (item) => item.status === "future",
       ),
       immunizationsMissed: immunizationStatuses.filter(
@@ -241,8 +246,4 @@ function compareImmunizationStatus(
   const bAge = b.recommendedAgeMonths ?? Number.MAX_SAFE_INTEGER;
   if (aAge !== bAge) return aAge - bAge;
   return a.code.localeCompare(b.code);
-}
-
-function isDue(item: TrackerImmunizationItemStatus): boolean {
-  return item.status === "upcoming";
 }

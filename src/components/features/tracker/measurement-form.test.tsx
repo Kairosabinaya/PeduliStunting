@@ -52,9 +52,6 @@ describe("MeasurementForm", () => {
       screen.getByLabelText(MEASUREMENTS_COPY.fields.heightLabel),
     ).toBeInTheDocument();
     expect(
-      screen.getByLabelText(MEASUREMENTS_COPY.fields.measuredLyingLabel),
-    ).toBeInTheDocument();
-    expect(
       screen.getByLabelText(MEASUREMENTS_COPY.fields.headCircumferenceLabel),
     ).toBeInTheDocument();
     expect(
@@ -106,6 +103,58 @@ describe("MeasurementForm", () => {
         screen.getByText(MEASUREMENTS_COPY.successMessage),
       ).toBeInTheDocument();
     });
+  });
+
+  it("calls onSaved after a successful save so a modal can auto-close", async () => {
+    addMeasurementMock.mockResolvedValueOnce({ ok: true });
+    const onSaved = vi.fn();
+
+    render(
+      <MeasurementForm
+        childId={childId}
+        childBirthDate={childBirthDate}
+        onSaved={onSaved}
+      />,
+    );
+    fireEvent.change(
+      screen.getByLabelText(MEASUREMENTS_COPY.fields.weightLabel),
+      { target: { value: "8.5" } },
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: MEASUREMENTS_COPY.submit }),
+    );
+
+    await waitFor(() => {
+      expect(onSaved).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("does not call onSaved when the action returns an error", async () => {
+    addMeasurementMock.mockResolvedValueOnce({
+      ok: false,
+      message: "Periksa kembali isian Anda.",
+    });
+    const onSaved = vi.fn();
+
+    render(
+      <MeasurementForm
+        childId={childId}
+        childBirthDate={childBirthDate}
+        onSaved={onSaved}
+      />,
+    );
+    fireEvent.change(
+      screen.getByLabelText(MEASUREMENTS_COPY.fields.weightLabel),
+      { target: { value: "8.5" } },
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: MEASUREMENTS_COPY.submit }),
+    );
+
+    await waitFor(() => {
+      expect(addMeasurementMock).toHaveBeenCalledTimes(1);
+    });
+    expect(onSaved).not.toHaveBeenCalled();
   });
 
   it("renders field-level errors when the action returns them", async () => {

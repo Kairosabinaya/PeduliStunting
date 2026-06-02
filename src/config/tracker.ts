@@ -12,6 +12,20 @@ import { LANDING_ROUTE } from "@/config/app";
 export const TRACKER_ROUTE = "/tracker";
 export const TRACKER_NEW_CHILD_ROUTE = "/tracker/anak/baru";
 
+/**
+ * `?modal=` keys for the `/tracker` page. Triggers (buttons) set these and the
+ * page renders the matching modal as an overlay, so child creation and adding a
+ * measurement happen in-place instead of navigating away.
+ */
+export const TRACKER_MODAL = {
+  editChild: "edit",
+  addChild: "tambah-anak",
+  addMeasurement: "tambah-pengukuran",
+} as const;
+
+export type TrackerModalKey =
+  (typeof TRACKER_MODAL)[keyof typeof TRACKER_MODAL];
+
 export const TRACKER_DASHBOARD_SECTIONS = {
   growth: "pertumbuhan",
   immunization: "imunisasi",
@@ -73,25 +87,24 @@ export function trackerChildMilestonesRoute(childId: string): string {
 
 export const TRACKER_LIST_COPY = {
   metaTitle: "Tracker",
-  eyebrow: "Tracker anak",
-  title: "Dashboard tumbuh kembang anak",
+  eyebrow: "PANTAU ANAK",
+  title: "Pantau tumbuh kembang anak dengan lebih mudah",
   description:
-    "Lihat status pertumbuhan, tren, imunisasi, dan perkembangan anak dalam bahasa yang mudah dipahami.",
+    "Lihat pertumbuhan, imunisasi, dan perkembangan anak dalam satu tempat.",
   addCta: "Tambah anak",
-  errorTitle: "Tidak bisa memuat data anak",
+  errorTitle: "Data anak belum bisa dimuat",
   errorDescriptionFallback:
     "Terjadi kesalahan saat mengambil data. Coba muat ulang halaman.",
   errorRetry: "Coba lagi",
   emptyTitle: "Belum ada anak terdaftar",
   emptyDescription:
-    "Tambahkan profil anak untuk mulai memantau berat, tinggi, lingkar kepala, dan imunisasi.",
+    "Tambahkan profil anak untuk mulai memantau berat badan, tinggi badan, lingkar kepala, dan imunisasi.",
   switcherAriaLabel: "Pilih anak",
 } as const;
 
 export const TRACKER_FIELD_LIMITS = {
   childNameMaxLength: 80,
   noteMaxLength: 500,
-  dashboardImmunizationPreviewCount: 4,
   birthWeightKg: { min: 0.5, max: 10, step: "0.01" },
   birthLengthCm: { min: 20, max: 80, step: "0.1" },
   gestationalAgeWeeks: { min: 20, max: 36, step: "1" },
@@ -135,54 +148,57 @@ export const TRACKER_DASHBOARD_COPY = {
   status: {
     title: "Status anak hari ini",
     description:
-      "Status ini adalah skrining dari data pengukuran terakhir, bukan diagnosis medis.",
+      "Hasil ini berasal dari pengukuran terakhir dan berfungsi sebagai skrining awal, bukan diagnosis medis.",
     emptyTitle: "Belum ada pengukuran",
     emptyDescription:
-      "Tambahkan berat dan tinggi/panjang anak untuk mulai melihat status pertumbuhan.",
-    titleNormal: "Pertumbuhan dalam rentang normal",
+      "Tambahkan berat badan dan tinggi badan anak untuk mulai melihat status pertumbuhan.",
+    titleNormal: "Pertumbuhan anak dalam rentang normal",
     titleWatch: "Ada indikator yang perlu dipantau",
     titleUrgent: "Ada indikator yang perlu segera dikonsultasikan",
     addMeasurement: "Tambah pengukuran",
     lastMeasuredAt: (date: string) => `Pengukuran terakhir: ${date}`,
+    tileMeasuredAt: (date: string) => `Diukur ${date}`,
     ageFormat: (ageMonths: number) => `${ageMonths} bulan`,
     noValue: "Belum ada data",
     source:
-      "Mengacu pada WHO Child Growth Standards dan standar antropometri nasional.",
+      "Mengacu pada standar pertumbuhan WHO dan standar antropometri nasional.",
   },
   growth: {
     title: "Tren pertumbuhan",
     description:
-      "Pantau arah grafik dari waktu ke waktu. Pilih indikator untuk melihat tren yang berbeda.",
+      "Lihat arah pertumbuhan anak dari waktu ke waktu. Pilih indikator yang ingin dipantau.",
     addCardTitle: "Tambah pengukuran",
     addCardDescription:
-      "Catat pengukuran terbaru agar status skrining tetap akurat.",
+      "Catat pengukuran terbaru agar status skrining tetap sesuai kondisi anak.",
     addMeasurementAnchorId: "tambah-pengukuran",
     historyTitle: "Riwayat pengukuran",
   },
   immunization: {
     title: "Imunisasi",
     description:
-      "Lihat imunisasi yang sudah waktunya, akan datang, dan yang perlu dikejar.",
-    dueTitle: "Sudah waktunya",
+      "Pantau imunisasi yang sudah selesai, akan datang, belum waktunya, dan yang perlu dilengkapi.",
     upcomingTitle: "Akan datang",
-    missedTitle: "Perlu dikejar",
-    emptyDue: "Tidak ada imunisasi yang perlu diberikan hari ini.",
-    emptyUpcoming: "Belum ada jadwal imunisasi berikutnya.",
+    futureTitle: "Belum waktunya",
+    missedTitle: "Perlu dilengkapi",
+    emptyUpcoming:
+      "Tidak ada imunisasi yang perlu diberikan dalam waktu dekat.",
+    emptyFuture: "Belum ada jadwal imunisasi berikutnya.",
     emptyMissed: "Tidak ada imunisasi yang terlewat.",
     noSchedule: "Tanpa jadwal",
     ageFormat: (months: number) => `${months} bulan`,
+    countLabel: (total: number) => `${total} vaksin`,
   },
   development: {
-    title: "Perkembangan",
+    title: "Perkembangan anak",
     description:
-      "Cek kemampuan anak sesuai rentang usianya. Bila ada yang belum tercapai, konsultasikan ke posyandu atau Puskesmas.",
+      "Cek kemampuan anak sesuai usianya. Jika ada yang belum tercapai, konsultasikan ke posyandu atau puskesmas.",
   },
   fields: {
     age: "Usia",
-    measurement: "Pengukuran",
+    measurement: "Pengukuran terakhir",
     zScore: "z-score",
     status: "Status",
-    nutritionStatus: "Status Gizi",
+    nutritionStatus: "Status gizi",
   },
   units: {
     month: "bulan",
@@ -191,7 +207,7 @@ export const TRACKER_DASHBOARD_COPY = {
   },
   risk: {
     normal: "Normal",
-    watch: "Perlu pantau",
+    watch: "Perlu dipantau",
     urgent: "Perlu konsultasi",
     empty: "Belum ada data",
   },
@@ -202,18 +218,18 @@ export const ADD_CHILD_COPY = {
   eyebrow: "Tracker",
   title: "Tambah profil anak",
   description:
-    "Isi data dasar anak. Anda bisa melengkapi pengukuran dan imunisasi setelah profil dibuat.",
+    "Isi data dasar anak. Pengukuran dan imunisasi bisa dilengkapi setelah profil dibuat.",
   cancel: "Batal",
   submit: "Simpan profil anak",
   identitySectionTitle: "Identitas anak",
-  birthSectionTitle: "Kondisi kelahiran",
-  birthSectionHint: "Opsional. Lengkapi bila Anda mengingatnya.",
+  birthSectionTitle: "Kondisi saat lahir",
+  birthSectionHint: "Opsional. Lengkapi jika datanya tersedia.",
   birthStatus: {
     legend: "Apakah anak lahir prematur?",
     term: "Cukup bulan",
     preterm: "Prematur",
     termNote:
-      "Anak lahir cukup bulan (37 minggu atau lebih). Tidak perlu mengisi usia kehamilan.",
+      "Anak lahir cukup bulan pada usia kehamilan 37 minggu atau lebih. Usia kehamilan tidak perlu diisi.",
   },
   fields: {
     nameLabel: "Nama anak",
@@ -226,28 +242,27 @@ export const ADD_CHILD_COPY = {
     birthLengthLabel: "Panjang lahir (cm)",
     gestationalAgeLabel: "Usia kehamilan saat lahir (minggu)",
     gestationalAgeHint:
-      "Diisi untuk bayi prematur. Cukup bulan biasanya 37-42 minggu.",
+      "Diisi untuk bayi prematur. Bayi cukup bulan biasanya lahir pada usia 37 sampai 42 minggu.",
     notesLabel: "Catatan",
     notesHint: "Opsional. Maksimal 500 karakter.",
   },
   genericError:
-    "Tidak bisa menyimpan profil anak. Coba lagi atau muat ulang halaman.",
+    "Profil anak belum bisa disimpan. Coba lagi atau muat ulang halaman.",
 } as const;
 
 export const EDIT_CHILD_COPY = {
   metaTitle: "Edit anak — Tracker",
   eyebrow: "Tracker",
   title: "Edit profil anak",
-  description:
-    "Perbaiki data anak bila ada yang salah input. Perubahan langsung tersimpan ke profil.",
+  description: "Perbaiki data anak jika ada informasi yang belum tepat.",
   submit: "Simpan perubahan",
   cancel: "Batal",
   notFoundTitle: "Anak tidak ditemukan",
   notFoundDescription:
-    "Profil anak yang ingin diedit tidak ada atau bukan milik akun ini.",
-  invalidId: "Anak tidak valid. Muat ulang halaman lalu coba lagi.",
+    "Profil anak yang ingin diedit tidak tersedia atau bukan milik akun ini.",
+  invalidId: "Data anak tidak valid. Muat ulang halaman lalu coba lagi.",
   genericError:
-    "Tidak bisa menyimpan perubahan. Coba lagi atau muat ulang halaman.",
+    "Perubahan belum bisa disimpan. Coba lagi atau muat ulang halaman.",
 } as const;
 
 export const CHILD_DETAIL_COPY = {
@@ -291,19 +306,19 @@ export const CHILD_DETAIL_COPY = {
 } as const;
 
 export const DELETE_CHILD_COPY = {
-  trigger: "Hapus anak",
+  trigger: "Hapus data",
   triggerAriaLabel: (name: string) => `Hapus data anak ${name}`,
   title: "Hapus data anak?",
   description:
     "Profil anak beserta seluruh riwayatnya akan dihapus dari akun Anda.",
   confirmBody: (name: string) =>
-    `Data ${name} — termasuk pengukuran, imunisasi, dan perkembangan — tidak akan tampil lagi di akun ini. Tindakan ini tidak dapat dibatalkan dari aplikasi.`,
+    `Data ${name}, termasuk pengukuran, imunisasi, dan perkembangan, tidak akan tampil lagi di akun ini. Tindakan ini tidak dapat dibatalkan dari aplikasi.`,
   cancel: "Batal",
   confirm: "Ya, hapus",
   pending: "Menghapus...",
   invalidId: "ID anak tidak valid.",
   genericError:
-    "Tidak bisa menghapus data anak. Coba lagi atau muat ulang halaman.",
+    "Data anak belum bisa dihapus. Coba lagi atau muat ulang halaman.",
 } as const;
 
 export const MEASUREMENTS_COPY = {
@@ -325,11 +340,8 @@ export const MEASUREMENTS_COPY = {
     measuredAtLabel: "Tanggal pengukuran",
     weightLabel: "Berat badan (kg)",
     heightLabel: "Tinggi badan (cm)",
-    measuredLyingLabel: "Posisi pengukuran",
-    measuredLyingStanding: "Berdiri",
-    measuredLyingLying: "Berbaring",
     headCircumferenceLabel: "Lingkar kepala (cm)",
-    muacLabel: "LiLA (cm)",
+    muacLabel: "Lingkar lengan atas (LiLA, cm)",
     noteLabel: "Catatan",
     noteHint: "Opsional. Maksimal 500 karakter.",
   },
@@ -555,6 +567,8 @@ export const NUTRITION_VITAMIN_A_COPY = {
   saving: "Menyimpan...",
   resetCta: "Reset catatan",
   ineligibleMessage: "Belum sesuai rentang usia anak.",
+  outOfMonthMessage:
+    "Kapsul ini diberikan pada bulan kampanye nasional (lihat keterangan di atas). Tombol aktif saat bulannya tiba.",
   educationHeading: "Mengapa Vitamin A penting?",
   educationBody:
     "Vitamin A mendukung kekebalan tubuh dan kesehatan mata. Dosis sesuai jadwal Kemenkes mengurangi risiko infeksi yang dapat menghambat pertumbuhan.",
@@ -591,18 +605,18 @@ export const MILESTONE_DOMAIN_ICON: Record<MilestoneDomain, string> = {
 };
 
 export const MILESTONE_ALERT_COPY = {
-  title: "Beberapa milestone belum tercapai",
+  title: "Beberapa kemampuan belum tercapai",
   bodyFormat: (delayed: number) =>
-    `${delayed} tonggak perkembangan ditandai terlambat. Sesuai panduan Buku KIA, konsultasikan ke posyandu atau Puskesmas untuk pemeriksaan SDIDTK lebih lanjut.`,
+    `${delayed} kemampuan perkembangan ditandai belum tercapai. Konsultasikan ke posyandu atau puskesmas untuk pemeriksaan SDIDTK lebih lanjut.`,
   ctaLabel: "Pelajari panduan SDIDTK",
   ctaHref: LANDING_ROUTE,
 } as const;
 
 export const MILESTONE_RANGE_FILTER_COPY = {
   legend: "Tampilkan",
-  optionCurrent: "Rentang usia anak",
+  optionCurrent: "Sesuai usia anak",
   optionAll: "Semua rentang",
-  ariaLabel: "Mode tampilan rentang milestone",
+  ariaLabel: "Mode tampilan rentang perkembangan",
   summaryFormat: (childAgeMonths: number) =>
     `Anak berusia ${childAgeMonths} bulan saat ini.`,
 } as const;
@@ -612,10 +626,10 @@ export const MILESTONE_CARD_COPY = {
   delayedCta: "Belum tercapai",
   resetCta: "Reset",
   saving: "Menyimpan...",
-  expandNote: "Catatan & tanggal",
+  expandNote: "Catatan dan tanggal",
   collapseNote: "Tutup catatan",
   emptyStimulation:
-    "Panduan stimulasi untuk rentang usia ini belum tersedia. Konsultasikan ke posyandu atau Puskesmas.",
+    "Panduan stimulasi untuk rentang usia ini belum tersedia. Konsultasikan ke posyandu atau puskesmas.",
   stimulationHeading: "Coba aktivitas ini",
   ageRangeFormat: (min: number, max: number) => `${min}–${max} bulan`,
   saveNoteCta: "Simpan",
@@ -626,7 +640,7 @@ export const MILESTONE_CARD_COPY = {
 export const IMMUNIZATION_CELL_COPY = {
   done: { label: "Selesai", tone: "success" as const },
   upcoming: { label: "Akan datang", tone: "primary" as const },
-  missed: { label: "Terlewat", tone: "warning" as const },
+  missed: { label: "Perlu dilengkapi", tone: "warning" as const },
   future: { label: "Belum waktunya", tone: "neutral" as const },
   skipped: { label: "Dilewati", tone: "neutral" as const },
 } as const;
@@ -638,16 +652,16 @@ export const IMMUNIZATION_PROGRESS_COPY = {
   countFormat: (done: number, total: number) => `dari ${total}`,
   caption: "Berdasarkan usia anak dan jadwal Buku KIA 2024.",
   legendDone: "Selesai",
-  legendUpcoming: "Akan datang dalam ~30 hari",
-  legendMissed: "Terlewat lebih dari sebulan",
+  legendUpcoming: "Akan datang dalam sekitar 30 hari",
+  legendMissed: "Perlu dilengkapi",
   legendFuture: "Belum waktunya",
-  legendSkipped: "Dilewati (alasan medis)",
+  legendSkipped: "Dilewati karena alasan medis",
 } as const;
 
 export const IMMUNIZATION_EDUCATION_COPY = {
   title: "Mengapa imunisasi lengkap penting?",
-  body: "Imunisasi tidak lengkap berkaitan dengan risiko stunting yang lebih tinggi karena infeksi berulang dapat mengganggu penyerapan gizi. Tetap ikuti jadwal posyandu — keterlambatan beberapa minggu masih dapat dikejar.",
-  ctaLabel: "Pelajari lebih lanjut tentang stunting",
+  body: "Imunisasi membantu melindungi anak dari infeksi berulang yang dapat mengganggu penyerapan gizi dan tumbuh kembang. Jika ada jadwal yang terlewat, tanyakan ke posyandu atau puskesmas karena sebagian imunisasi masih bisa dikejar.",
+  ctaLabel: "Pelajari lagi tentang stunting",
   ctaHref: LANDING_ROUTE,
   sourceLabel: "Buku KIA 2024",
 } as const;
@@ -655,11 +669,11 @@ export const IMMUNIZATION_EDUCATION_COPY = {
 export const IMMUNIZATION_TIMELINE_COPY = {
   title: "Timeline imunisasi",
   description:
-    "Geser ke samping di layar kecil. Ketuk satu kotak untuk lihat detail dan tandai sudah diberikan.",
+    "Geser ke samping di layar kecil. Ketuk kotak imunisasi untuk melihat detail atau menandai sudah diberikan.",
   ageColumnLabel: (months: number) => `${months} bulan`,
   emptyTitle: "Belum ada jadwal imunisasi",
   emptyDescription:
-    "Katalog imunisasi belum di-seed. Hubungi admin atau jalankan migration seed jadwal imunisasi.",
+    "Katalog imunisasi belum tersedia. Hubungi admin atau jalankan seed jadwal imunisasi.",
 } as const;
 
 export const IMMUNIZATION_DETAIL_COPY = {
@@ -692,17 +706,17 @@ export const TREND_COPY = {
   },
   improving: {
     label: "Membaik",
-    description: "Tren grafik naik ke arah yang lebih baik.",
+    description: "Tren pengukuran bergerak ke arah yang lebih baik.",
     tone: "success" as const,
   },
   stable: {
     label: "Stabil",
-    description: "Pertumbuhan stabil sesuai jalurnya.",
+    description: "Pertumbuhan anak masih mengikuti jalurnya.",
     tone: "primary" as const,
   },
   monitor: {
-    label: "Perlu pantau",
-    description: "Tren grafik menurun, perhatikan asupan gizi.",
+    label: "Perlu dipantau",
+    description: "Tren menurun. Perhatikan asupan gizi dan jadwal pemantauan.",
     tone: "warning" as const,
   },
 } as const;
@@ -710,15 +724,15 @@ export const TREND_COPY = {
 /* ─────────────────────────── status hero copy ─────────────────────────── */
 
 export const STATUS_HERO_COPY = {
-  titleNormal: "Semua dalam jalur normal",
-  titleWarning: "Beberapa hal perlu perhatian",
+  titleNormal: "Semua dalam rentang normal",
+  titleWarning: "Beberapa hal perlu dipantau",
   titleDanger: "Perlu segera konsultasi",
   addMeasurementCta: "Tambah pengukuran",
   viewDetailsCta: "Lihat detail",
   quickStatsFormat: (ageMonths: number, weight: string, height: string) =>
     `Usia ${ageMonths} bulan • BB: ${weight} • TB: ${height}`,
   emptyMeasurements: "Belum ada pengukuran",
-  lastMeasurementFormat: (date: string) => `Diukur tanggal ${date}`,
+  lastMeasurementFormat: (date: string) => `Diukur pada ${date}`,
 } as const;
 
 /* ─────────────────────────── fun-size copy ─────────────────────────── */
@@ -726,12 +740,12 @@ export const STATUS_HERO_COPY = {
 export const FUN_SIZE_COPY = {
   title: "Sekilas perbandingan",
   description:
-    "Sekadar bayangan supaya angka pengukuran lebih mudah dikira-kira di rumah.",
+    "Gambaran sederhana agar angka pengukuran lebih mudah dibayangkan di rumah.",
   weightFormat: (kg: number, label: string) =>
     `Berat ${kg.toFixed(1)} kg ${label}.`,
   heightFormat: (cm: number, label: string) =>
     `Tinggi ${cm.toFixed(1)} cm ${label}.`,
-  emptyState: "Tambah pengukuran untuk melihat perbandingan ini.",
+  emptyState: "Tambahkan pengukuran untuk melihat perbandingan ini.",
 } as const;
 
 /* ─────────────────────────── detail sheet copy ─────────────────────────── */
@@ -745,7 +759,7 @@ export const GROWTH_DETAIL_COPY = {
   weightLabel: "Berat",
   heightLabel: "Tinggi/Panjang",
   headCircumferenceLabel: "Lingkar kepala",
-  muacLabel: "LiLA",
+  muacLabel: "Lingkar lengan atas (LiLA)",
   notesLabel: "Catatan",
   noNotes: "Tidak ada catatan.",
   close: "Tutup",

@@ -46,32 +46,34 @@ export const AUTH_BRAND_PANEL: AuthBrandPanel = {
     alt: APP_NAME,
   },
   headline:
-    "Data stunting nasional, edukasi Buku KIA, dan pemantauan pertumbuhan anak dalam satu aplikasi.",
-  body: "Akun gratis. Data Anda tersimpan aman dan terikat pada profil keluarga.",
-  source: "Sumber data: BPS, Susenas, dan Kemenkes RI.",
+    "Data stunting nasional, panduan Buku KIA, dan pemantauan anak dalam satu tempat.",
+  body: "Gratis digunakan. Data anak tersimpan aman di akun keluarga Anda.",
+  source: "Sumber data: BPS, Susenas, Kemenkes RI, dan Buku KIA 2024.",
 };
 
 /** Toast copy shown on the sign-in page right after a successful sign-out. */
 export const SIGN_OUT_NOTICE_COPY = {
   toastTitle: "Anda telah keluar",
   toastDescription:
-    "Sampai jumpa lagi. Masuk kembali kapan saja untuk melanjutkan.",
+    "Sampai jumpa. Masuk kembali kapan saja untuk melanjutkan pemantauan.",
 } as const;
 
 export const SIGN_IN_COPY: AuthPageCopy = {
   metaTitle: "Masuk",
-  eyebrow: "Selamat datang kembali",
-  title: "Masuk ke akun Anda",
-  description: `Lanjutkan memantau pertumbuhan anak dan data stunting nasional bersama ${APP_NAME}.`,
+  eyebrow: "MASUK KE AKUN",
+  title: "Lanjutkan pemantauan anak",
+  description:
+    "Masuk untuk melihat tracker anak, data stunting, dan panduan pencegahan.",
   footerPrompt: "Belum memiliki akun?",
   footerLink: { href: "/auth/sign-up", label: "Daftar gratis" },
 };
 
 export const SIGN_UP_COPY: AuthPageCopy = {
   metaTitle: "Daftar",
-  eyebrow: "Buat akun baru",
-  title: "Mulai dengan satu langkah",
-  description: `Bergabung gratis dengan ${APP_NAME}.`,
+  eyebrow: "DAFTAR AKUN",
+  title: "Mulai pantau anak dengan lebih mudah",
+  description:
+    "Buat akun gratis untuk menyimpan profil anak dan memantau perkembangannya.",
   footerPrompt: "Sudah memiliki akun?",
   footerLink: { href: "/auth/sign-in", label: "Masuk" },
 };
@@ -81,9 +83,9 @@ export const RESET_PASSWORD_COPY: AuthPageCopy = {
   eyebrow: "Lupa kata sandi",
   title: "Atur ulang kata sandi",
   description:
-    "Masukkan email yang terdaftar. Kami akan mengirim tautan untuk membuat kata sandi baru.",
+    "Masukkan email akun Anda. Tautan akan dikirim untuk membuat kata sandi baru.",
   footerPrompt: "Sudah ingat kata sandi?",
-  footerLink: { href: "/auth/sign-in", label: "Kembali ke masuk" },
+  footerLink: { href: "/auth/sign-in", label: "Masuk kembali" },
 };
 
 export const UPDATE_PASSWORD_COPY: AuthPageCopy = {
@@ -169,9 +171,9 @@ export const AUTH_LABELS = {
     step2: "Verifikasi email",
   },
   trustSignals: {
-    encrypted: "Data terenkripsi end-to-end",
-    free: "Gratis selamanya",
-    official: "Konten Buku KIA Kemenkes RI",
+    encrypted: "Data tersimpan aman",
+    free: "Gratis digunakan",
+    official: "Panduan mengacu pada Buku KIA",
   },
 } as const;
 

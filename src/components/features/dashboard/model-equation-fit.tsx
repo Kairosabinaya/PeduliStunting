@@ -9,6 +9,7 @@ import "katex/dist/katex.min.css";
 
 import { useEffect, useState } from "react";
 
+import { InfoHint } from "@/components/primitives/info-hint";
 import { SIMULATOR_EQUATION } from "@/config/dashboard";
 import { STUNTING_CATEGORIES } from "@/domain/region/value-objects/stunting-category";
 
@@ -102,10 +103,22 @@ export function ModelEquationFit({
 
   return (
     <section className="space-y-2">
-      <h3 className="text-sm font-semibold text-foreground">
-        {SIMULATOR_EQUATION.localTitle} — {regionName}, {tahun}
-      </h3>
-      <div className="space-y-1.5 overflow-x-auto rounded-lg border border-border bg-surface-muted/40 p-4">
+      <div className="flex items-center gap-1.5">
+        <h3 className="text-sm font-semibold text-foreground">
+          {SIMULATOR_EQUATION.localTitle} — {regionName}, {tahun}
+        </h3>
+        <InfoHint label={SIMULATOR_EQUATION.localInfoLabel}>
+          <p>{SIMULATOR_EQUATION.proportionalOddsNote}</p>
+          <p className="mt-2">
+            {SIMULATOR_EQUATION.standardizedNote}{" "}
+            {SIMULATOR_EQUATION.nActiveNote(active, total)}
+          </p>
+        </InfoHint>
+      </div>
+      {/* `overflow-y-hidden` stops the horizontal scrollbar (the 20 terms never
+          fit) from coercing a spurious vertical scrollbar; `p-4` leaves room for
+          it. */}
+      <div className="space-y-1.5 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-surface-muted/40 p-4">
         {lines.map(({ category, intercept }) => {
           const text = buildText(category, intercept, beta);
           // The plain-text equation is always in the DOM: it is the accessible
@@ -141,13 +154,6 @@ export function ModelEquationFit({
           );
         })}
       </div>
-      <p className="text-xs text-muted-foreground">
-        {SIMULATOR_EQUATION.proportionalOddsNote}
-      </p>
-      <p className="text-xs text-muted-foreground">
-        {SIMULATOR_EQUATION.standardizedNote}{" "}
-        {SIMULATOR_EQUATION.nActiveNote(active, total)}
-      </p>
     </section>
   );
 }

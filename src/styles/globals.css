@@ -106,6 +106,9 @@
     --glass-highlight: 255 255 255;
     --glass-highlight-opacity: 0.55;
     --shadow-glass: 0 12px 32px -12px rgb(0 0 0 / 0.18);
+    /* Deeper drop shadow for floating chrome (AI assistant pill/card/launcher)
+       so the pieces read clearly over the basemap without an enclosing box. */
+    --shadow-glass-strong: 0 18px 50px -12px rgb(0 0 0 / 0.3);
 
     /* Edukasi scrollytelling tokens. The primary blue / soft-blue / accent
        green palette reuses existing brand tokens above (the canonical
@@ -181,6 +184,7 @@
     --glass-highlight: 255 255 255;
     --glass-highlight-opacity: 0.06;
     --shadow-glass: 0 16px 40px -16px rgb(0 0 0 / 0.55);
+    --shadow-glass-strong: 0 22px 60px -16px rgb(0 0 0 / 0.7);
 
     /* Dark theme edukasi token overrides. The warm yellow stays vivid; the
        danger red is nudged lighter so it sits readably on the near-black
@@ -331,6 +335,30 @@
     (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
   ) {
     .glass-panel-strong {
+      background-color: rgb(var(--color-surface));
+    }
+  }
+
+  /**
+   * Floating chrome variant for the AI assistant (composer pill, suggestion
+   * card, launcher). Same Apple glass material as .glass-panel (translucent +
+   * 28px blur + inset top highlight) but with a deeper drop shadow so the
+   * chrome-less floating pieces read clearly over the basemap.
+   */
+  .glass-floating {
+    background-color: rgb(var(--glass-bg) / var(--glass-bg-opacity));
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgb(var(--glass-border) / var(--glass-border-opacity));
+    box-shadow:
+      inset 0 1px 0 0
+        rgb(var(--glass-highlight) / var(--glass-highlight-opacity)),
+      var(--shadow-glass-strong);
+  }
+  @supports not (
+    (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+  ) {
+    .glass-floating {
       background-color: rgb(var(--color-surface));
     }
   }
@@ -714,4 +742,17 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ───────────────────── Sonner close button ────────────────────────────
+   Sonner anchors the toast close button to the start edge (top-left in LTR)
+   via these position variables. Override them so the "x" sits in the
+   top-right corner instead. The app is LTR, so the toaster element always
+   carries `dir="ltr"`; the leading `html` raises specificity above Sonner's
+   own `[data-sonner-toaster][dir='ltr']` rule so this wins regardless of its
+   runtime style-injection order. The close button inherits these vars. */
+html [data-sonner-toaster][dir="ltr"] {
+  --toast-close-button-start: unset;
+  --toast-close-button-end: 0;
+  --toast-close-button-transform: translate(35%, -35%);
 }

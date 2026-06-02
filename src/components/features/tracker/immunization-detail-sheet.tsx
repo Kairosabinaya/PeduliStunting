@@ -27,6 +27,8 @@ import {
 import type { ChildImmunizationStatus } from "@/domain/health-plan/entities/child-immunization";
 import { todayIso } from "@/lib/today";
 
+import { applyImmunizationStatus } from "./immunization-quick-action";
+
 export interface ImmunizationDetailSheetProps {
   readonly childId: string;
   readonly childBirthDate: string;
@@ -116,15 +118,7 @@ function SheetBody({
     const form = formRef.current
       ? new FormData(formRef.current)
       : new FormData();
-    form.set("childBirthDate", childBirthDate);
-    form.set("status", nextStatus);
-    if (nextStatus === "done") {
-      const value = currentGivenAt || today;
-      form.set("givenAt", value);
-    } else {
-      form.set("givenAt", "");
-    }
-    form.set("note", currentNote);
+    applyImmunizationStatus(form, { childBirthDate, nextStatus, today });
     startTransition(() => {
       action(form);
     });

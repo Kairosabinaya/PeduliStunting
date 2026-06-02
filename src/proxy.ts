@@ -3,9 +3,11 @@ import { NextResponse, type NextRequest } from "next/server";
 import {
   DEFAULT_AUTHENTICATED_ROUTE,
   SIGN_IN_ROUTE,
+  isApiRoute,
   isPublicRoute,
   shouldRedirectAuthenticatedAway,
 } from "@/config/routes";
+import { AppErrors, appErrorToHttpStatus } from "@/domain/errors/app-error";
 import { updateSupabaseSession } from "@/infrastructure/supabase/middleware-client";
 
 const REDIRECT_PARAM = "redirect";
@@ -15,6 +17,16 @@ export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
   if (!user && !isPublicRoute(pathname)) {
+    // API clients expect JSON, not an HTML sign-in page. A 307 redirect here
+    // would make a `fetch().json()` caller throw and surface as a misleading
+    // "network error" instead of an actionable 401.
+    if (isApiRoute(pathname)) {
+      const error = AppErrors.unauthorized();
+      return NextResponse.json(
+        { ok: false, error },
+        { status: appErrorToHttpStatus(error) },
+      );
+    }
     const url = request.nextUrl.clone();
     url.pathname = SIGN_IN_ROUTE;
     url.search = "";

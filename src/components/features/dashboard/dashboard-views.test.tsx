@@ -8,6 +8,7 @@ import type {
   InsightYearGroup,
 } from "@/application/region/insights";
 
+import { COPYRIGHT_NOTICE } from "@/config/app";
 import {
   BASELINE_FULL_NAMES,
   DASHBOARD_MOVERS,
@@ -305,6 +306,11 @@ describe("DashboardFooter", () => {
     render(<DashboardFooter />);
     expect(screen.getByText(/SSGI\/SKI Kemenkes/)).toBeInTheDocument();
     expect(screen.getByText(/BPS RI/)).toBeInTheDocument();
+  });
+
+  it("carries the site-wide copyright notice", () => {
+    render(<DashboardFooter />);
+    expect(screen.getByText(COPYRIGHT_NOTICE)).toBeInTheDocument();
   });
 });
 

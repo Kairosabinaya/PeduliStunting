@@ -4,6 +4,7 @@ import { z } from "zod";
 import { makeUseCases } from "@/composition";
 import { AppErrors, appErrorToHttpStatus } from "@/domain/errors/app-error";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { tryServerSession } from "@/lib/server-session";
 
 export const dynamic = "force-dynamic";
 
@@ -22,10 +23,11 @@ const RequestSchema = z
 
 /**
  * Runs the user-supplied screening inputs through the domain calculator and
- * returns z-scores plus Buku KIA SD classifications. The endpoint is
- * authenticated (mounted inside `/api/tracker`) but does not require any
- * stored child profile — it is the backend of the floating "Cek Cepat"
- * banner mounted at `/tracker/**`.
+ * returns z-scores plus Buku KIA SD classifications. The endpoint requires an
+ * authenticated session (it reads RLS-protected WHO standards) but does not
+ * require any stored child profile — it is the backend of the floating "Cek
+ * Cepat" banner mounted at `/tracker/**`. Authentication is verified here, not
+ * only at the proxy (project guidelines Section 6).
  *
  * The handler returns a Result-shape JSON `{ ok, value?, error? }` so client
  * code can branch with the same convention used by Server Actions.
@@ -54,6 +56,15 @@ export async function POST(request: NextRequest) {
         ),
       },
       { status: 400 },
+    );
+  }
+
+  const session = await tryServerSession();
+  if (!session) {
+    const error = AppErrors.unauthorized();
+    return Response.json(
+      { ok: false, error },
+      { status: appErrorToHttpStatus(error) },
     );
   }
 

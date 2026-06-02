@@ -208,9 +208,11 @@ export function PredictorSimulator({
 
   return (
     <div>
-      {/* Floating Control Panel: Sticky group containing the title, controls, and prediction result. 
-          Uses top-0 so it scrolls all the way up behind the floating header and touches the very edge of the screen before sticking. */}
-      <div className="sticky top-0 z-sticky mb-6 rounded-2xl border border-border/50 bg-surface/95 p-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-surface/80 md:p-6">
+      {/* Control panel: title, region/year controls, and the prediction card.
+          Sticky only on lg+ (desktop), where it pins below the floating header.
+          On mobile/tablet it scrolls away normally — matching `lg:hidden` on the
+          compact fixed summary bar below, which keeps the prediction in view. */}
+      <div className="mb-6 rounded-2xl border border-border/50 bg-surface/95 p-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-surface/80 md:p-6 lg:sticky lg:top-0 lg:z-sticky">
         <PageHeader
           eyebrow={eyebrow}
           title={title}

@@ -74,8 +74,15 @@ export function computeMilestoneAlert(
 
 /**
  * Filter milestone berdasarkan mode tampilan:
- *   - `current`: hanya milestone yang sesuai dengan rentang usia anak.
- *   - `all`: semua entri katalog tanpa filter.
+ *   - `current`: milestone yang rentang usianya sudah dimulai (`minAge <= usia`)
+ *     — yaitu rentang saat ini DAN semua yang sudah terlewati. Ini membiarkan
+ *     orang tua mendata/centang tonggak lama yang belum sempat dicatat, tanpa
+ *     dipenuhi tonggak masa depan. Milestone masa depan (`minAge > usia`)
+ *     disembunyikan hingga mode `all`.
+ *   - `all`: semua entri katalog tanpa filter (termasuk masa depan).
+ *
+ * Catatan: `isMilestoneInRange` (rentang persis saat ini) tetap dipakai
+ * terpisah oleh {@link computeMilestoneAlert} untuk skrining sesuai usia.
  */
 export function filterMilestonesByMode<T extends MilestoneInput>(
   catalog: readonly T[],
@@ -83,5 +90,5 @@ export function filterMilestonesByMode<T extends MilestoneInput>(
   mode: "current" | "all",
 ): readonly T[] {
   if (mode === "all") return catalog;
-  return catalog.filter((m) => isMilestoneInRange(m, childAgeMonths));
+  return catalog.filter((m) => m.minAgeMonths <= childAgeMonths);
 }

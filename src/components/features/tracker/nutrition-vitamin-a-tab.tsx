@@ -18,6 +18,8 @@ import { NUTRITION_VITAMIN_A_COPY } from "@/config/tracker";
 import { latestEventOfKind } from "@/domain/health-plan/services/nutrition-status";
 import { todayIso } from "@/lib/today";
 
+import { vitAKapsulEligibility } from "./vit-a-eligibility";
+
 export interface NutritionVitaminATabProps {
   readonly childId: string;
   readonly childAgeMonths: number;
@@ -92,8 +94,18 @@ function KapsulCard({
       ? recordState.record
       : latestEventOfKind(events, spec.kind);
 
-  const eligibleByAge =
-    childAgeMonths >= spec.minAgeMonths && childAgeMonths <= spec.maxAgeMonths;
+  // Derive the calendar month from the canonical "today" (matches the eventDate
+  // we persist) so February/August campaign gating cannot drift by a day across
+  // a timezone boundary.
+  const currentMonth = Number(todayIso().slice(5, 7));
+  const eligibility = vitAKapsulEligibility({
+    childAgeMonths,
+    minAgeMonths: spec.minAgeMonths,
+    maxAgeMonths: spec.maxAgeMonths,
+    calendarMonth: spec.calendarMonth,
+    currentMonth,
+  });
+  const eligible = eligibility === "ok";
 
   function submitRecord() {
     const form = new FormData();
@@ -124,9 +136,13 @@ function KapsulCard({
         <p className="text-sm font-semibold text-foreground">{spec.label}</p>
         <p className="text-xs text-muted-foreground">{spec.description}</p>
       </header>
-      {!eligibleByAge ? (
+      {eligibility === "out_of_age" ? (
         <p className="text-xs text-muted-foreground">
           {NUTRITION_VITAMIN_A_COPY.ineligibleMessage}
+        </p>
+      ) : eligibility === "out_of_month" ? (
+        <p className="text-xs text-muted-foreground">
+          {NUTRITION_VITAMIN_A_COPY.outOfMonthMessage}
         </p>
       ) : null}
       {latest ? (
@@ -142,7 +158,7 @@ function KapsulCard({
           variant={latest ? "secondary" : "primary"}
           size="sm"
           onClick={submitRecord}
-          disabled={pending || !eligibleByAge}
+          disabled={pending || !eligible}
           loading={recordPending}
         >
           {recordPending

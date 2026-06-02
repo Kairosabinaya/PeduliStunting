@@ -280,6 +280,38 @@ describe("AddMeasurementUseCase", () => {
     expect(stored.sdClass).toEqual({});
   });
 
+  it("rejects a measurement when the child is older than the WHO standard range", async () => {
+    const { useCase, measurements } = setup();
+    // Child born 2024-01-15; measured at ~62 months old (beyond WHO 0-60mo).
+    const result = await useCase.execute({
+      ...baseCommand,
+      measuredAt: asDateOnly("2029-03-15"),
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.kind).toBe("validation");
+    }
+    // Must not silently persist a status-less measurement.
+    expect(measurements.created).toHaveLength(0);
+  });
+
+  it("maps a duplicate-date conflict to a friendly message (no raw DB text)", async () => {
+    const { useCase, measurements } = setup();
+    measurements.create = async () =>
+      err(
+        AppErrors.conflict(
+          'duplicate key value violates unique constraint "growth_measurements_child_id_measured_at_key"',
+        ),
+      );
+    const result = await useCase.execute(baseCommand);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.kind).toBe("conflict");
+      expect(result.error.message).toMatch(/tanggal/i);
+      expect(result.error.message).not.toMatch(/duplicate key|constraint/i);
+    }
+  });
+
   it("rejects measurements dated before the child's birth", async () => {
     const { useCase } = setup();
     const result = await useCase.execute({

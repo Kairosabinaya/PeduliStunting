@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
+import { AiChatMount } from "@/components/features/ai/ai-chat-mount";
 import { EmptyChildDashboard } from "@/components/features/tracker/empty-child-dashboard";
 import { TrackerChildSection } from "@/components/features/tracker/tracker-child-section";
-import { buttonVariants } from "@/components/primitives/button";
+import { TrackerModalButton } from "@/components/features/tracker/tracker-modal-button";
 import { EmptyState } from "@/components/primitives/empty-state";
 import { ErrorState } from "@/components/primitives/error-state";
 import { PageHeader } from "@/components/primitives/page-header";
-import { TRACKER_LIST_COPY, TRACKER_NEW_CHILD_ROUTE } from "@/config/tracker";
+import { TRACKER_LIST_COPY, TRACKER_MODAL } from "@/config/tracker";
 import { fetchChildrenByOwner } from "@/lib/tracker-cache";
+import { resolveEditTarget } from "@/lib/tracker-edit-target";
 import { requireServerSession } from "@/lib/server-session";
 import { TrackerEditChildModal } from "@/components/features/tracker/modals/tracker-edit-child-modal";
+import { TrackerAddChildModal } from "@/components/features/tracker/modals/tracker-add-child-modal";
+import { TrackerAddMeasurementModal } from "@/components/features/tracker/modals/tracker-add-measurement-modal";
 
 export const metadata: Metadata = {
   title: TRACKER_LIST_COPY.metaTitle,
@@ -40,20 +43,26 @@ export default async function TrackerPage({ searchParams }: TrackerPageProps) {
   const { anak, modal } = await searchParams;
 
   const addChildCta = (
-    <Link
-      href={TRACKER_NEW_CHILD_ROUTE}
-      className={buttonVariants({ variant: "primary" })}
-    >
-      {TRACKER_LIST_COPY.addCta}
-    </Link>
+    <TrackerModalButton
+      modalKey={TRACKER_MODAL.addChild}
+      label={TRACKER_LIST_COPY.addCta}
+    />
   );
 
-  // Determine selected child for modal context
-  const selectedChild =
-    childrenResult.ok && childrenResult.value.length > 0
-      ? (childrenResult.value.find((child) => child.id === anak) ??
-        childrenResult.value[0])
-      : null;
+  // The edit modal mutates a profile, so it must resolve to the exact child
+  // named by `?anak=` — never a `[0]` fallback that could overwrite the wrong
+  // child from a stale or foreign link.
+  const editChild = childrenResult.ok
+    ? resolveEditTarget(childrenResult.value, anak, modal)
+    : null;
+
+  // The currently-viewed child (mirrors TrackerChildSection's selection) — the
+  // target for the "Tambah pengukuran" modal.
+  const activeChild = childrenResult.ok
+    ? (childrenResult.value.find((child) => child.id === anak) ??
+      childrenResult.value[0] ??
+      null)
+    : null;
 
   return (
     <div className="space-y-8">
@@ -89,9 +98,13 @@ export default async function TrackerPage({ searchParams }: TrackerPageProps) {
         />
       )}
 
-      {selectedChild && modal === "edit" ? (
-        <TrackerEditChildModal childId={selectedChild.id} />
+      {editChild ? <TrackerEditChildModal childId={editChild.id} /> : null}
+      {modal === TRACKER_MODAL.addChild ? <TrackerAddChildModal /> : null}
+      {activeChild && modal === TRACKER_MODAL.addMeasurement ? (
+        <TrackerAddMeasurementModal childId={activeChild.id} />
       ) : null}
+
+      <AiChatMount pageId="tracker" childId={activeChild?.id} />
     </div>
   );
 }

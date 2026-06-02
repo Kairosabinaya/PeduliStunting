@@ -68,7 +68,6 @@ export async function addMeasurement(
     measuredAt: String(formData.get("measuredAt") ?? ""),
     weightKg: String(formData.get("weightKg") ?? ""),
     heightCm: String(formData.get("heightCm") ?? ""),
-    measuredLying: String(formData.get("measuredLying") ?? ""),
     headCircumferenceCm: String(formData.get("headCircumferenceCm") ?? ""),
     muacCm: String(formData.get("muacCm") ?? ""),
     note: String(formData.get("note") ?? ""),
@@ -86,7 +85,9 @@ export async function addMeasurement(
     measuredAt: parsed.data.measuredAt,
     weightKg: parsed.data.weightKg,
     heightCm: parsed.data.heightCm,
-    measuredLying: parsed.data.measuredLying,
+    // "Posisi pengukuran" is no longer collected (it never affected z-scores
+    // or display); the nullable column is retained until a future migration.
+    measuredLying: null,
     headCircumferenceCm: parsed.data.headCircumferenceCm,
     muacCm: parsed.data.muacCm,
     note: parsed.data.note,

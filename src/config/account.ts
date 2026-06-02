@@ -18,23 +18,21 @@ export const ACCOUNT_ROUTE = "/account";
 
 export const ACCOUNT_PAGE_COPY = {
   metaTitle: "Akun",
-  eyebrow: "Profil & preferensi",
+  eyebrow: "AKUN & TAMPILAN",
   title: "Akun saya",
-  description:
-    "Perbarui nama tampilan, atur preferensi tampilan, dan keluar dari sesi aktif.",
+  description: "Atur nama tampilan, foto profil, tema, dan akses akun Anda.",
 } as const;
 
 export const ACCOUNT_FORM_COPY = {
   cardTitle: "Profil pengguna",
-  cardDescription:
-    "Perubahan akan langsung tersinkron ke seluruh halaman aplikasi.",
+  cardDescription: "Perubahan akan diterapkan di seluruh halaman aplikasi.",
   displayNameLabel: "Nama tampilan",
   displayNamePlaceholder: "Mis. Bunda Aira",
   displayNameHint:
-    "Tampil di header dan sapaan aplikasi. Boleh nama panggilan, bukan nama lengkap.",
+    "Tampil di header dan sapaan aplikasi. Boleh memakai nama panggilan.",
   themeLabel: "Tema tampilan",
   themeHint:
-    "Mengikuti sistem berarti menyesuaikan mode terang/gelap perangkat Anda.",
+    "Mengikuti sistem berarti tema menyesuaikan pengaturan terang atau gelap di perangkat Anda.",
   submit: "Simpan perubahan",
   resetDirty: "Batalkan",
   successMessage: "Perubahan profil berhasil disimpan.",
@@ -42,8 +40,7 @@ export const ACCOUNT_FORM_COPY = {
 
 export const ACCOUNT_DETAILS_COPY = {
   cardTitle: "Detail akun",
-  cardDescription:
-    "Informasi identitas yang ditautkan ke sesi masuk Anda saat ini.",
+  cardDescription: "Informasi akun yang sedang digunakan untuk masuk.",
   emailLabel: "Email",
   emailMissing: "Email tidak tersedia",
   userIdLabel: "ID pengguna",
@@ -53,7 +50,7 @@ export const ACCOUNT_SIGN_OUT_COPY = {
   triggerLabel: "Keluar dari akun",
   dialogTitle: "Keluar dari akun?",
   dialogDescription:
-    "Sesi pada perangkat ini akan ditutup. Data tetap aman di akun Anda.",
+    "Anda akan keluar dari perangkat ini. Data tetap tersimpan di akun Anda.",
   confirmLabel: "Ya, keluar",
   cancelLabel: "Batal",
 } as const;

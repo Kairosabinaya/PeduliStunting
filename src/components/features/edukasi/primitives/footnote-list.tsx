@@ -1,3 +1,4 @@
+import { COPYRIGHT_NOTICE } from "@/config/app";
 import { CLOSING_COPY } from "@/config/edukasi";
 import { EDUKASI_FOOTNOTES } from "@/data/edukasi/footnotes";
 
@@ -80,6 +81,7 @@ export function FootnoteList() {
           {CLOSING_COPY.lastUpdatedPrefix} {CLOSING_COPY.lastUpdatedDate}.{" "}
           {CLOSING_COPY.caveat}
         </p>
+        <p className="mt-2 text-xs text-muted-foreground">{COPYRIGHT_NOTICE}</p>
       </div>
     </aside>
   );

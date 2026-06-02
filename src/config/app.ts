@@ -9,6 +9,25 @@ export const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
 export const APP_URL = env.NEXT_PUBLIC_APP_URL;
 export const APP_LOCALE = "id-ID";
 
+/** Author/owner of the application, shown in the site-wide copyright notice. */
+export const APP_AUTHOR = "Kairos Abinaya Susanto";
+
+/** Year stamped on the copyright notice. */
+export const COPYRIGHT_YEAR = 2026;
+
+/**
+ * Single source of truth for the copyright line rendered on every page
+ * (footer on standard layouts, info card on `/map`, closing block on the
+ * landing). Referencing this constant everywhere keeps the string from
+ * drifting across surfaces (project guidelines Section 2/4).
+ *
+ * @example
+ * ```ts
+ * COPYRIGHT_NOTICE; // "© 2026 Kairos Abinaya Susanto"
+ * ```
+ */
+export const COPYRIGHT_NOTICE = `© ${COPYRIGHT_YEAR} ${APP_AUTHOR}`;
+
 /** Route that authenticated users land on after sign-in. */
 export const DEFAULT_AUTHENTICATED_ROUTE = "/map";
 

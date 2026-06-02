@@ -84,13 +84,28 @@ describe("filterMilestonesByMode", () => {
     expect(all).toHaveLength(2);
   });
 
-  it("returns only in-range milestones when mode is 'current'", () => {
+  it("includes milestones already started (current and earlier) when mode is 'current'", () => {
     const current = filterMilestonesByMode(
-      [milestone("a", 3, 6), milestone("b", 12, 18)],
-      4,
+      [
+        milestone("past", 0, 3),
+        milestone("now", 6, 9),
+        milestone("future", 12, 18),
+      ],
+      8,
       "current",
     );
-    expect(current).toHaveLength(1);
-    expect(current[0]?.id).toBe("a");
+    // Past + current ranges are shown so parents can backfill checks they
+    // missed; only future milestones (min > age) stay hidden until "Semua
+    // rentang".
+    expect(current.map((m) => m.id)).toEqual(["past", "now"]);
+  });
+
+  it("excludes future milestones whose range has not started yet", () => {
+    const current = filterMilestonesByMode(
+      [milestone("now", 6, 9), milestone("future", 12, 18)],
+      8,
+      "current",
+    );
+    expect(current.map((m) => m.id)).toEqual(["now"]);
   });
 });

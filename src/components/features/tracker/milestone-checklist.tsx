@@ -76,8 +76,8 @@ function groupByDomain(
 
 /**
  * Render katalog SDIDTK sebagai grid `MilestoneCard` yang dikelompokkan per
- * domain perkembangan. Pengguna dapat memfilter mode "rentang anak saat ini"
- * (default) atau "semua rentang".
+ * domain perkembangan. Pengguna dapat memfilter mode "rentang usia anak"
+ * (default: usia saat ini dan yang sudah terlewati) atau "semua rentang".
  *
  * Tiap card mengelola `useActionState`-nya sendiri agar simpan satu kartu
  * tidak mereset card lain (lihat `MilestoneCard`).

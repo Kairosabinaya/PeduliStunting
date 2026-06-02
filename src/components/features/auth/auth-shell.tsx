@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { SiteFooter } from "@/components/navigation/site-footer";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { APP_NAME, LANDING_ROUTE } from "@/config/app";
 import { AUTH_LABELS } from "@/config/auth";
@@ -75,6 +76,8 @@ export function AuthShell({ children }: AuthShellProps) {
         <div className="flex flex-1 items-center justify-center px-6 pb-10 sm:px-8 lg:px-12">
           <div className="w-full max-w-md">{children}</div>
         </div>
+
+        <SiteFooter className="px-6 pb-6 pt-0 sm:px-8 lg:px-12" />
       </main>
     </div>
   );

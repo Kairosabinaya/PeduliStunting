@@ -124,16 +124,6 @@ function requiredDateInputSchema(futureMessage: string) {
     .refine((date) => date <= getSafeMaxDate(), futureMessage);
 }
 
-const measuredLyingInputSchema = z
-  .enum(["", "standing", "lying"], {
-    error: TRACKER_VALIDATION_COPY.required,
-  })
-  .transform((value): boolean | null => {
-    if (value === "lying") return true;
-    if (value === "standing") return false;
-    return null;
-  });
-
 const sexFormInputSchema = z
   .enum(["", ...SEX_VALUES], { error: TRACKER_VALIDATION_COPY.required })
   .refine((value): value is Sex => value !== "", {
@@ -352,7 +342,6 @@ export const recordMeasurementFormInputSchema = z
       "cm",
       TRACKER_FIELD_LIMITS.measurementHeightCm,
     ),
-    measuredLying: measuredLyingInputSchema,
     headCircumferenceCm: optionalDecimalInputSchema(
       "Lingkar kepala",
       "cm",

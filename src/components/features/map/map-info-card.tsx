@@ -11,6 +11,7 @@
 
 import { useState } from "react";
 
+import { COPYRIGHT_NOTICE } from "@/config/app";
 import {
   CATEGORY_BG_CLASS,
   CATEGORY_ORDER,
@@ -91,6 +92,13 @@ export function MapInfoCard({
       </div>
 
       <div>{tab === "kategori" ? <KategoriPanel /> : <PanduanPanel />}</div>
+
+      {/* `/map` is a full-bleed surface with no room for a footer, so the
+          site-wide copyright rides at the bottom of this always-visible info
+          card instead (project guidelines attribution requirement). */}
+      <p className="mt-3 border-t border-border pt-2 text-center text-xs text-muted-foreground">
+        {COPYRIGHT_NOTICE}
+      </p>
     </section>
   );
 }

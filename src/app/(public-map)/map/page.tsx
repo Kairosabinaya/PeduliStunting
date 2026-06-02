@@ -5,6 +5,7 @@ import { SUPPORTED_YEARS, type SupportedYear } from "@/config/years";
 
 import { ErrorState } from "@/components/primitives/error-state";
 
+import { AiChatMount } from "@/components/features/ai/ai-chat-mount";
 import {
   buildMapFeatures,
   toFeatureCollection,
@@ -153,24 +154,31 @@ export default async function MapPage({ searchParams }: MapPageProps) {
   );
 
   return (
-    <MapStateProvider
-      initialTahun={parsed.tahun}
-      initialSumber={parsed.sumber}
-      initialWilayah={parsed.selection}
-    >
-      <MapShell
-        regions={regions}
-        featureCollectionsByYear={featureCollectionsByYear}
-        indicatorsByYear={indicatorsByYear}
-        predictionsByYear={predictionsByYear}
-        defaultModel={defaultModel}
-        predictedAvailable={predictedAvailable}
-        bounds={bounds}
-        displayName={displayName}
-        email={session?.email ?? null}
-        avatarUrl={avatarUrl}
+    <>
+      <MapStateProvider
+        initialTahun={parsed.tahun}
+        initialSumber={parsed.sumber}
+        initialWilayah={parsed.selection}
+      >
+        <MapShell
+          regions={regions}
+          featureCollectionsByYear={featureCollectionsByYear}
+          indicatorsByYear={indicatorsByYear}
+          predictionsByYear={predictionsByYear}
+          defaultModel={defaultModel}
+          predictedAvailable={predictedAvailable}
+          bounds={bounds}
+          displayName={displayName}
+          email={session?.email ?? null}
+          avatarUrl={avatarUrl}
+        />
+      </MapStateProvider>
+      <AiChatMount
+        pageId="map"
+        kodeBps={parsed.selection ?? undefined}
+        tahun={parsed.tahun}
       />
-    </MapStateProvider>
+    </>
   );
 }
 

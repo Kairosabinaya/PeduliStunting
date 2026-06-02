@@ -1,4 +1,4 @@
-import { MeasurementForm } from "@/components/features/tracker/measurement-form";
+import { ModalMeasurementForm } from "@/components/features/tracker/modal-measurement-form";
 import { ErrorState } from "@/components/primitives/error-state";
 import { MEASUREMENTS_COPY } from "@/config/tracker";
 import { asChildId } from "@/domain/shared/ids";
@@ -31,7 +31,7 @@ export async function TrackerAddMeasurementModal({
       title={MEASUREMENTS_COPY.addCardTitle}
       description={MEASUREMENTS_COPY.addCardDescription}
     >
-      <MeasurementForm
+      <ModalMeasurementForm
         childId={childId}
         childBirthDate={childResult.value.birthDate}
       />

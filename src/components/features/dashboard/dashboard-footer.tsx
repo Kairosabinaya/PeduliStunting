@@ -1,10 +1,13 @@
+import { COPYRIGHT_NOTICE } from "@/config/app";
 import { DASHBOARD_FOOTER } from "@/config/dashboard";
 import { cn } from "@/lib/cn";
 
 /**
  * Data-source attribution required for the public dashboard (SSGI/SKI Kemenkes
- * for prevalence, BPS for the socio-economic predictors), plus a one-line model
- * provenance note.
+ * for prevalence, BPS for the socio-economic predictors), plus the site-wide
+ * copyright line. This is the lone `contentinfo` landmark on `/data` and
+ * `/prediksi`, so those routes fold the copyright in here rather than also
+ * rendering {@link SiteFooter}.
  */
 export function DashboardFooter({
   className,
@@ -26,6 +29,7 @@ export function DashboardFooter({
         </span>{" "}
         {DASHBOARD_FOOTER.sources}
       </p>
+      <p>{COPYRIGHT_NOTICE}</p>
     </footer>
   );
 }

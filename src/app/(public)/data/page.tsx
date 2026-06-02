@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { AiChatMount } from "@/components/features/ai/ai-chat-mount";
 import { CHOROPLETH } from "@/components/features/landing/scroll-choropleth/choropleth-data";
 import { DataView } from "@/components/features/dashboard/data-view";
 import { DashboardFooter } from "@/components/features/dashboard/dashboard-footer";
@@ -63,6 +64,11 @@ export default async function DataPage({
         initialKodeBps={initialKodeBps}
       />
       <DashboardFooter />
+      <AiChatMount
+        pageId="data"
+        kodeBps={initialKodeBps ?? undefined}
+        tahun={initialYear}
+      />
     </div>
   );
 }

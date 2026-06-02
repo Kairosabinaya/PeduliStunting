@@ -15,7 +15,6 @@ import { Button } from "@/components/primitives/button";
 import { FeedbackBanner } from "@/components/primitives/feedback-banner";
 import { Input } from "@/components/primitives/input";
 import { Label } from "@/components/primitives/label";
-import { Select } from "@/components/primitives/select";
 import { Textarea } from "@/components/primitives/textarea";
 import {
   MEASUREMENTS_COPY,
@@ -34,6 +33,12 @@ import {
 export interface MeasurementFormProps {
   readonly childId: string;
   readonly childBirthDate: string;
+  /**
+   * Called once after a measurement is saved successfully. The modal wrapper
+   * uses this to close itself; when omitted the form just shows its success
+   * banner in place. Keep the reference stable (e.g. `useCallback`).
+   */
+  readonly onSaved?: () => void;
 }
 
 type MeasurementFormFields = z.input<typeof recordMeasurementFormInputSchema>;
@@ -65,6 +70,7 @@ function fieldError(
 export function MeasurementForm({
   childId,
   childBirthDate,
+  onSaved,
 }: MeasurementFormProps) {
   const boundAction = addMeasurement.bind(null, childId);
   const [state, action] = useActionState<
@@ -80,7 +86,6 @@ export function MeasurementForm({
       measuredAt: todayIso(),
       weightKg: "",
       heightCm: "",
-      measuredLying: "",
       headCircumferenceCm: "",
       muacCm: "",
       note: "",
@@ -98,7 +103,6 @@ export function MeasurementForm({
   const measuredAtId = useId();
   const weightId = useId();
   const heightId = useId();
-  const measuredLyingId = useId();
   const headCircumferenceId = useId();
   const muacId = useId();
   const noteId = useId();
@@ -106,8 +110,9 @@ export function MeasurementForm({
   useEffect(() => {
     if (state?.ok) {
       form.reset(defaultValues);
+      onSaved?.();
     }
-  }, [defaultValues, form, state]);
+  }, [defaultValues, form, state, onSaved]);
 
   const generalError =
     state && !state.ok
@@ -187,29 +192,6 @@ export function MeasurementForm({
             )}
             {...form.register("heightCm")}
           />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor={measuredLyingId}>
-            {MEASUREMENTS_COPY.fields.measuredLyingLabel}
-          </Label>
-          <Select
-            id={measuredLyingId}
-            errorMessage={fieldError(
-              state,
-              "measuredLying",
-              form.formState.errors.measuredLying?.message,
-            )}
-            {...form.register("measuredLying")}
-          >
-            <option value="">—</option>
-            <option value="standing">
-              {MEASUREMENTS_COPY.fields.measuredLyingStanding}
-            </option>
-            <option value="lying">
-              {MEASUREMENTS_COPY.fields.measuredLyingLying}
-            </option>
-          </Select>
         </div>
 
         <div className="space-y-2">
