@@ -73,6 +73,7 @@ const config = [
       "vitest.config.ts",
       "playwright.config.ts",
       "sentry.*.config.ts",
+      "next.config.ts",
       "src/instrumentation.ts",
     ],
     rules: {

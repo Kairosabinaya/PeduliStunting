@@ -6,6 +6,7 @@ import type { IndicatorDefinitionDto } from "@/application/region/dtos";
 import type { PredictorModelMeta } from "@/domain/region/entities/indicator-definition";
 
 import { loadRegionFit } from "@/app/(public)/prediksi/actions";
+import { DASHBOARD_SIMULATOR } from "@/config/dashboard";
 
 import {
   PredictorSimulator,
@@ -144,7 +145,9 @@ describe("PredictorSimulator", () => {
     renderSimulator();
     const slider = screen.getByRole("slider", { name: /Kemiskinan/ });
     fireEvent.change(slider, { target: { value: "0" } });
-    const reset = screen.getByRole("button", { name: /Kembalikan/ });
+    const reset = screen.getByRole("button", {
+      name: new RegExp(DASHBOARD_SIMULATOR.resetLabel, "i"),
+    });
     expect(reset).toBeEnabled();
     fireEvent.click(reset);
     expect(screen.getByTestId("predicted-class")).toHaveTextContent("Rendah");

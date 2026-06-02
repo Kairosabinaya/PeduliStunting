@@ -167,6 +167,25 @@ pernah menghubungi Gemini langsung. Variabel server-only:
   (anon vs login). Bila kosong, rate limiting memakai no-op dev (tidak andal
   di produksi; isi sebelum rilis).
 
+### Cache & revalidasi data riset publik
+
+Data riset publik (regions, boundaries, indikator, model, prediksi, local fits) di-cache
+lintas-request dengan revalidate 7 hari (lihat `docs/STATE.md` §5.6 dan `docs/adr/0022`).
+Karena `pnpm import:*` adalah skrip CLI di luar runtime Next, cache TIDAK ter-invalidasi
+otomatis. Sesudah re-import data, segarkan cache dengan salah satu:
+
+- `POST /api/revalidate` dengan header `x-revalidate-secret: $REVALIDATE_SECRET`
+  (me-`revalidateTag` seluruh `DATA_CACHE_TAGS` di `src/config/cache-tags.ts`), atau
+- redeploy aplikasi (membersihkan seluruh data cache).
+
+```bash
+curl -X POST https://pedulistunting.id/api/revalidate \
+  -H "x-revalidate-secret: $REVALIDATE_SECRET"
+```
+
+- `REVALIDATE_SECRET` (server-only) — secret bersama untuk endpoint di atas. Bila kosong,
+  endpoint nonaktif (mengembalikan 401).
+
 ---
 
 ## 8. Testing

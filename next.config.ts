@@ -1,3 +1,4 @@
+import bundleAnalyzer from "@next/bundle-analyzer";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -9,6 +10,9 @@ const nextConfig: NextConfig = {
     // file_size_limit is 2 MiB so the Server Action needs headroom for
     // the multipart boundary on top of the raw bytes.
     serverActions: { bodySizeLimit: "4mb" },
+    // Rewrite barrel imports to direct paths so unused exports tree-shake out
+    // of each route's bundle.
+    optimizePackageImports: ["lucide-react", "recharts", "date-fns"],
   },
   images: {
     formats: ["image/avif", "image/webp"],
@@ -42,4 +46,10 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Wrap with the analyzer so `ANALYZE=true pnpm build` emits chunk reports; a
+// no-op for normal builds.
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
+
+export default withBundleAnalyzer(nextConfig);

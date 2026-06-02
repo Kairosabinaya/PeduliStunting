@@ -63,7 +63,7 @@ export const getCachedRegions = unstable_cache(
     });
   },
   ["map:regions:v3"],
-  { tags: ["regions"], revalidate: 60 * 60 * 24 },
+  { tags: ["regions"], revalidate: 60 * 60 * 24 * 7 },
 );
 
 /**
@@ -172,7 +172,7 @@ export const getCachedIndicatorsByYear = unstable_cache(
     });
   },
   ["map:indicators-by-year:v3"],
-  { tags: ["region-indicators"], revalidate: 60 * 60 },
+  { tags: ["region-indicators"], revalidate: 60 * 60 * 24 * 7 },
 );
 
 export const getCachedDefaultModel = unstable_cache(
@@ -190,7 +190,7 @@ export const getCachedDefaultModel = unstable_cache(
     });
   },
   ["map:default-model:v3"],
-  { tags: ["model-metadata"], revalidate: 60 * 60 },
+  { tags: ["model-metadata"], revalidate: 60 * 60 * 24 * 7 },
 );
 
 /**
@@ -238,5 +238,5 @@ export const getCachedPredictionsByYear = unstable_cache(
     });
   },
   ["map:predictions-by-year:v3"],
-  { tags: ["model-predictions"], revalidate: 60 * 60 },
+  { tags: ["model-predictions"], revalidate: 60 * 60 * 24 * 7 },
 );

@@ -10,9 +10,14 @@ import {
   sortSimulatorPredictors,
 } from "@/components/features/dashboard/simulator-data";
 import { PREDIKSI_REGION_PARAM } from "@/config/dashboard";
-import { makeUseCases } from "@/composition";
-import { asModelVersion } from "@/domain/shared/ids";
-import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import {
+  getCachedDefaultModelMetadata,
+  getCachedFittedRegionYears,
+  getCachedIndicatorDictionary,
+  getCachedRegionFit,
+  safeCache,
+} from "@/lib/cached-dashboard-data";
+import { getCachedRegions } from "@/lib/cached-map-data";
 
 export const metadata: Metadata = {
   title: "Simulasi prediksi stunting",
@@ -33,19 +38,13 @@ export default async function PrediksiPage({
   const rawRegion = params[PREDIKSI_REGION_PARAM];
   const requestedRegion = typeof rawRegion === "string" ? rawRegion : null;
 
-  const supabase = await createSupabaseServerClient();
-  const useCases = makeUseCases(supabase);
-
-  const [defaultModelResult, dictionaryResult, regionsResult] =
-    await Promise.all([
-      useCases.getDefaultModelMetadata.execute(),
-      useCases.listIndicatorDictionary.execute(),
-      useCases.listRegions.execute(),
-    ]);
-
-  const defaultModel = defaultModelResult.ok ? defaultModelResult.value : null;
-  const dictionary = dictionaryResult.ok ? dictionaryResult.value : [];
-  const regionsList = regionsResult.ok ? regionsResult.value : [];
+  // Cross-request cached (reference data does not change); degrade to empty on
+  // a cache-fetch error so the simulator still renders (matches prior behavior).
+  const [defaultModel, dictionary, regionsList] = await Promise.all([
+    safeCache(getCachedDefaultModelMetadata, null),
+    safeCache(getCachedIndicatorDictionary, []),
+    safeCache(getCachedRegions, []),
+  ]);
 
   const predictors = sortSimulatorPredictors(dictionary);
   let regionOptions: readonly SimulatorRegionOption[] = [];
@@ -58,19 +57,20 @@ export default async function PrediksiPage({
 
   if (defaultModel !== null) {
     etaSign = defaultModel.etaSign;
-    const version = asModelVersion(defaultModel.version);
-    const fittedResult = await useCases.listFittedRegionYears.execute(version);
-    const fitted = fittedResult.ok ? fittedResult.value : [];
+    const version = defaultModel.version;
+    const fitted = await safeCache(
+      () => getCachedFittedRegionYears(version),
+      [],
+    );
     regionOptions = buildRegionOptions(regionsList, fitted);
     const selection = pickSelectionForRegion(regionOptions, requestedRegion);
     if (selection !== null) {
-      const fitResult = await useCases.getRegionFit.execute({
-        version,
-        kodeBps: selection.kodeBps,
-        tahun: selection.tahun,
-      });
-      if (fitResult.ok && fitResult.value !== null) {
-        initial = { ...selection, fit: fitResult.value };
+      const fit = await safeCache(
+        () => getCachedRegionFit(version, selection.kodeBps, selection.tahun),
+        null,
+      );
+      if (fit !== null) {
+        initial = { ...selection, fit };
       }
     }
   }

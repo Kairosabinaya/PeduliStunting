@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
 
+import type { DashboardDatasetDto } from "@/application/region/dashboard-dataset";
 import { AiChatMount } from "@/components/features/ai/ai-chat-mount";
 import { CHOROPLETH } from "@/components/features/landing/scroll-choropleth/choropleth-data";
 import { DataView } from "@/components/features/dashboard/data-view";
 import { DashboardFooter } from "@/components/features/dashboard/dashboard-footer";
-import { makeUseCases } from "@/composition";
 import {
   DASHBOARD_REGION_PARAM,
   DASHBOARD_YEAR_PARAM,
   DEFAULT_DASHBOARD_YEAR,
 } from "@/config/dashboard-filter";
 import { isSupportedYear, type SupportedYear } from "@/config/years";
-import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
+import { AppErrors, type AppError } from "@/domain/errors/app-error";
+import { err, ok, type Result } from "@/domain/shared/result";
+import { getCachedDashboardDataset } from "@/lib/cached-dashboard-data";
 
 export const metadata: Metadata = {
   title: "Potret stunting",
@@ -33,9 +35,20 @@ export default async function DataPage({
   readonly searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
-  const supabase = await createSupabaseServerClient();
-  const useCases = makeUseCases(supabase);
-  const dataset = await useCases.getDashboardDataset.execute();
+
+  // Cross-request cached (reference data does not change); degrade to an error
+  // Result so DataView shows its error state instead of crashing.
+  let dataset: Result<DashboardDatasetDto, AppError>;
+  try {
+    dataset = ok(await getCachedDashboardDataset());
+  } catch (cause) {
+    dataset = err(
+      AppErrors.unexpected(
+        "Tidak bisa memuat data dashboard.",
+        cause instanceof Error ? cause : undefined,
+      ),
+    );
+  }
 
   const yearParam = Number(firstParam(params[DASHBOARD_YEAR_PARAM]));
   const initialYear: SupportedYear = isSupportedYear(yearParam)

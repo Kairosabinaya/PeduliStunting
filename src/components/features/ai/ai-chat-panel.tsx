@@ -25,6 +25,8 @@ export interface AiChatPanelProps {
   readonly pageId: AiPageId;
   readonly selection: PageContextSelection;
   readonly recommended: RecommendedQuestionInput;
+  /** Focus the composer on mount (set when opened by activating the shell). */
+  readonly autoFocusComposer?: boolean | undefined;
 }
 
 /**
@@ -37,6 +39,7 @@ export function AiChatPanel({
   pageId,
   selection,
   recommended,
+  autoFocusComposer,
 }: AiChatPanelProps) {
   const chat = useAiChat(selection);
   const sectionRef = useRef<HTMLElement>(null);
@@ -123,6 +126,7 @@ export function AiChatPanel({
         onReset={handleReset}
         showReset={!isEmpty}
         onFocusChange={handleFocusChange}
+        autoFocus={autoFocusComposer}
       />
       <p className="px-2 text-center text-xs text-muted-foreground">
         {AI_COPY.disclaimer}

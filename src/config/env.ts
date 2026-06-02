@@ -52,6 +52,10 @@ const EnvSchema = z.object({
   // --- Upstash Redis (rate limiting; server-only) ---
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
+
+  // Shared secret for POST /api/revalidate (refresh data caches after a
+  // research re-import). When unset, the endpoint is disabled.
+  REVALIDATE_SECRET: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof EnvSchema>;
@@ -97,6 +101,7 @@ function loadEnv(): Env {
     UPSTASH_REDIS_REST_TOKEN: emptyToUndefined(
       process.env.UPSTASH_REDIS_REST_TOKEN,
     ),
+    REVALIDATE_SECRET: emptyToUndefined(process.env.REVALIDATE_SECRET),
   });
 
   if (!parsed.success) {

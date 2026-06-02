@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import type { GrowthMeasurementDto } from "@/application/tracking/dtos";
+import { FUN_SIZE_COPY } from "@/config/tracker";
 
 import { FunSizeCard } from "./fun-size-card";
 
@@ -28,7 +29,7 @@ function makeMeasurement(
 describe("FunSizeCard", () => {
   it("renders empty state when no measurement is supplied", () => {
     render(<FunSizeCard latest={null} />);
-    expect(screen.getByText(/tambah pengukuran/i)).toBeInTheDocument();
+    expect(screen.getByText(FUN_SIZE_COPY.emptyState)).toBeInTheDocument();
   });
 
   it("renders both weight and height comparisons", () => {

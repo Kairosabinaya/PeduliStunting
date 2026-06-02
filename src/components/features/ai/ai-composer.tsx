@@ -1,7 +1,13 @@
 "use client";
 
 import { Send, Sparkles, Square } from "lucide-react";
-import { useState, type FormEvent, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 
 import { Button } from "@/components/primitives";
 import { AI_COPY } from "@/config/ai-copy";
@@ -20,6 +26,7 @@ export function AiComposer({
   onReset,
   showReset,
   onFocusChange,
+  autoFocus,
 }: {
   readonly status: UseAiChatResult["status"];
   readonly onSend: (text: string) => void;
@@ -27,9 +34,17 @@ export function AiComposer({
   readonly onReset: () => void;
   readonly showReset: boolean;
   readonly onFocusChange?: (focused: boolean) => void;
+  readonly autoFocus?: boolean | undefined;
 }) {
   const [value, setValue] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isBusy = status === "streaming" || status === "submitted";
+
+  // Focus on mount when opened by activating the lightweight shell, so the
+  // handoff feels seamless. Ref-based to avoid the `autoFocus` a11y rule.
+  useEffect(() => {
+    if (autoFocus) textareaRef.current?.focus();
+  }, [autoFocus]);
 
   function submit() {
     if (isBusy || value.trim().length === 0) return;
@@ -66,6 +81,7 @@ export function AiComposer({
         </button>
       ) : null}
       <textarea
+        ref={textareaRef}
         value={value}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={handleKeyDown}
