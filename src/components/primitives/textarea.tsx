@@ -2,8 +2,7 @@ import { forwardRef } from "react";
 
 import { cn } from "@/lib/cn";
 
-export interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   readonly hint?: string | undefined;
   readonly errorMessage?: string | undefined;
 }

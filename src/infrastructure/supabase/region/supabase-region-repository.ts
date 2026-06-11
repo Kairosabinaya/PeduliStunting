@@ -55,9 +55,7 @@ export class SupabaseRegionRepository implements RegionRepository {
       if (!mapped.ok) return err(mapped.error);
       return ok(mapped.value);
     } catch (cause) {
-      return err(
-        mapUnknownInfrastructureError(cause, "regions.findByKodeBps"),
-      );
+      return err(mapUnknownInfrastructureError(cause, "regions.findByKodeBps"));
     }
   }
 }

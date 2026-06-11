@@ -182,7 +182,6 @@ export function makeChildOverview(
     childImmunizations: [],
     milestoneCatalog: [],
     childMilestones: [],
-    nutritionEvents: [],
     ...over,
   };
 }

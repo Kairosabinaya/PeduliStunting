@@ -14,8 +14,6 @@ const TRACKER_ROUTES = [
   "/tracker/anak/11111111-1111-1111-1111-111111111111/pengukuran",
   "/tracker/anak/11111111-1111-1111-1111-111111111111/imunisasi",
   "/tracker/anak/11111111-1111-1111-1111-111111111111/perkembangan",
-  "/tracker/anak/11111111-1111-1111-1111-111111111111/gizi",
-  "/tracker/kehamilan",
 ] as const;
 
 test.describe("/tracker (anonymous)", () => {
@@ -26,7 +24,10 @@ test.describe("/tracker (anonymous)", () => {
       await page.goto(route);
       await expect(page).toHaveURL(/\/auth\/sign-in/);
       await expect(
-        page.getByRole("heading", { name: /masuk ke akun anda/i, level: 1 }),
+        page.getByRole("heading", {
+          name: /lanjutkan pemantauan anak/i,
+          level: 1,
+        }),
       ).toBeVisible();
     });
   }

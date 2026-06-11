@@ -41,6 +41,13 @@ const nextConfig: NextConfig = {
         key: "Strict-Transport-Security",
         value: "max-age=63072000; includeSubDomains; preload",
       },
+      // Isolates the browsing context group from cross-origin openers.
+      // The Content-Security-Policy itself is set per-request in
+      // `src/proxy.ts` (nonce-based, so it cannot live in static headers).
+      {
+        key: "Cross-Origin-Opener-Policy",
+        value: "same-origin",
+      },
     ];
     return [{ source: "/:path*", headers: securityHeaders }];
   },

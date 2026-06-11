@@ -24,7 +24,20 @@ export interface StaggerRevealProps {
   readonly as?: "span" | "div";
   /** Class applied to the wrapper element. */
   readonly className?: string;
+  /**
+   * `"in-view"` (default) animates via motion when scrolled into view.
+   * `"mount"` renders a CSS-only reveal that starts the moment stylesheets
+   * apply — REQUIRED for above-the-fold content: the motion variant holds
+   * `opacity: 0` until hydration, which excludes the element from Largest
+   * Contentful Paint and stalls LCP behind the whole JS pipeline.
+   */
+  readonly trigger?: "in-view" | "mount";
 }
+
+/** CSSProperties extended with the reveal offset custom property. */
+type RevealMountStyle = React.CSSProperties & {
+  readonly "--edu-rise-offset": string;
+};
 
 /**
  * Reveal child elements one-by-one as the wrapper enters the viewport. Each
@@ -52,6 +65,7 @@ export function StaggerReveal({
   offsetPx = 12,
   as = "span",
   className,
+  trigger = "in-view",
 }: StaggerRevealProps) {
   const reduceMotion = useReducedMotion();
   const Wrapper = as === "div" ? motion.div : motion.span;
@@ -84,6 +98,46 @@ export function StaggerReveal({
     if (!isValidElement(child)) return false;
     return (child as { type?: unknown }).type === "br";
   };
+
+  if (trigger === "mount") {
+    // CSS-only path: each word carries `.edu-reveal-mount` plus an inline
+    // stagger delay, so the wave starts at first paint (pre-hydration) and
+    // the words remain LCP-eligible the whole time (opacity stays 1; the
+    // keyframes animate translate + blur only). Reduced-motion is handled
+    // by the stylesheet, not React, so SSR output is identical for all.
+    const StaticWrapper = as === "div" ? "div" : "span";
+    // Stagger position per item index, skipping whitespace and <br/> so the
+    // wave timing matches motion's staggerChildren behaviour. Built as a
+    // local Map (no render-scope reassignment, react-hooks/immutability).
+    const revealOrder = new Map<number, number>();
+    items.forEach((child, index) => {
+      if (isWhitespaceOnly(child) || isBrElement(child)) return;
+      revealOrder.set(index, revealOrder.size);
+    });
+    return (
+      <StaticWrapper className={className}>
+        {items.map((child, index) => {
+          if (isWhitespaceOnly(child)) return child;
+          if (isBrElement(child)) return <br key={`br-${index}`} />;
+          const style: RevealMountStyle = {
+            animationDelay: `${(revealOrder.get(index) ?? 0) * staggerMs}ms`,
+            "--edu-rise-offset": `${offsetPx}px`,
+          };
+          return (
+            <span
+              key={
+                isValidElement(child) && child.key !== null ? child.key : index
+              }
+              className="edu-reveal-mount inline-block"
+              style={style}
+            >
+              {child}
+            </span>
+          );
+        })}
+      </StaticWrapper>
+    );
+  }
 
   return (
     <Wrapper

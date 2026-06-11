@@ -11,7 +11,9 @@ export class GetCurrentProfileUseCase {
     const result = await this.repository.findByUserId(userId);
     if (!result.ok) return err(result.error);
     if (result.value === null) {
-      return err(AppErrors.notFound("Profil pengguna tidak ditemukan.", "profiles"));
+      return err(
+        AppErrors.notFound("Profil pengguna tidak ditemukan.", "profiles"),
+      );
     }
     return ok(toUserProfileDto(result.value));
   }

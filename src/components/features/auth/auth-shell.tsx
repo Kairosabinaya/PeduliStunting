@@ -44,7 +44,7 @@ export function AuthShell({ children }: AuthShellProps) {
         <div className="pt-safe-4 flex items-center gap-4 px-6 pb-2 sm:px-8 lg:px-12">
           <span className="flex items-center lg:hidden">
             <Image
-              src="/brand/logo-stacked-color.png"
+              src="/brand/logo-stacked-color.webp"
               width={40}
               height={40}
               alt={APP_NAME}
@@ -53,7 +53,7 @@ export function AuthShell({ children }: AuthShellProps) {
               className="block h-10 w-10 dark:hidden"
             />
             <Image
-              src="/brand/logo-stacked-white.png"
+              src="/brand/logo-stacked-white.webp"
               width={40}
               height={40}
               alt={APP_NAME}

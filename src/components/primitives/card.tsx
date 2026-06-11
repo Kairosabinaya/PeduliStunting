@@ -25,7 +25,8 @@ const cardVariants = cva("rounded-xl border bg-surface text-foreground", {
 });
 
 export interface CardProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof cardVariants> {}
 
 /**

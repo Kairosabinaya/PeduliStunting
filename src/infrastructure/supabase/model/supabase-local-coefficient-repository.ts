@@ -16,9 +16,7 @@ import type { TypedSupabaseClient } from "../server-client";
 const SELECT_COLUMNS =
   "id, model_version, kode_bps, tahun, predictor_code, coefficient, se, is_inference, created_at, updated_at";
 
-export class SupabaseLocalCoefficientRepository
-  implements LocalCoefficientRepository
-{
+export class SupabaseLocalCoefficientRepository implements LocalCoefficientRepository {
   constructor(private readonly client: TypedSupabaseClient) {}
 
   async listByRegionAndYear(

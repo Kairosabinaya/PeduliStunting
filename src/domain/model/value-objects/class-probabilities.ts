@@ -20,11 +20,7 @@ export class ClassProbabilities {
   }
 
   isComplete(): boolean {
-    return (
-      this.rendah !== null &&
-      this.sedang !== null &&
-      this.tinggi !== null
-    );
+    return this.rendah !== null && this.sedang !== null && this.tinggi !== null;
   }
 
   sum(): number {

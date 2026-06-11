@@ -21,7 +21,9 @@ export default function AddChildErrorBoundary({
     <div className="py-12">
       <ErrorState
         title={TRACKER_LIST_COPY.errorTitle}
-        description={error.message || TRACKER_LIST_COPY.errorDescriptionFallback}
+        description={
+          error.message || TRACKER_LIST_COPY.errorDescriptionFallback
+        }
         {...(error.digest === undefined ? {} : { correlationId: error.digest })}
         action={
           <Button variant="primary" onClick={reset}>

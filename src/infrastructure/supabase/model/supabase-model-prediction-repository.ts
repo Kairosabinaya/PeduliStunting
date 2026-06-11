@@ -16,9 +16,7 @@ import type { TypedSupabaseClient } from "../server-client";
 const SELECT_COLUMNS =
   "id, model_version, kode_bps, tahun, predicted_category, prob_rendah, prob_sedang, prob_tinggi, created_at, updated_at";
 
-export class SupabaseModelPredictionRepository
-  implements ModelPredictionRepository
-{
+export class SupabaseModelPredictionRepository implements ModelPredictionRepository {
   constructor(private readonly client: TypedSupabaseClient) {}
 
   async listByVersionAndYear(

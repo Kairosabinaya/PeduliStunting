@@ -98,7 +98,31 @@ export const DASHBOARD_TREND = {
   trendDownLabel: "Menurun sejak {tahun}",
   trendUpLabel: "Naik sejak {tahun}",
   trendFlatLabel: "Stabil sejak {tahun}",
+  /**
+   * Rendered chart height. Shared by the Recharts container AND the
+   * loading skeleton shown while the code-split chart chunk loads, so the
+   * swap is layout-shift free (CLS budget, project guidelines Section 7).
+   */
+  chartHeightPx: 340,
+  /** Minimum chart height on narrow viewports. */
+  chartMinHeightPx: 260,
+  /**
+   * IntersectionObserver margin for loading the code-split chart chunk.
+   * Zero margin: with a positive pre-margin the observer fired during
+   * initial load on tall mobile viewports, pulling the Recharts chunk back
+   * into the critical window it was split out of.
+   */
+  chartInViewRootMargin: "0px",
 } as const;
+
+/**
+ * Fallback delay before the KaTeX renderer loads on its own when the user
+ * has not interacted yet. Any interaction loads it immediately; the timer
+ * only covers idle readers. Mirrors the deferred map boot pattern
+ * (MAP_BOOT_IDLE_DELAY_MS) so the ~150 KB KaTeX chunks stay out of the
+ * critical loading window on throttled mobile devices.
+ */
+export const KATEX_IDLE_DELAY_MS = 4000;
 
 /** Trend chart series filter (Semua / Kabupaten / Kota). */
 export const DASHBOARD_TREND_FILTER = {

@@ -20,7 +20,8 @@ const spinnerVariants = cva(
 );
 
 export interface SpinnerProps
-  extends VariantProps<typeof spinnerVariants>,
+  extends
+    VariantProps<typeof spinnerVariants>,
     Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> {
   /** Accessible label announced by screen readers. */
   readonly label?: string;

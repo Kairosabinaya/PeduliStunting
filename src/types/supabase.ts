@@ -119,50 +119,6 @@ export type Database = {
           },
         ];
       };
-      child_nutrition_events: {
-        Row: {
-          child_id: string;
-          created_at: string;
-          data: Json;
-          event_date: string;
-          id: string;
-          kind: string;
-          note: string | null;
-          updated_at: string;
-          user_id: string;
-        };
-        Insert: {
-          child_id: string;
-          created_at?: string;
-          data?: Json;
-          event_date: string;
-          id?: string;
-          kind: string;
-          note?: string | null;
-          updated_at?: string;
-          user_id: string;
-        };
-        Update: {
-          child_id?: string;
-          created_at?: string;
-          data?: Json;
-          event_date?: string;
-          id?: string;
-          kind?: string;
-          note?: string | null;
-          updated_at?: string;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "child_nutrition_events_child_id_fkey";
-            columns: ["child_id"];
-            isOneToOne: false;
-            referencedRelation: "children";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       children: {
         Row: {
           birth_date: string;
@@ -670,89 +626,6 @@ export type Database = {
           },
         ];
       };
-      pregnancies: {
-        Row: {
-          archived_at: string | null;
-          created_at: string;
-          expected_due: string | null;
-          height_cm: number | null;
-          hpht: string;
-          id: string;
-          initial_weight_kg: number | null;
-          notes: string | null;
-          updated_at: string;
-          user_id: string;
-        };
-        Insert: {
-          archived_at?: string | null;
-          created_at?: string;
-          expected_due?: string | null;
-          height_cm?: number | null;
-          hpht: string;
-          id?: string;
-          initial_weight_kg?: number | null;
-          notes?: string | null;
-          updated_at?: string;
-          user_id: string;
-        };
-        Update: {
-          archived_at?: string | null;
-          created_at?: string;
-          expected_due?: string | null;
-          height_cm?: number | null;
-          hpht?: string;
-          id?: string;
-          initial_weight_kg?: number | null;
-          notes?: string | null;
-          updated_at?: string;
-          user_id?: string;
-        };
-        Relationships: [];
-      };
-      pregnancy_events: {
-        Row: {
-          created_at: string;
-          data: Json;
-          event_date: string;
-          id: string;
-          kind: string;
-          note: string | null;
-          pregnancy_id: string;
-          updated_at: string;
-          user_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          data?: Json;
-          event_date: string;
-          id?: string;
-          kind: string;
-          note?: string | null;
-          pregnancy_id: string;
-          updated_at?: string;
-          user_id: string;
-        };
-        Update: {
-          created_at?: string;
-          data?: Json;
-          event_date?: string;
-          id?: string;
-          kind?: string;
-          note?: string | null;
-          pregnancy_id?: string;
-          updated_at?: string;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "pregnancy_events_pregnancy_id_fkey";
-            columns: ["pregnancy_id"];
-            isOneToOne: false;
-            referencedRelation: "pregnancies";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -957,6 +830,7 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      cleanup_unconfirmed_signups: { Args: never; Returns: number };
       is_admin: { Args: never; Returns: boolean };
     };
     Enums: {

@@ -48,18 +48,26 @@ export function AiChatMount({
 }: AiChatMountProps) {
   const [activated, setActivated] = useState(false);
 
-  // Prefetch the panel chunk during idle time (after the page is interactive)
-  // so the chat is ready on first click without weighing on LCP.
+  // Prefetch the panel chunk on the FIRST user interaction instead of during
+  // browser idle: requestIdleCallback fired right after load, so the heavy
+  // chat engine (AI SDK + recharts + katex + markdown) downloaded and parsed
+  // inside the critical loading window on every public page — bandwidth and
+  // main-thread time that delayed LCP/TBT on throttled mobile devices. A
+  // scroll/pointer/keydown means the page is interactive and idle, and the
+  // chunk is still ready long before anyone reaches the composer.
   useEffect(() => {
     const prefetch = (): void => {
       void import("./ai-chat-panel");
     };
-    if (typeof window.requestIdleCallback === "function") {
-      const id = window.requestIdleCallback(prefetch);
-      return () => window.cancelIdleCallback(id);
+    const events = ["pointerdown", "keydown", "scroll", "touchstart"] as const;
+    for (const event of events) {
+      window.addEventListener(event, prefetch, { once: true, passive: true });
     }
-    const timer = window.setTimeout(prefetch, 2500);
-    return () => window.clearTimeout(timer);
+    return () => {
+      for (const event of events) {
+        window.removeEventListener(event, prefetch);
+      }
+    };
   }, []);
 
   const selection: PageContextSelection = {

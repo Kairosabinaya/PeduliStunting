@@ -11,7 +11,6 @@ import type {
   ChildMilestoneDto,
   ImmunizationDto,
   MilestoneDto,
-  NutritionEventDto,
 } from "@/application/health-plan/dtos";
 import { makeUseCases } from "@/composition";
 import type { AppError } from "@/domain/errors/app-error";
@@ -45,11 +44,6 @@ export function immunizationsTag(childId: string): string {
 /** Cache tag for the milestone status rows of a single child. */
 export function milestonesTag(childId: string): string {
   return `child:${childId}:milestones`;
-}
-
-/** Cache tag for the nutrition events of a single child. */
-export function nutritionEventsTag(childId: string): string {
-  return `child:${childId}:nutrition-events`;
 }
 
 /** Cache tag for the public immunization schedule catalog. */
@@ -133,19 +127,5 @@ export const fetchChildMilestones = cache(
   ): Promise<Result<readonly ChildMilestoneDto[], AppError>> => {
     const supabase = await createSupabaseServerClient();
     return makeUseCases(supabase).listChildMilestones.execute(userId, childId);
-  },
-);
-
-/** Per-request memoised fetch of a child's nutrition events (Phase 5). */
-export const fetchNutritionEventsByChild = cache(
-  async (
-    userId: UserId,
-    childId: ChildId,
-  ): Promise<Result<readonly NutritionEventDto[], AppError>> => {
-    const supabase = await createSupabaseServerClient();
-    return makeUseCases(supabase).listNutritionEventsByChild.execute(
-      userId,
-      childId,
-    );
   },
 );

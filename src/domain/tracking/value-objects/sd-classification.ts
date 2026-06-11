@@ -30,10 +30,7 @@ export type SdClass = (typeof SD_CLASSES)[number];
  * verbatim in Buku KIA 2024. Keeping the rules in one function lets the test
  * suite assert every boundary in a single table-driven spec.
  */
-export function classify(
-  indicator: GrowthIndicator,
-  z: number,
-): SdClass {
+export function classify(indicator: GrowthIndicator, z: number): SdClass {
   switch (indicator) {
     case "BB_U": {
       if (z < -3) return "buruk";

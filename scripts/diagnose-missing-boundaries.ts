@@ -4,10 +4,7 @@
  *   npx tsx --env-file=.env.local scripts/diagnose-missing-boundaries.ts
  */
 
-import {
-  createScriptAdminClient,
-  runScript,
-} from "./_lib/script-context.ts";
+import { createScriptAdminClient, runScript } from "./_lib/script-context.ts";
 
 await runScript("diagnose-missing-boundaries", async ({ logger }) => {
   const client = createScriptAdminClient();
@@ -23,9 +20,7 @@ await runScript("diagnose-missing-boundaries", async ({ logger }) => {
   if (boundariesErr) throw new Error(boundariesErr.message);
 
   const boundarySet = new Set((boundaries ?? []).map((b) => b.kode_bps));
-  const missing = (regions ?? []).filter(
-    (r) => !boundarySet.has(r.kode_bps),
-  );
+  const missing = (regions ?? []).filter((r) => !boundarySet.has(r.kode_bps));
   missing.sort((a, b) => a.kode_bps.localeCompare(b.kode_bps));
 
   logger.info("counts", {

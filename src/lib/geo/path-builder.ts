@@ -49,15 +49,12 @@ function ringToPath(
   return `${path}Z`;
 }
 
-export function geometryToPath(
-  geometry: unknown,
-  project: Projector,
-): string {
+export function geometryToPath(geometry: unknown, project: Projector): string {
   if (!isPolygonLike(geometry)) return "";
   if (geometry.type === "Polygon") {
-    return geometry.coordinates.map((ring) => ringToPath(ring, project)).join(
-      " ",
-    );
+    return geometry.coordinates
+      .map((ring) => ringToPath(ring, project))
+      .join(" ");
   }
   return geometry.coordinates
     .flatMap((polygon) => polygon.map((ring) => ringToPath(ring, project)))

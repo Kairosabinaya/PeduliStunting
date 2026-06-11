@@ -50,7 +50,7 @@ export const TIMELINE_FRAMES: readonly TimelineFrame[] = [
       "Hindari rokok, alkohol, dan obat tanpa resep dokter",
     ],
     sourceLabel: "Buku KIA 2024, hal. 4–7",
-    image: "/edukasi/1000 hari - 1.png",
+    image: "/edukasi/1000-hari-1.webp",
   },
   {
     id: "frame-trimester-2",
@@ -66,7 +66,7 @@ export const TIMELINE_FRAMES: readonly TimelineFrame[] = [
       "Ikuti kelas ibu hamil jika tersedia di posyandu atau puskesmas",
     ],
     sourceLabel: "Buku KIA 2024, hal. 16",
-    image: "/edukasi/1000 hari - 2.png",
+    image: "/edukasi/1000-hari-2.webp",
   },
   {
     id: "frame-trimester-3",
@@ -82,7 +82,7 @@ export const TIMELINE_FRAMES: readonly TimelineFrame[] = [
       "Siapkan rencana persalinan dan tas bersalin",
     ],
     sourceLabel: "Buku KIA 2024, hal. 17",
-    image: "/edukasi/1000 hari - 3.png",
+    image: "/edukasi/1000-hari-3.webp",
   },
   {
     id: "frame-0-6-months",
@@ -98,7 +98,7 @@ export const TIMELINE_FRAMES: readonly TimelineFrame[] = [
       "Lakukan pemeriksaan bayi baru lahir sesuai anjuran tenaga kesehatan",
     ],
     sourceLabel: "Buku KIA 2024, hal. 38–48",
-    image: "/edukasi/1000 hari - 4.png",
+    image: "/edukasi/1000-hari-4.webp",
   },
   {
     id: "frame-6-12-months",
@@ -114,7 +114,7 @@ export const TIMELINE_FRAMES: readonly TimelineFrame[] = [
       "Lakukan pemeriksaan kesehatan anak pada usia 6 sampai 7 bulan",
     ],
     sourceLabel: "Buku KIA 2024, hal. 56–62",
-    image: "/edukasi/1000 hari - 5.png",
+    image: "/edukasi/1000-hari-5.webp",
   },
   {
     id: "frame-12-24-months",
@@ -130,7 +130,7 @@ export const TIMELINE_FRAMES: readonly TimelineFrame[] = [
       "Berikan obat cacing 2 kali setahun sesuai anjuran dan lengkapi imunisasi lanjutan",
     ],
     sourceLabel: "Buku KIA 2024, hal. 64–70",
-    image: "/edukasi/1000 hari - 6.png",
+    image: "/edukasi/1000-hari-6.webp",
   },
 ] as const;
 

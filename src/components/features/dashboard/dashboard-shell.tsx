@@ -182,7 +182,9 @@ function MapSection({
             {category}
           </li>
         ))}
-        <li className="text-muted-foreground/70">
+        {/* Full-strength muted-foreground: the previous /70 dim landed at
+            4.07:1 on the dark legend card (axe color-contrast). */}
+        <li className="text-muted-foreground">
           {DASHBOARD_CHOROPLETH.selectHint}
         </li>
       </ul>

@@ -2,8 +2,7 @@ import { forwardRef } from "react";
 
 import { cn } from "@/lib/cn";
 
-export interface SelectProps
-  extends React.SelectHTMLAttributes<HTMLSelectElement> {
+export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   readonly hint?: string | undefined;
   readonly errorMessage?: string | undefined;
 }

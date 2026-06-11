@@ -63,18 +63,18 @@ export function SourceToggle({
       data-pending={pending ? "" : undefined}
     >
       <header className="flex flex-col gap-0.5">
-        <h2
-          id={titleId}
-          className="text-sm font-semibold text-foreground"
-        >
+        <h2 id={titleId} className="text-sm font-semibold text-foreground">
           Sumber data
         </h2>
       </header>
-      <div role="radiogroup" aria-labelledby={titleId} className="mt-3 grid grid-cols-2 gap-2">
+      <div
+        role="radiogroup"
+        aria-labelledby={titleId}
+        className="mt-3 grid grid-cols-2 gap-2"
+      >
         {MAP_SOURCE_OPTIONS.map((option) => {
           const selected = option.value === value;
-          const disabled =
-            option.value === "predicted" && !predictedAvailable;
+          const disabled = option.value === "predicted" && !predictedAvailable;
           return (
             <button
               key={option.value}

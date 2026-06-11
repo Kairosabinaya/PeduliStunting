@@ -102,9 +102,16 @@ function HorizontalTimeline() {
             >
               <ServiceText service={service} />
             </li>
-            <div className={cn(col, "row-start-2 flex justify-center")}>
+            {/* `li`, not `div`: an `ol` may only contain li/script/template
+                children (axe `list`). The node is decorative chrome for the
+                text entry above/below it, so it opts out of list semantics
+                with `list-none` + aria-hidden. */}
+            <li
+              aria-hidden="true"
+              className={cn(col, "row-start-2 flex list-none justify-center")}
+            >
               <ServiceNode service={service} />
-            </div>
+            </li>
           </Fragment>
         );
       })}

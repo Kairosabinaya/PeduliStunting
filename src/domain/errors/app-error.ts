@@ -67,11 +67,15 @@ export const AppErrors = {
       : { kind: "validation", message };
   },
 
-  unauthorized(message = "Anda perlu masuk untuk melanjutkan."): UnauthorizedError {
+  unauthorized(
+    message = "Anda perlu masuk untuk melanjutkan.",
+  ): UnauthorizedError {
     return { kind: "unauthorized", message };
   },
 
-  forbidden(message = "Anda tidak memiliki akses untuk tindakan ini."): ForbiddenError {
+  forbidden(
+    message = "Anda tidak memiliki akses untuk tindakan ini.",
+  ): ForbiddenError {
     return { kind: "forbidden", message };
   },
 
@@ -91,7 +95,11 @@ export const AppErrors = {
       : { kind: "rate_limit", message };
   },
 
-  externalService(message: string, service?: string, cause?: unknown): ExternalServiceError {
+  externalService(
+    message: string,
+    service?: string,
+    cause?: unknown,
+  ): ExternalServiceError {
     const base: ExternalServiceError = { kind: "external_service", message };
     return {
       ...base,
@@ -100,7 +108,10 @@ export const AppErrors = {
     };
   },
 
-  unexpected(message = "Terjadi kesalahan yang tidak terduga.", cause?: unknown): UnexpectedError {
+  unexpected(
+    message = "Terjadi kesalahan yang tidak terduga.",
+    cause?: unknown,
+  ): UnexpectedError {
     return cause !== undefined
       ? { kind: "unexpected", message, cause }
       : { kind: "unexpected", message };

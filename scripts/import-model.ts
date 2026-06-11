@@ -116,9 +116,7 @@ function coerceNumber(value: string): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function coerceCategory(
-  value: string,
-): "Rendah" | "Sedang" | "Tinggi" | null {
+function coerceCategory(value: string): "Rendah" | "Sedang" | "Tinggi" | null {
   const lower = value.trim().toLowerCase();
   if (lower === "rendah") return "Rendah";
   if (lower === "sedang") return "Sedang";
@@ -135,9 +133,7 @@ function loadMetadata(logger: ScriptLogger): ModelMetadata | null {
   const raw = JSON.parse(readFileSync(path, "utf8"));
   const parsed = MetadataSchema.safeParse(raw);
   if (!parsed.success) {
-    throw new Error(
-      `model_metadata.json invalid: ${parsed.error.message}`,
-    );
+    throw new Error(`model_metadata.json invalid: ${parsed.error.message}`);
   }
   return parsed.data;
 }
@@ -198,8 +194,7 @@ function buildCoefficientRows(
       continue;
     }
     const isInferenceRaw = (row.is_inference ?? "").toLowerCase();
-    const isInference =
-      isInferenceRaw === "true" || isInferenceRaw === "1";
+    const isInference = isInferenceRaw === "true" || isInferenceRaw === "1";
     const parsed = CoefficientRowSchema.safeParse({
       model_version: version,
       kode_bps,
@@ -257,11 +252,7 @@ async function upsertPredictions(
   rows: readonly PredictionRow[],
   logger: ScriptLogger,
 ): Promise<void> {
-  for (
-    let offset = 0;
-    offset < rows.length;
-    offset += PREDICTIONS_BATCH_SIZE
-  ) {
+  for (let offset = 0; offset < rows.length; offset += PREDICTIONS_BATCH_SIZE) {
     const batch = rows.slice(offset, offset + PREDICTIONS_BATCH_SIZE);
     const { error } = await client
       .from("model_predictions")
@@ -311,13 +302,9 @@ async function upsertCoefficients(
 await runScript("import-model", async ({ logger }) => {
   const metadata = loadMetadata(logger);
   if (metadata === null) {
-    logger.warn(
-      "import-model.no-metadata",
-      {
-        hint:
-          "Run `Rscript scripts/export-model-from-rds.R` first to produce docs/source/_generated/model_metadata.json.",
-      },
-    );
+    logger.warn("import-model.no-metadata", {
+      hint: "Run `Rscript scripts/export-model-from-rds.R` first to produce docs/source/_generated/model_metadata.json.",
+    });
     return;
   }
 
@@ -355,8 +342,4 @@ await runScript("import-model", async ({ logger }) => {
   }
 });
 
-export {
-  buildCoefficientRows,
-  buildPredictionRows,
-  parseCsv,
-};
+export { buildCoefficientRows, buildPredictionRows, parseCsv };

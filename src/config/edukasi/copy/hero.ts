@@ -59,7 +59,7 @@ export const HERO_COPY = {
  * (project guidelines §2).
  */
 export const HERO_ILLUSTRATION = {
-  src: "/edukasi/Hero - Ibu pangku anak.png",
+  src: "/edukasi/hero-ibu-pangku-anak.webp",
   width: 1000,
   height: 1000,
 } as const;

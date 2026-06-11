@@ -158,9 +158,12 @@ export function FloatingHeader({ session }: FloatingHeaderProps) {
               during font / image load.
             */}
             <Image
-              src="/brand/logo-horizontal-color.png"
+              src="/brand/logo-horizontal-color.webp"
               alt={APP_NAME}
-              width={160}
+              // 108x40 matches the wordmark's intrinsic 960x356 aspect ratio
+              // at the rendered 40 px height; a mismatched declared ratio
+              // fails Lighthouse `image-aspect-ratio`.
+              width={108}
               height={40}
               priority
               // Inline `width: auto` silences the Next/Image intrinsic-size
@@ -172,9 +175,9 @@ export function FloatingHeader({ session }: FloatingHeaderProps) {
               className="block h-10 dark:hidden"
             />
             <Image
-              src="/brand/logo-horizontal-white.png"
+              src="/brand/logo-horizontal-white.webp"
               alt={APP_NAME}
-              width={160}
+              width={108}
               height={40}
               priority
               style={{ width: "auto" }}

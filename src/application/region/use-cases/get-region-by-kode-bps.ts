@@ -7,9 +7,7 @@ import { toRegionDto, type RegionDto } from "../dtos";
 export class GetRegionByKodeBpsUseCase {
   constructor(private readonly regions: RegionRepository) {}
 
-  async execute(
-    kodeBps: KodeBps,
-  ): Promise<Result<RegionDto | null, AppError>> {
+  async execute(kodeBps: KodeBps): Promise<Result<RegionDto | null, AppError>> {
     const result = await this.regions.findByKodeBps(kodeBps);
     return map(result, (row) => (row ? toRegionDto(row) : null));
   }

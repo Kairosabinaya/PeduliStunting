@@ -2,10 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ModelPredictionDto } from "@/application/model/dtos";
-import type {
-  RegionDto,
-  RegionIndicatorsDto,
-} from "@/application/region/dtos";
+import type { RegionDto, RegionIndicatorsDto } from "@/application/region/dtos";
 
 vi.mock("next/link", () => ({
   default: ({
@@ -122,14 +119,14 @@ describe("RegionDetailPanel", () => {
         currentSearch="tahun=2024"
       />,
     );
-    const obsMetric = screen
-      .getByText(/kategori observasi 2024/i)
-      .parentElement;
+    const obsMetric = screen.getByText(
+      /kategori observasi 2024/i,
+    ).parentElement;
     if (!obsMetric) throw new Error("observation metric has no parent");
     expect(within(obsMetric).getByText("Sedang")).toBeInTheDocument();
-    const predMetric = screen
-      .getByText(/kategori prediksi 2024/i)
-      .parentElement;
+    const predMetric = screen.getByText(
+      /kategori prediksi 2024/i,
+    ).parentElement;
     if (!predMetric) throw new Error("prediction metric has no parent");
     expect(within(predMetric).getByText("Tinggi")).toBeInTheDocument();
   });

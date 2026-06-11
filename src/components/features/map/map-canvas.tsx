@@ -824,29 +824,47 @@ export function MapCanvas({
       return true;
     };
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { longitude, latitude } = position.coords;
-        if (trySnapToUserLocation(longitude, latitude)) return;
-        // Regions layer wasn't ready when the geolocation callback fired —
-        // queue a single retry once the map finishes loading its sources.
-        const map = mapRef.current?.getMap();
-        if (!map) return;
-        const onIdleOnce = () => {
-          if (trySnapToUserLocation(longitude, latitude)) {
-            map.off("idle", onIdleOnce);
-          }
-        };
-        map.on("idle", onIdleOnce);
-      },
-      () => {
-        // User denied permission, position unavailable, or timed out —
-        // keep the default Indonesia framing without surfacing an error.
-      },
-      // 8s timeout strikes a balance: long enough for GPS warm-up on
-      // mobile, short enough that the user doesn't wait forever.
-      { enableHighAccuracy: false, timeout: 8000, maximumAge: 5 * 60 * 1000 },
-    );
+    const requestPosition = (): void => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { longitude, latitude } = position.coords;
+          if (trySnapToUserLocation(longitude, latitude)) return;
+          // Regions layer wasn't ready when the geolocation callback fired —
+          // queue a single retry once the map finishes loading its sources.
+          const map = mapRef.current?.getMap();
+          if (!map) return;
+          const onIdleOnce = () => {
+            if (trySnapToUserLocation(longitude, latitude)) {
+              map.off("idle", onIdleOnce);
+            }
+          };
+          map.on("idle", onIdleOnce);
+        },
+        () => {
+          // Position unavailable or timed out — keep the default Indonesia
+          // framing without surfacing an error.
+        },
+        // 8s timeout strikes a balance: long enough for GPS warm-up on
+        // mobile, short enough that the user doesn't wait forever.
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 5 * 60 * 1000 },
+      );
+    };
+
+    // Snap-to-location only runs when the user ALREADY granted geolocation
+    // in a previous session. Requesting the permission on page load is
+    // hostile UX and fails Lighthouse `geolocation-on-start`; first-time
+    // grants happen through the browser's own UI when the user initiates a
+    // location action elsewhere, never as a surprise dialog.
+    if (typeof navigator.permissions?.query !== "function") return;
+    navigator.permissions
+      .query({ name: "geolocation" })
+      .then((status) => {
+        if (status.state === "granted") requestPosition();
+      })
+      .catch(() => {
+        // Permissions API rejected (unsupported descriptor) — skip the
+        // snap-in rather than risk a load-time permission prompt.
+      });
   }, [isInteractive, mapReady, onSelect]);
 
   return (

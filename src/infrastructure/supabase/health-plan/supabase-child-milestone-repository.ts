@@ -1,11 +1,7 @@
 import "server-only";
 import { err, ok, type Result } from "@/domain/shared/result";
 import type { AppError } from "@/domain/errors/app-error";
-import type {
-  ChildId,
-  MilestoneId,
-  UserId,
-} from "@/domain/shared/ids";
+import type { ChildId, MilestoneId, UserId } from "@/domain/shared/ids";
 import type {
   ChildMilestone,
   ChildMilestoneStatus,
@@ -21,9 +17,7 @@ import type { TypedSupabaseClient } from "../server-client";
 const SELECT_COLUMNS =
   "id, user_id, child_id, milestone_id, status, checked_at, note, created_at, updated_at";
 
-export class SupabaseChildMilestoneRepository
-  implements ChildMilestoneRepository
-{
+export class SupabaseChildMilestoneRepository implements ChildMilestoneRepository {
   constructor(private readonly client: TypedSupabaseClient) {}
 
   async listByChild(

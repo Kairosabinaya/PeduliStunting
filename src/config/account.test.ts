@@ -15,7 +15,10 @@ import {
   THEME_OPTIONS,
 } from "./account";
 import { SUPPORTED_LOCALES } from "./locales";
-import { THEME_PREFERENCES, USER_ROLES } from "@/domain/account/entities/user-profile";
+import {
+  THEME_PREFERENCES,
+  USER_ROLES,
+} from "@/domain/account/entities/user-profile";
 
 describe("account config", () => {
   it("exposes the canonical account route", () => {

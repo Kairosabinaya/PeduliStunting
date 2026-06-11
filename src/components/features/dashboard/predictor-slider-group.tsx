@@ -57,7 +57,13 @@ export function PredictorSliderGroup({
           {sliders.map((slider) => (
             <div
               key={slider.code}
-              className={cn("space-y-1", slider.inactive && "opacity-70")}
+              // `grayscale` + 90% opacity still reads as "inactive" but keeps
+              // the muted text above the 4.5:1 floor that the old 70% dim
+              // broke on the dark simulator card (axe color-contrast).
+              className={cn(
+                "space-y-1",
+                slider.inactive && "opacity-90 grayscale",
+              )}
             >
               <div className="flex items-start justify-between gap-2">
                 <span className="text-sm font-medium leading-snug text-foreground">

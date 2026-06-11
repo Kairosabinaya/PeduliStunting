@@ -29,7 +29,9 @@ const FALLBACK_LABEL: PredictorDimensionLabel = {
   description: "Dimensi belum dipetakan ke label UI.",
 } as const;
 
-const LABELS_BY_CODE: Readonly<Record<IndicatorDimension, PredictorDimensionLabel>> = {
+const LABELS_BY_CODE: Readonly<
+  Record<IndicatorDimension, PredictorDimensionLabel>
+> = {
   outcome: {
     code: "outcome",
     label: "Outcome",
@@ -99,9 +101,7 @@ export function getPredictorDimensionLabel(
 }
 
 export function listPredictorDimensionLabels(): readonly PredictorDimensionLabel[] {
-  return PREDICTOR_DIMENSION_ORDER.map(
-    (code) => LABELS_BY_CODE[code],
-  );
+  return PREDICTOR_DIMENSION_ORDER.map((code) => LABELS_BY_CODE[code]);
 }
 
 export { INDICATOR_DIMENSIONS };

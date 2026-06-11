@@ -8,11 +8,16 @@ test.describe("auth flows (anonymous)", () => {
     await page.goto("/auth/sign-in");
 
     await expect(
-      page.getByRole("heading", { name: /masuk ke akun anda/i, level: 1 }),
+      page.getByRole("heading", {
+        name: /lanjutkan pemantauan anak/i,
+        level: 1,
+      }),
     ).toBeVisible();
-    await expect(page.getByText(/selamat datang kembali/i)).toBeVisible();
-    await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
-    await expect(page.getByLabel("Kata sandi", { exact: true })).toBeVisible();
+    await expect(
+      page.getByText(/masuk untuk melihat tracker anak/i),
+    ).toBeVisible();
+    await expect(page.getByLabel(/^email\b/i)).toBeVisible();
+    await expect(page.getByLabel(/^kata sandi\b/i)).toBeVisible();
     await expect(page.getByRole("button", { name: /^masuk$/i })).toBeVisible();
     await expect(
       page.getByRole("button", { name: /lanjutkan dengan google/i }),
@@ -20,10 +25,9 @@ test.describe("auth flows (anonymous)", () => {
     await expect(
       page.getByRole("link", { name: /lupa kata sandi/i }),
     ).toBeVisible();
-    // Brand panel only rendered at lg+ (desktop viewport).
-    await expect(
-      page.getByRole("complementary", { name: /panel sambutan/i }),
-    ).toBeVisible();
+    // Brand panel only rendered at lg+ (desktop viewport). The aside is the
+    // page's only complementary landmark (it carries no accessible name).
+    await expect(page.getByRole("complementary")).toBeVisible();
   });
 
   test("submitting an empty sign-in form surfaces inline validation", async ({
@@ -31,7 +35,7 @@ test.describe("auth flows (anonymous)", () => {
   }) => {
     await page.goto("/auth/sign-in");
 
-    const emailField = page.getByLabel("Email", { exact: true });
+    const emailField = page.getByLabel(/^email\b/i);
     await emailField.fill("not-an-email");
     await page.getByRole("button", { name: /^masuk$/i }).click();
 
@@ -41,7 +45,11 @@ test.describe("auth flows (anonymous)", () => {
   test("sign-in surfaces friendly query-string errors", async ({ page }) => {
     await page.goto("/auth/sign-in?error=callback_failed");
 
-    await expect(page.getByRole("alert")).toContainText(/sesi/i);
+    // `.filter({ hasText })` skips Next's empty route-announcer, which also
+    // carries role="alert" and would trip Playwright strict mode.
+    await expect(
+      page.getByRole("alert").filter({ hasText: /\S/ }),
+    ).toContainText(/sesi/i);
   });
 
   test("forgot-password link navigates to reset request flow", async ({
@@ -53,7 +61,7 @@ test.describe("auth flows (anonymous)", () => {
     await expect(
       page.getByRole("heading", { name: /atur ulang kata sandi/i, level: 1 }),
     ).toBeVisible();
-    await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
+    await expect(page.getByLabel(/^email\b/i)).toBeVisible();
     await expect(
       page.getByRole("button", { name: /kirim tautan reset/i }),
     ).toBeVisible();
@@ -64,18 +72,18 @@ test.describe("auth flows (anonymous)", () => {
 
     await expect(
       page.getByRole("heading", {
-        name: /mulai dengan satu langkah/i,
+        name: /mulai pantau anak dengan lebih mudah/i,
         level: 1,
       }),
     ).toBeVisible();
-    await expect(page.getByText(/buat akun baru/i).first()).toBeVisible();
+    await expect(page.getByText(/buat akun gratis/i).first()).toBeVisible();
     await expect(
       page.getByRole("navigation", { name: /tahap pendaftaran/i }),
     ).toBeVisible();
     await expect(page.getByLabel(/^foto profil$/i)).toBeVisible();
     await expect(page.getByLabel(/nama tampilan/i)).toBeVisible();
-    await expect(page.getByLabel("Email", { exact: true })).toBeVisible();
-    await expect(page.getByLabel("Kata sandi", { exact: true })).toBeVisible();
+    await expect(page.getByLabel(/^email\b/i)).toBeVisible();
+    await expect(page.getByLabel(/^kata sandi\b/i)).toBeVisible();
     await expect(page.getByLabel(/konfirmasi kata sandi/i)).toBeVisible();
     await expect(
       page.getByRole("group", { name: /kekuatan kata sandi/i }),
@@ -86,7 +94,7 @@ test.describe("auth flows (anonymous)", () => {
   test("password strength updates as the user types", async ({ page }) => {
     await page.goto("/auth/sign-up");
 
-    const passwordField = page.getByLabel("Kata sandi", { exact: true });
+    const passwordField = page.getByLabel(/^kata sandi\b/i);
     const strength = page.getByRole("group", {
       name: /kekuatan kata sandi/i,
     });
@@ -94,7 +102,9 @@ test.describe("auth flows (anonymous)", () => {
     await passwordField.fill("abc");
     await expect(strength).toContainText(/lemah/i);
 
-    await passwordField.fill("abcdefgh");
+    // Length 8 plus two character classes scores "fair" on the heuristic
+    // (length alone stays "weak").
+    await passwordField.fill("abcdefg1");
     await expect(strength).toContainText(/cukup/i);
 
     await passwordField.fill("abcdEFGH12!@");
@@ -104,7 +114,7 @@ test.describe("auth flows (anonymous)", () => {
   test("confirm password shows a live mismatch hint", async ({ page }) => {
     await page.goto("/auth/sign-up");
 
-    await page.getByLabel("Kata sandi", { exact: true }).fill("password1");
+    await page.getByLabel(/^kata sandi\b/i).fill("password1");
     await page.getByLabel(/konfirmasi kata sandi/i).fill("different");
 
     await expect(

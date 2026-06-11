@@ -8,10 +8,7 @@
 import Link from "next/link";
 
 import type { ModelPredictionDto } from "@/application/model/dtos";
-import type {
-  RegionDto,
-  RegionIndicatorsDto,
-} from "@/application/region/dtos";
+import type { RegionDto, RegionIndicatorsDto } from "@/application/region/dtos";
 import {
   CATEGORY_BADGE_TONE,
   MAP_COPY,
@@ -167,7 +164,7 @@ function PopulatedPanel({
                 </span>
                 <CategoryCell label="Obs." category={row.observed} />
                 <CategoryCell label="Pred." category={row.predicted} />
-                <span className="text-right text-muted-foreground tabular-nums">
+                <span className="text-right tabular-nums text-muted-foreground">
                   {formatPercent(row.prevalence)}
                 </span>
               </li>

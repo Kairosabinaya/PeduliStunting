@@ -5,14 +5,22 @@ import { mapSupabaseAuthError } from "./supabase-auth-error";
 
 describe("mapSupabaseAuthError", () => {
   it("maps invalid_credentials to unauthorized with a friendly message", () => {
-    const err = new AuthError("Invalid login credentials", 400, "invalid_credentials");
+    const err = new AuthError(
+      "Invalid login credentials",
+      400,
+      "invalid_credentials",
+    );
     const mapped = mapSupabaseAuthError(err);
     expect(mapped.kind).toBe("unauthorized");
     expect(mapped.message).toMatch(/salah/i);
   });
 
   it("maps email_not_confirmed to unauthorized with a verification hint", () => {
-    const err = new AuthError("Email not confirmed", 400, "email_not_confirmed");
+    const err = new AuthError(
+      "Email not confirmed",
+      400,
+      "email_not_confirmed",
+    );
     const mapped = mapSupabaseAuthError(err);
     expect(mapped.kind).toBe("unauthorized");
     expect(mapped.message).toMatch(/verifikasi/i);

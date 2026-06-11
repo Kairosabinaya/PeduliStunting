@@ -1,45 +1,44 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("public landing", () => {
-  test("renders the hero, brand pillars, and CTA banner", async ({ page }) => {
+  test("renders the hero, scroll-story acts, and closing CTAs", async ({
+    page,
+  }) => {
     await page.goto("/");
 
+    // Scroll-story hero headline ("1 dari 5 balita Indonesia mengalami
+    // stunting."), word-split into spans — match on the stable keyword.
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
-      "Peduli Stunting",
+      /stunting/i,
     );
 
-    const main = page.locator("#main");
     await expect(
-      main.getByRole("heading", { name: /empat alat/i }),
+      page.getByRole("heading", { name: /otak bayi terbentuk/i }),
     ).toBeVisible();
     await expect(
-      main.getByRole("heading", { name: /peta nasional/i }),
+      page.getByRole("heading", { name: /stunting tidak tersebar/i }),
+    ).toBeVisible();
+    // Closing band CTAs route to the map and the tracker.
+    await expect(
+      page.getByRole("link", { name: /pelajari peta nasional/i }),
     ).toBeVisible();
     await expect(
-      main.getByRole("heading", {
-        name: /1\.000 hari yang mengubah segalanya/i,
-      }),
-    ).toBeVisible();
-    await expect(
-      main.getByRole("heading", { name: /tracker pertumbuhan/i }),
-    ).toBeVisible();
-    await expect(
-      main.getByRole("heading", { name: /dashboard model/i }),
+      page.getByRole("link", { name: /mulai pantau anak/i }),
     ).toBeVisible();
   });
 
-  test("primary CTA navigates to sign-up", async ({ page }) => {
+  test("header CTA navigates to sign-up", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("link", { name: /daftar gratis/i }).click();
+    await page.getByRole("link", { name: /^daftar$/i }).click();
     await expect(page).toHaveURL(/\/auth\/sign-up$/);
   });
 
-  test("secondary CTA navigates to sign-in", async ({ page }) => {
+  test("closing CTA navigates to the national map", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("link", { name: /saya sudah punya akun/i }).click();
-    await expect(page).toHaveURL(/\/auth\/sign-in$/);
+    await page.getByRole("link", { name: /pelajari peta nasional/i }).click();
+    await expect(page).toHaveURL(/\/map$/);
   });
 
   test("layout has no horizontal overflow at common breakpoints", async ({
@@ -48,15 +47,19 @@ test.describe("public landing", () => {
     for (const width of [360, 768, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
-      const overflow = await page.evaluate(
-        () =>
-          document.documentElement.scrollWidth -
-          document.documentElement.clientWidth,
-      );
-      expect(
-        overflow,
-        `viewport ${width}px must not overflow horizontally`,
-      ).toBeLessThanOrEqual(1);
+      // Poll: a one-shot read raced entrance animations / streamed chunks
+      // and flaked. The page must settle to zero horizontal overflow.
+      await expect
+        .poll(
+          () =>
+            page.evaluate(
+              () =>
+                document.documentElement.scrollWidth -
+                document.documentElement.clientWidth,
+            ),
+          { message: `viewport ${width}px must not overflow horizontally` },
+        )
+        .toBeLessThanOrEqual(1);
     }
   });
 });

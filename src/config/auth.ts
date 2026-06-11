@@ -40,7 +40,7 @@ export interface AuthBrandPanel {
 
 export const AUTH_BRAND_PANEL: AuthBrandPanel = {
   logo: {
-    src: "/brand/logo-stacked-white.png",
+    src: "/brand/logo-stacked-white.webp",
     width: 360,
     height: 360,
     alt: APP_NAME,

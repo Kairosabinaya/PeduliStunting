@@ -18,7 +18,7 @@ describe("auth config", () => {
   describe("AUTH_BRAND_PANEL", () => {
     it("points at a public brand asset with sensible dimensions", () => {
       expect(AUTH_BRAND_PANEL.logo.src.startsWith("/brand/")).toBe(true);
-      expect(AUTH_BRAND_PANEL.logo.src.endsWith(".png")).toBe(true);
+      expect(AUTH_BRAND_PANEL.logo.src.endsWith(".webp")).toBe(true);
       expect(AUTH_BRAND_PANEL.logo.width).toBeGreaterThan(0);
       expect(AUTH_BRAND_PANEL.logo.height).toBeGreaterThan(0);
       expect(AUTH_BRAND_PANEL.logo.alt.length).toBeGreaterThan(0);

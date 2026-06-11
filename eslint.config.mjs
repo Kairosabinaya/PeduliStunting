@@ -53,7 +53,10 @@ const config = [
     },
   },
   {
-    files: ["src/config/env.ts"],
+    // env.ts (server, Zod-validated) and env.client.ts (browser-safe
+    // NEXT_PUBLIC values, no Zod) are together the single sanctioned
+    // process.env boundary.
+    files: ["src/config/env.ts", "src/config/env.client.ts"],
     rules: {
       "no-restricted-syntax": "off",
     },

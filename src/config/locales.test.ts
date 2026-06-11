@@ -18,9 +18,9 @@ describe("locales config", () => {
   });
 
   it("the default locale is among supported locales", () => {
-    expect((SUPPORTED_LOCALES as readonly string[]).includes(DEFAULT_LOCALE)).toBe(
-      true,
-    );
+    expect(
+      (SUPPORTED_LOCALES as readonly string[]).includes(DEFAULT_LOCALE),
+    ).toBe(true);
   });
 
   it("isSupportedLocale narrows correctly", () => {

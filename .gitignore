@@ -87,6 +87,9 @@ tmp/
 scratch/
 .scratch/
 
+# --- Lighthouse audit artifacts (scripts/audit-lighthouse.ts) ---
+.lighthouse/
+
 # --- Misc ---
 *.pid
 *.seed

@@ -50,7 +50,9 @@ export interface MapDatasetInput {
  * active year). If none has data, keep the first arbitrarily so the panel
  * still works when the user clicks it.
  */
-export function buildMapFeatures(input: MapDatasetInput): readonly MapFeature[] {
+export function buildMapFeatures(
+  input: MapDatasetInput,
+): readonly MapFeature[] {
   const regionByKode = indexBy(input.regions, (r) => r.kodeBps);
   const indicatorByKode = indexBy(input.indicators, (i) => i.kodeBps);
   const predictionByKode = indexBy(input.predictions, (p) => p.kodeBps);
@@ -75,7 +77,10 @@ export function buildMapFeatures(input: MapDatasetInput): readonly MapFeature[] 
       byPhysicalKey.set(key, feature);
       continue;
     }
-    if (incumbent.observedCategory === null && feature.observedCategory !== null) {
+    if (
+      incumbent.observedCategory === null &&
+      feature.observedCategory !== null
+    ) {
       byPhysicalKey.set(key, feature);
     }
   }
@@ -142,7 +147,10 @@ export function computeRegionalSummary(
     Tinggi: 0,
   };
   for (const row of indicators) {
-    if (typeof row.y1Prevalence === "number" && !Number.isNaN(row.y1Prevalence)) {
+    if (
+      typeof row.y1Prevalence === "number" &&
+      !Number.isNaN(row.y1Prevalence)
+    ) {
       prevalenceSum += row.y1Prevalence;
       prevalenceCount += 1;
     }
@@ -211,7 +219,10 @@ export function mergeYearlyRows(
   observed: readonly RegionIndicatorsDto[],
   predicted: readonly ModelPredictionDto[],
 ): readonly YearlyRow[] {
-  const byYear = new Map<number, { observed?: RegionIndicatorsDto; predicted?: ModelPredictionDto }>();
+  const byYear = new Map<
+    number,
+    { observed?: RegionIndicatorsDto; predicted?: ModelPredictionDto }
+  >();
   for (const row of observed) {
     const entry = byYear.get(row.tahun) ?? {};
     entry.observed = row;

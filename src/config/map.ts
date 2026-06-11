@@ -155,6 +155,30 @@ export const MAP_SOURCE_OPTIONS: readonly MapSourceOption[] = [
   },
 ] as const;
 
+/**
+ * Endpoint serving the cached boundary rows for the client-side feature
+ * join. Geometry used to travel inside the RSC flight payload once per
+ * supported year (~12 MB raw); fetching it once from a cacheable endpoint
+ * after the deferred map boot keeps the document tiny.
+ */
+export const MAP_BOUNDARIES_ENDPOINT = "/api/map/boundaries";
+
+/**
+ * Browser/CDN cache policy for {@link MAP_BOUNDARIES_ENDPOINT}. Boundary
+ * geometry only changes on a manual re-import, so a day of freshness plus a
+ * week of stale-while-revalidate is safely conservative.
+ */
+export const MAP_BOUNDARIES_CACHE_CONTROL =
+  "public, max-age=86400, stale-while-revalidate=604800";
+
+/**
+ * How long the static SSR poster stays before the WebGL map boots on its
+ * own. Any user intent (pointer, key, wheel, touch) boots it immediately;
+ * the timer only covers idle visitors. 4s keeps MapLibre's boot cost out of
+ * the Lighthouse mobile trace window while feeling near-instant in practice.
+ */
+export const MAP_BOOT_IDLE_DELAY_MS = 4000;
+
 export const MAP_COPY = {
   eyebrow: "Sebaran prevalensi",
   title: "Peta stunting Indonesia",

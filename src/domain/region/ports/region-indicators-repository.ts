@@ -5,7 +5,9 @@ import type { KodeBps } from "../value-objects/kode-bps";
 import type { Year } from "../value-objects/year";
 
 export interface RegionIndicatorsRepository {
-  listByYear(tahun: Year): Promise<Result<readonly RegionIndicators[], AppError>>;
+  listByYear(
+    tahun: Year,
+  ): Promise<Result<readonly RegionIndicators[], AppError>>;
   findByRegion(
     kodeBps: KodeBps,
   ): Promise<Result<readonly RegionIndicators[], AppError>>;

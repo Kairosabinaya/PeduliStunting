@@ -21,9 +21,7 @@ import type { TypedSupabaseClient } from "../server-client";
 const SELECT_COLUMNS =
   "id, user_id, child_id, measured_at, weight_kg, height_cm, measured_lying, head_circumference_cm, muac_cm, z_scores, sd_class, note, created_at, updated_at";
 
-export class SupabaseGrowthMeasurementRepository
-  implements GrowthMeasurementRepository
-{
+export class SupabaseGrowthMeasurementRepository implements GrowthMeasurementRepository {
   constructor(private readonly client: TypedSupabaseClient) {}
 
   async listByChild(

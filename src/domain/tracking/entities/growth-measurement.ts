@@ -1,8 +1,4 @@
-import type {
-  ChildId,
-  MeasurementId,
-  UserId,
-} from "@/domain/shared/ids";
+import type { ChildId, MeasurementId, UserId } from "@/domain/shared/ids";
 import type { DateOnly } from "@/domain/shared/date-only";
 import type { GrowthIndicator } from "../value-objects/growth-indicator";
 import type { SdClass } from "../value-objects/sd-classification";

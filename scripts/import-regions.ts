@@ -28,22 +28,12 @@ const DATASET_SHEET = "Dataset";
 const REGIONS_BATCH_SIZE = 200;
 
 const RegionRowSchema = z.object({
-  kode_bps: z
-    .string()
-    .regex(/^\d{4}$/, "kode_bps must be a 4-digit string"),
+  kode_bps: z.string().regex(/^\d{4}$/, "kode_bps must be a 4-digit string"),
   provinsi: z.string().min(1),
   kabupaten_kota: z.string().min(1),
   tipe: z.enum(["Kabupaten", "Kota"]),
-  latitude: z
-    .number()
-    .min(-11.5)
-    .max(6.5)
-    .nullable(),
-  longitude: z
-    .number()
-    .min(94)
-    .max(142)
-    .nullable(),
+  latitude: z.number().min(-11.5).max(6.5).nullable(),
+  longitude: z.number().min(94).max(142).nullable(),
 });
 
 type RegionRow = z.infer<typeof RegionRowSchema>;

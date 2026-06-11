@@ -83,15 +83,17 @@ export interface LandingFooter {
 export const LANDING_LOGO: Readonly<
   Record<"light" | "dark", LandingBrandLogo>
 > = {
+  // 324x120 matches the wordmark's intrinsic 960x356 aspect ratio; a
+  // mismatched declared ratio fails Lighthouse `image-aspect-ratio`.
   light: {
-    src: "/brand/logo-horizontal-color.png",
-    width: 480,
+    src: "/brand/logo-horizontal-color.webp",
+    width: 324,
     height: 120,
     alt: APP_NAME,
   },
   dark: {
-    src: "/brand/logo-horizontal-white.png",
-    width: 480,
+    src: "/brand/logo-horizontal-white.webp",
+    width: 324,
     height: 120,
     alt: APP_NAME,
   },

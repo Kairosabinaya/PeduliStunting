@@ -101,9 +101,9 @@ describe("geometryToPath", () => {
 
   it("returns an empty string for non-polygon input", () => {
     expect(geometryToPath(null, project)).toBe("");
-    expect(geometryToPath({ type: "Point", coordinates: [0, 0] }, project)).toBe(
-      "",
-    );
+    expect(
+      geometryToPath({ type: "Point", coordinates: [0, 0] }, project),
+    ).toBe("");
   });
 
   it("skips empty rings without throwing", () => {

@@ -1,10 +1,6 @@
 import { map, type Result } from "@/domain/shared/result";
 import type { AppError } from "@/domain/errors/app-error";
-import type {
-  ChildId,
-  ImmunizationCode,
-  UserId,
-} from "@/domain/shared/ids";
+import type { ChildId, ImmunizationCode, UserId } from "@/domain/shared/ids";
 import type { DateOnly } from "@/domain/shared/date-only";
 import type { ChildImmunizationRepository } from "@/domain/health-plan/ports/child-immunization-repository";
 import type { ChildImmunizationStatus } from "@/domain/health-plan/entities/child-immunization";

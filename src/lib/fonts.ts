@@ -10,6 +10,9 @@ import { Bricolage_Grotesque } from "next/font/google";
  */
 export const displayFont = Bricolage_Grotesque({
   subsets: ["latin"],
-  display: "swap",
+  // "optional" for the same reason as the body font (see src/app/layout.tsx):
+  // a swap-repaint of the landing headline re-issued the LCP entry seconds
+  // after first paint on throttled mobile.
+  display: "optional",
   variable: "--font-display",
 });

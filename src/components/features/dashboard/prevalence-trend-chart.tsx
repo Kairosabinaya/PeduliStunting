@@ -77,7 +77,11 @@ export function PrevalenceTrendChart({
       aria-label={DASHBOARD_TREND.title}
       className="w-full select-none"
     >
-      <ResponsiveContainer width="100%" height={340} minHeight={260}>
+      <ResponsiveContainer
+        width="100%"
+        height={DASHBOARD_TREND.chartHeightPx}
+        minHeight={DASHBOARD_TREND.chartMinHeightPx}
+      >
         <ComposedChart
           data={data}
           margin={{ top: 12, right: 18, bottom: 4, left: 0 }}

@@ -1,3 +1,7 @@
+// Side effect first: switches Zod to jitless mode so no client bundle that
+// contains these schemas ever runs the CSP-violating eval probe.
+import "@/lib/zod-jitless";
+
 import { z } from "zod";
 
 import {
@@ -13,7 +17,6 @@ import {
   asChildMilestoneId,
   asImmunizationCode,
   asMilestoneId,
-  asNutritionEventId,
   asUserId,
   type ImmunizationCode,
 } from "@/domain/shared/ids";
@@ -34,12 +37,6 @@ import {
   Milestone,
   type MilestoneDomain,
 } from "@/domain/health-plan/entities/milestone";
-import {
-  NUTRITION_EVENT_KINDS,
-  NutritionEvent,
-  type NutritionEventData,
-  type NutritionEventKind,
-} from "@/domain/health-plan/entities/nutrition-event";
 import { childIdSchema, dateOnlySchema } from "./tracking";
 
 function getSafeMaxDate(): string {
@@ -231,71 +228,6 @@ export function mapChildMilestoneRow(
       milestoneId: asMilestoneId(row.milestone_id),
       status: statusResult.data as ChildMilestoneStatus,
       checkedAt: row.checked_at ? asDateOnly(row.checked_at) : null,
-      note: row.note,
-    }),
-  );
-}
-
-/* ─────────────────────────── nutrition events ─────────────────────────── */
-
-type NutritionEventRow = Tables<"child_nutrition_events">;
-
-export const nutritionEventKindSchema = z.enum(NUTRITION_EVENT_KINDS);
-
-const nutritionEventDataSchema = z.record(z.string(), z.unknown());
-
-export const recordNutritionEventInputSchema = z
-  .object({
-    childId: childIdSchema,
-    kind: nutritionEventKindSchema,
-    eventDate: dateOnlyNotFutureSchema,
-    data: nutritionEventDataSchema.optional(),
-    note: z.string().max(TRACKER_FIELD_LIMITS.noteMaxLength).nullable(),
-  })
-  .strict();
-
-export type RecordNutritionEventInput = z.infer<
-  typeof recordNutritionEventInputSchema
->;
-
-export const deleteNutritionEventInputSchema = z
-  .object({
-    childId: childIdSchema,
-    kind: nutritionEventKindSchema,
-    eventDate: dateOnlyNotFutureSchema,
-  })
-  .strict();
-
-export type DeleteNutritionEventInput = z.infer<
-  typeof deleteNutritionEventInputSchema
->;
-
-export function mapNutritionEventRow(
-  row: NutritionEventRow,
-): Result<NutritionEvent, ValidationError> {
-  const kindResult = nutritionEventKindSchema.safeParse(row.kind);
-  if (!kindResult.success) {
-    return err(AppErrors.validation(`kind tidak valid: ${row.kind}`));
-  }
-  if (!isDateOnly(row.event_date)) {
-    return err(
-      AppErrors.validation(`event_date tidak valid: ${row.event_date}`),
-    );
-  }
-  const data: NutritionEventData =
-    typeof row.data === "object" &&
-    row.data !== null &&
-    !Array.isArray(row.data)
-      ? (row.data as NutritionEventData)
-      : {};
-  return ok(
-    new NutritionEvent({
-      id: asNutritionEventId(row.id),
-      userId: asUserId(row.user_id),
-      childId: asChildId(row.child_id),
-      kind: kindResult.data as NutritionEventKind,
-      eventDate: asDateOnly(row.event_date),
-      data,
       note: row.note,
     }),
   );

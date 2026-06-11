@@ -26,7 +26,9 @@ const SOURCE_LABEL_SUFFIX = " (backfilled from pre-2022 Papua code)";
 
 async function listMissingRegions(
   client: ReturnType<typeof createScriptAdminClient>,
-): Promise<readonly { kode_bps: string; kabupaten_kota: string; provinsi: string }[]> {
+): Promise<
+  readonly { kode_bps: string; kabupaten_kota: string; provinsi: string }[]
+> {
   const { data: regions, error: regionsErr } = await client
     .from("regions")
     .select("kode_bps, provinsi, kabupaten_kota");

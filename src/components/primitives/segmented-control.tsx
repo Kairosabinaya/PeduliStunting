@@ -186,7 +186,14 @@ export function SegmentedControl<T extends string>({
             role="tab"
             id={`${base}-${item.id}-tab`}
             aria-selected={active}
-            aria-controls={`${base}-${item.id}-panel`}
+            // `aria-controls` must reference an element that exists in the
+            // DOM (axe `aria-valid-attr-value`). Only consumers that pass an
+            // explicit `idBase` render matching panels via
+            // `segmentedPanelProps`; auto-id consumers filter content
+            // in place and have no discrete panel element to point at.
+            aria-controls={
+              idBase !== undefined ? `${base}-${item.id}-panel` : undefined
+            }
             onClick={() => onValueChange(item.id)}
             className={segmentedItemVariants({ variant: "pills", active })}
           >

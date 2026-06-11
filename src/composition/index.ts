@@ -28,7 +28,6 @@ import { SupabaseImmunizationRepository } from "@/infrastructure/supabase/health
 import { SupabaseChildImmunizationRepository } from "@/infrastructure/supabase/health-plan/supabase-child-immunization-repository";
 import { SupabaseMilestoneRepository } from "@/infrastructure/supabase/health-plan/supabase-milestone-repository";
 import { SupabaseChildMilestoneRepository } from "@/infrastructure/supabase/health-plan/supabase-child-milestone-repository";
-import { SupabaseNutritionEventRepository } from "@/infrastructure/supabase/health-plan/supabase-nutrition-event-repository";
 import { SupabaseUserProfileRepository } from "@/infrastructure/supabase/account/supabase-user-profile-repository";
 import { SupabaseAvatarStorage } from "@/infrastructure/supabase/account/supabase-avatar-storage";
 import { SupabaseAdminAccountRepository } from "@/infrastructure/supabase/account/supabase-admin-account-repository";
@@ -62,9 +61,6 @@ import { UpsertChildImmunizationUseCase } from "@/application/health-plan/use-ca
 import { ListMilestonesUseCase } from "@/application/health-plan/use-cases/list-milestones";
 import { ListChildMilestonesUseCase } from "@/application/health-plan/use-cases/list-child-milestones";
 import { UpsertChildMilestoneUseCase } from "@/application/health-plan/use-cases/upsert-child-milestone";
-import { ListNutritionEventsByChildUseCase } from "@/application/health-plan/use-cases/list-nutrition-events";
-import { RecordNutritionEventUseCase } from "@/application/health-plan/use-cases/record-nutrition-event";
-import { DeleteNutritionEventUseCase } from "@/application/health-plan/use-cases/delete-nutrition-event";
 import { GetCurrentProfileUseCase } from "@/application/account/use-cases/get-current-profile";
 import { UpdateUserProfileUseCase } from "@/application/account/use-cases/update-user-profile";
 import { UpdateUserAvatarUseCase } from "@/application/account/use-cases/update-user-avatar";
@@ -123,9 +119,6 @@ export interface UseCases {
   readonly listMilestones: ListMilestonesUseCase;
   readonly listChildMilestones: ListChildMilestonesUseCase;
   readonly upsertChildMilestone: UpsertChildMilestoneUseCase;
-  readonly listNutritionEventsByChild: ListNutritionEventsByChildUseCase;
-  readonly recordNutritionEvent: RecordNutritionEventUseCase;
-  readonly deleteNutritionEvent: DeleteNutritionEventUseCase;
   // account
   readonly getCurrentProfile: GetCurrentProfileUseCase;
   readonly updateUserProfile: UpdateUserProfileUseCase;
@@ -170,7 +163,6 @@ export function makeUseCases(client: TypedSupabaseClient): UseCases {
   const childImmunizationRepo = new SupabaseChildImmunizationRepository(client);
   const milestoneRepo = new SupabaseMilestoneRepository(client);
   const childMilestoneRepo = new SupabaseChildMilestoneRepository(client);
-  const nutritionEventRepo = new SupabaseNutritionEventRepository(client);
   const profileRepo = new SupabaseUserProfileRepository(client);
   const avatarStorage = new SupabaseAvatarStorage(client);
 
@@ -241,11 +233,6 @@ export function makeUseCases(client: TypedSupabaseClient): UseCases {
     listMilestones: new ListMilestonesUseCase(milestoneRepo),
     listChildMilestones: new ListChildMilestonesUseCase(childMilestoneRepo),
     upsertChildMilestone: new UpsertChildMilestoneUseCase(childMilestoneRepo),
-    listNutritionEventsByChild: new ListNutritionEventsByChildUseCase(
-      nutritionEventRepo,
-    ),
-    recordNutritionEvent: new RecordNutritionEventUseCase(nutritionEventRepo),
-    deleteNutritionEvent: new DeleteNutritionEventUseCase(nutritionEventRepo),
     getCurrentProfile: new GetCurrentProfileUseCase(profileRepo),
     updateUserProfile: new UpdateUserProfileUseCase(profileRepo),
     updateUserAvatar: new UpdateUserAvatarUseCase(profileRepo, avatarStorage),

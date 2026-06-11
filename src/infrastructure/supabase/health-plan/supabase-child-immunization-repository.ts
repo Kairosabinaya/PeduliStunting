@@ -14,9 +14,7 @@ import type { TypedSupabaseClient } from "../server-client";
 const SELECT_COLUMNS =
   "id, user_id, child_id, immunization_code, status, given_at, note, created_at, updated_at";
 
-export class SupabaseChildImmunizationRepository
-  implements ChildImmunizationRepository
-{
+export class SupabaseChildImmunizationRepository implements ChildImmunizationRepository {
   constructor(private readonly client: TypedSupabaseClient) {}
 
   async listByChild(
@@ -40,10 +38,7 @@ export class SupabaseChildImmunizationRepository
       return ok(out);
     } catch (cause) {
       return err(
-        mapUnknownInfrastructureError(
-          cause,
-          "child_immunizations.listByChild",
-        ),
+        mapUnknownInfrastructureError(cause, "child_immunizations.listByChild"),
       );
     }
   }

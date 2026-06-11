@@ -12,6 +12,15 @@ const SCRIPT = `(() => {
   } catch (_) {}
 })();`;
 
+export interface ThemeScriptProps {
+  /**
+   * Per-request CSP nonce from the proxy. Without it the nonce-based
+   * `script-src` would block this inline script and dark-mode users would
+   * see a light-theme flash.
+   */
+  readonly nonce?: string | undefined;
+}
+
 /**
  * Inline script that runs before React hydration so the correct theme is
  * applied to `<html>` on first paint and the user does not see a flash of
@@ -25,10 +34,11 @@ const SCRIPT = `(() => {
  * `suppressHydrationWarning` silences the resulting attribute mismatch. This is
  * the Next.js-documented no-flash pattern for the App Router.
  */
-export function ThemeScript() {
+export function ThemeScript({ nonce }: ThemeScriptProps) {
   return (
     <script
       type={typeof window === "undefined" ? "text/javascript" : "text/plain"}
+      nonce={nonce}
       suppressHydrationWarning
       dangerouslySetInnerHTML={{ __html: SCRIPT }}
     />

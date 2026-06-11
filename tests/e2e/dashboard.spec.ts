@@ -26,12 +26,12 @@ test.describe("dashboard routes (anonymous)", () => {
     await expect(page).toHaveURL(/\/prediksi$/);
     await expect(
       page.getByRole("heading", {
-        name: /simulasi prediksi stunting/i,
+        name: /simulasi risiko stunting/i,
         level: 1,
       }),
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: /cara kerja model/i }),
+      page.getByRole("heading", { name: /tentang model prediksi/i }),
     ).toBeVisible();
   });
 

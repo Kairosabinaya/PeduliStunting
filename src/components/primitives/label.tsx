@@ -2,8 +2,7 @@ import { forwardRef } from "react";
 
 import { cn } from "@/lib/cn";
 
-export interface LabelProps
-  extends React.LabelHTMLAttributes<HTMLLabelElement> {
+export interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
   /** Mark the field as required (renders an asterisk + screen-reader text). */
   readonly required?: boolean;
 }

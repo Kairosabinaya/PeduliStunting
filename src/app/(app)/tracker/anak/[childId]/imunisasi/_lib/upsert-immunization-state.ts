@@ -7,6 +7,5 @@ export interface UpsertImmunizationFormState {
   readonly record?: ChildImmunizationDto;
 }
 
-export const INITIAL_UPSERT_IMMUNIZATION_STATE:
-  | UpsertImmunizationFormState
-  | null = null;
+export const INITIAL_UPSERT_IMMUNIZATION_STATE: UpsertImmunizationFormState | null =
+  null;

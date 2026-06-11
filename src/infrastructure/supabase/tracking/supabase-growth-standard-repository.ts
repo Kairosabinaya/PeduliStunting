@@ -15,9 +15,7 @@ import type { TypedSupabaseClient } from "../server-client";
 const SELECT_COLUMNS =
   "indicator, sex, age_months, x_value, l, m, s, source, created_at, updated_at";
 
-export class SupabaseGrowthStandardRepository
-  implements GrowthStandardRepository
-{
+export class SupabaseGrowthStandardRepository implements GrowthStandardRepository {
   constructor(private readonly client: TypedSupabaseClient) {}
 
   async findForAge(

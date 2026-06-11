@@ -10,7 +10,7 @@ import "katex/dist/katex.min.css";
 import { useEffect, useState } from "react";
 
 import { InfoHint } from "@/components/primitives/info-hint";
-import { SIMULATOR_EQUATION } from "@/config/dashboard";
+import { KATEX_IDLE_DELAY_MS, SIMULATOR_EQUATION } from "@/config/dashboard";
 import { STUNTING_CATEGORIES } from "@/domain/region/value-objects/stunting-category";
 
 interface KatexRenderer {
@@ -84,13 +84,28 @@ export function ModelEquationFit({
   nActive,
 }: ModelEquationFitProps) {
   const [katex, setKatex] = useState<KatexRenderer | null>(null);
+  // KaTeX (~150 KB across two chunks) loads on the FIRST user interaction,
+  // or after an idle delay for readers who never touch the page — loading it
+  // on mount put the chunks inside the critical window and inflated LCP/TBT
+  // on throttled mobile. The plain-text fallback renders meanwhile.
   useEffect(() => {
     let active = true;
-    void import("katex").then((mod) => {
-      if (active) setKatex(mod.default);
-    });
+    const load = (): void => {
+      void import("katex").then((mod) => {
+        if (active) setKatex(mod.default);
+      });
+    };
+    const events = ["pointerdown", "keydown", "scroll", "touchstart"] as const;
+    for (const event of events) {
+      window.addEventListener(event, load, { once: true, passive: true });
+    }
+    const timer = window.setTimeout(load, KATEX_IDLE_DELAY_MS);
     return () => {
       active = false;
+      for (const event of events) {
+        window.removeEventListener(event, load);
+      }
+      window.clearTimeout(timer);
     };
   }, []);
 
@@ -104,9 +119,11 @@ export function ModelEquationFit({
   return (
     <section className="space-y-2">
       <div className="flex items-center gap-1.5">
-        <h3 className="text-sm font-semibold text-foreground">
+        {/* h2 to mirror the sibling "bentuk umum" heading — both are parallel
+            sections directly under the page h1 (axe heading-order). */}
+        <h2 className="text-sm font-semibold text-foreground">
           {SIMULATOR_EQUATION.localTitle} — {regionName}, {tahun}
-        </h3>
+        </h2>
         <InfoHint label={SIMULATOR_EQUATION.localInfoLabel}>
           <p>{SIMULATOR_EQUATION.proportionalOddsNote}</p>
           <p className="mt-2">

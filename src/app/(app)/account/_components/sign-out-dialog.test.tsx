@@ -38,7 +38,9 @@ describe("SignOutDialog", () => {
   it("does not render the dialog content until the trigger is clicked", () => {
     render(<SignOutDialog />);
     expect(
-      screen.queryByRole("heading", { name: ACCOUNT_SIGN_OUT_COPY.dialogTitle }),
+      screen.queryByRole("heading", {
+        name: ACCOUNT_SIGN_OUT_COPY.dialogTitle,
+      }),
     ).not.toBeInTheDocument();
   });
 

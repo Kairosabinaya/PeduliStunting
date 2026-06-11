@@ -14,9 +14,7 @@ import type { TypedSupabaseClient } from "../server-client";
 const SELECT_COLUMNS =
   "kode_bps, geometry, simplification_tolerance, source, created_at, updated_at";
 
-export class SupabaseRegionBoundaryRepository
-  implements RegionBoundaryRepository
-{
+export class SupabaseRegionBoundaryRepository implements RegionBoundaryRepository {
   constructor(private readonly client: TypedSupabaseClient) {}
 
   async listAll(): Promise<Result<readonly RegionBoundary[], AppError>> {
@@ -57,10 +55,7 @@ export class SupabaseRegionBoundaryRepository
       return ok(mapped.value);
     } catch (cause) {
       return err(
-        mapUnknownInfrastructureError(
-          cause,
-          "region_boundaries.findByKodeBps",
-        ),
+        mapUnknownInfrastructureError(cause, "region_boundaries.findByKodeBps"),
       );
     }
   }

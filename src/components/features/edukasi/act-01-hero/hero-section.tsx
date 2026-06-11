@@ -65,8 +65,10 @@ export function HeroSection() {
           </p>
           <HeroHeadline />
           {/* Lead + fact line reveal together just after the headline's
-              per-word stagger settles. */}
-          <FadeInView as="div" delayMs={200}>
+              per-word stagger settles. `trigger="mount"`: this block is in
+              the first viewport, so the reveal must not wait for hydration
+              (the in-view variant holds opacity 0 and stalls LCP). */}
+          <FadeInView as="div" delayMs={200} trigger="mount">
             <HeroLead />
             <p className="mt-10 max-w-prose text-sm text-muted-foreground">
               {HERO_COPY.factLine}

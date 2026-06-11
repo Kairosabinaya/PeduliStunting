@@ -110,7 +110,6 @@ const config: Config = {
           immunization:
             "rgb(var(--color-tracker-immunization) / <alpha-value>)",
           milestone: "rgb(var(--color-tracker-milestone) / <alpha-value>)",
-          nutrition: "rgb(var(--color-tracker-nutrition) / <alpha-value>)",
         },
       },
       fontFamily: {

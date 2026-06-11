@@ -36,7 +36,10 @@ export function computeZScore(measurement: number, params: LmsParams): number {
     throw new Error("Measurement must be positive.");
   }
   const { l, m, s } = params;
-  const rawZ = l === 0 ? Math.log(measurement / m) / s : (Math.pow(measurement / m, l) - 1) / (l * s);
+  const rawZ =
+    l === 0
+      ? Math.log(measurement / m) / s
+      : (Math.pow(measurement / m, l) - 1) / (l * s);
   if (!Number.isFinite(rawZ)) {
     throw new Error("Z-score computation produced a non-finite value.");
   }

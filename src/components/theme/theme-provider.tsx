@@ -62,7 +62,10 @@ export function ThemeProvider({
     () => getStoredTheme(defaultTheme),
     [defaultTheme],
   );
-  const getStoredServerSnapshot = useCallback(() => defaultTheme, [defaultTheme]);
+  const getStoredServerSnapshot = useCallback(
+    () => defaultTheme,
+    [defaultTheme],
+  );
 
   const theme = useSyncExternalStore(
     subscribeStoredTheme,
@@ -76,8 +79,7 @@ export function ThemeProvider({
     getSystemThemeServerSnapshot,
   );
 
-  const resolvedTheme: ResolvedTheme =
-    theme === "system" ? systemTheme : theme;
+  const resolvedTheme: ResolvedTheme = theme === "system" ? systemTheme : theme;
 
   useEffect(() => {
     applyDocumentTheme(resolvedTheme);

@@ -296,9 +296,12 @@ export function PredictorSimulator({
             <aside className="mb-5">
               <Card elevation="sm" padding="md" className="space-y-4">
                 <section className="space-y-2">
-                  <h3 className="text-sm font-semibold text-foreground">
+                  {/* h2 (visually small): the only heading between the page
+                      h1 and this card, so h3 skipped a level
+                      (axe heading-order). */}
+                  <h2 className="text-sm font-semibold text-foreground">
                     {SIMULATOR_EQUATION.generalTitle}
-                  </h3>
+                  </h2>
                   {generalEquation}
                 </section>
                 <ModelEquationFit

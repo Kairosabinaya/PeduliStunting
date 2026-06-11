@@ -63,7 +63,6 @@
     --color-tracker-growth: 52 168 83;
     --color-tracker-immunization: 9 95 150;
     --color-tracker-milestone: 147 51 234;
-    --color-tracker-nutrition: 245 158 11;
 
     /* Text-safe + secondary tokens consumed by Tailwind utilities
        (`text-primary-ink`, `bg-secondary`, `text-accent-ink`). Part of the base
@@ -167,7 +166,6 @@
     --color-tracker-growth: 76 192 110;
     --color-tracker-immunization: 74 165 223;
     --color-tracker-milestone: 168 85 247;
-    --color-tracker-nutrition: 251 191 36;
 
     --color-primary-ink: 122 188 226;
     --color-secondary: 122 188 226;
@@ -597,6 +595,49 @@
   dialog::backdrop {
     background-color: rgb(0 0 0 / 0.5);
     backdrop-filter: blur(2px);
+  }
+
+  /* CSS-only entrance reveals for ABOVE-THE-FOLD scrollytelling content
+     (`trigger="mount"` on StaggerReveal / FadeInView). They start the moment
+     the stylesheet applies — before hydration — so first-viewport content
+     never waits for the JS pipeline. Opacity deliberately stays 1 the whole
+     time: content hidden at opacity 0 is excluded from Largest Contentful
+     Paint, which is exactly the multi-second LCP regression the motion
+     `initial="hidden"` variants caused on the landing hero. Durations and
+     easings reuse the Tailwind tokens mirrored by src/config/edukasi/tokens.ts
+     (EDU_DURATION / EDU_EASE); per-item stagger delays are set inline from
+     EDU_WORD_STAGGER_MS so the timing source of truth stays in config. */
+  .edu-reveal-mount {
+    animation: edu-rise theme("transitionDuration.emphatic")
+      theme("transitionTimingFunction.emphasized") both;
+  }
+  .edu-fade-mount {
+    animation: edu-rise-soft theme("transitionDuration.slow")
+      theme("transitionTimingFunction.standard") both;
+  }
+  @keyframes edu-rise {
+    from {
+      transform: translateY(var(--edu-rise-offset, 0.75rem));
+      filter: blur(6px);
+    }
+    to {
+      transform: translateY(0);
+      filter: blur(0);
+    }
+  }
+  @keyframes edu-rise-soft {
+    from {
+      transform: translateY(var(--edu-rise-offset, 1rem));
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .edu-reveal-mount,
+    .edu-fade-mount {
+      animation: none;
+    }
   }
 }
 

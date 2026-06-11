@@ -45,7 +45,10 @@ const highlightVariants = cva(
         success: "bg-accent text-accent-foreground",
         warm: "bg-edu-warm text-foreground",
         danger: "bg-edu-flag text-white",
-        white: "bg-white text-primary",
+        // brand-600, not `text-primary`: dark mode flips `--color-primary`
+        // to sky-400 (#4aa5df) which reaches only 2.71:1 on the white chip;
+        // the static brand ladder keeps the deep blue in both themes.
+        white: "bg-white text-brand-600",
       },
       rotate: {
         true: "-rotate-1",

@@ -121,14 +121,19 @@ export function mapSupabaseAuthError(error: unknown): AppError {
   if (code !== undefined) {
     const codedKind = KIND_BY_CODE[code];
     if (codedKind !== undefined) {
-      const message = FRIENDLY_BY_CODE[code] ?? GENERIC_MESSAGE_BY_KIND[codedKind];
+      const message =
+        FRIENDLY_BY_CODE[code] ?? GENERIC_MESSAGE_BY_KIND[codedKind];
       return buildAppError(codedKind, message, error);
     }
   }
 
   if (status !== undefined) {
     const statusKind = FALLBACK_BY_STATUS[status] ?? "unauthorized";
-    return buildAppError(statusKind, GENERIC_MESSAGE_BY_KIND[statusKind], error);
+    return buildAppError(
+      statusKind,
+      GENERIC_MESSAGE_BY_KIND[statusKind],
+      error,
+    );
   }
 
   return AppErrors.unauthorized(GENERIC_MESSAGE_BY_KIND.unauthorized);

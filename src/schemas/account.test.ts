@@ -100,7 +100,9 @@ describe("updateProfilePreferencesInputSchema", () => {
     });
     expect(result.success).toBe(false);
     if (result.success) return;
-    expect(result.error.flatten().fieldErrors.themePreference?.[0]).toBeTruthy();
+    expect(
+      result.error.flatten().fieldErrors.themePreference?.[0],
+    ).toBeTruthy();
   });
 
   it("rejects an unsupported locale", () => {

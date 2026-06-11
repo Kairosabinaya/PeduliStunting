@@ -33,7 +33,7 @@ describe("landing config", () => {
       for (const variant of ["light", "dark"] as const) {
         const logo = LANDING_LOGO[variant];
         expect(logo.src.startsWith("/brand/")).toBe(true);
-        expect(logo.src.endsWith(".png")).toBe(true);
+        expect(logo.src.endsWith(".webp")).toBe(true);
         expect(logo.width).toBeGreaterThan(0);
         expect(logo.height).toBeGreaterThan(0);
         expect(logo.alt.length).toBeGreaterThan(0);

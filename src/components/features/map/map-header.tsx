@@ -225,7 +225,7 @@ function CompactSearchRow({
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
         >
           <Image
-            src="/brand/icon-color.png"
+            src="/brand/icon-color.webp"
             alt={APP_NAME}
             width={32}
             height={32}
@@ -233,7 +233,7 @@ function CompactSearchRow({
             className="h-8 w-8 dark:hidden"
           />
           <Image
-            src="/brand/icon-white.png"
+            src="/brand/icon-white.webp"
             alt={APP_NAME}
             width={32}
             height={32}
@@ -300,18 +300,20 @@ function DesktopDefaultRow({
         aria-label={`${APP_NAME} – beranda`}
         className="flex items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
       >
+        {/* 108x40 matches the wordmark's intrinsic 960x356 ratio at the
+            rendered 40 px height (Lighthouse `image-aspect-ratio`). */}
         <Image
-          src="/brand/logo-horizontal-color.png"
+          src="/brand/logo-horizontal-color.webp"
           alt={APP_NAME}
-          width={160}
+          width={108}
           height={40}
           priority
           className="block h-10 w-auto dark:hidden"
         />
         <Image
-          src="/brand/logo-horizontal-white.png"
+          src="/brand/logo-horizontal-white.webp"
           alt={APP_NAME}
-          width={160}
+          width={108}
           height={40}
           priority
           className="hidden h-10 w-auto dark:block"

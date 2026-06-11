@@ -64,10 +64,7 @@ export function YearSlider({ value, className }: YearSliderProps) {
       data-pending={pending ? "" : undefined}
     >
       <header className="flex items-baseline justify-between gap-3">
-        <h2
-          id={titleId}
-          className="text-sm font-semibold text-foreground"
-        >
+        <h2 id={titleId} className="text-sm font-semibold text-foreground">
           {MAP_COPY.changeYearLabel}
         </h2>
         <output
@@ -102,7 +99,7 @@ export function YearSlider({ value, className }: YearSliderProps) {
               onClick={() => updateYear(year)}
               className={cn(
                 "rounded-md px-2 py-1 font-mono tabular-nums transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus",
-                year === value && "text-foreground font-semibold",
+                year === value && "font-semibold text-foreground",
               )}
             >
               {year}

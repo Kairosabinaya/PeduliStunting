@@ -71,10 +71,7 @@ interface BoundaryRow {
   readonly source: string;
 }
 
-function runPythonExporter(
-  outputPath: string,
-  logger: ScriptLogger,
-): void {
+function runPythonExporter(outputPath: string, logger: ScriptLogger): void {
   mkdirSync(dirname(outputPath), { recursive: true });
   const scriptPath = resolve(
     projectRoot(),
@@ -127,7 +124,9 @@ function parseLookup(csvText: string): readonly LookupRow[] {
     throw new Error("lookup_kabkota_shapefile.csv header is undefined.");
   }
   const columns = header.split(",").map((c) => c.trim().toLowerCase());
-  const kodeIdx = columns.findIndex((c) => c === "kode_fisik" || c === "kode_bps");
+  const kodeIdx = columns.findIndex(
+    (c) => c === "kode_fisik" || c === "kode_bps",
+  );
   const wadmkkIdx = columns.findIndex(
     (c) => c === "wadmkk_match" || c === "wadmkk",
   );
@@ -207,17 +206,15 @@ async function upsertBoundaries(
 ): Promise<void> {
   for (let offset = 0; offset < rows.length; offset += BOUNDARIES_BATCH_SIZE) {
     const batch = rows.slice(offset, offset + BOUNDARIES_BATCH_SIZE);
-    const { error } = await client
-      .from("region_boundaries")
-      .upsert(
-        batch.map((row) => ({
-          kode_bps: row.kode_bps,
-          geometry: row.geometry as never,
-          simplification_tolerance: row.simplification_tolerance,
-          source: row.source,
-        })),
-        { onConflict: "kode_bps" },
-      );
+    const { error } = await client.from("region_boundaries").upsert(
+      batch.map((row) => ({
+        kode_bps: row.kode_bps,
+        geometry: row.geometry as never,
+        simplification_tolerance: row.simplification_tolerance,
+        source: row.source,
+      })),
+      { onConflict: "kode_bps" },
+    );
     if (error) {
       throw new Error(
         `region_boundaries upsert failed at offset=${offset}: ${error.message}`,

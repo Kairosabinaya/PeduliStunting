@@ -6,7 +6,9 @@ import { toIndicatorDefinitionDto, type IndicatorDefinitionDto } from "../dtos";
 export class ListIndicatorDictionaryUseCase {
   constructor(private readonly repository: IndicatorDictionaryRepository) {}
 
-  async execute(): Promise<Result<readonly IndicatorDefinitionDto[], AppError>> {
+  async execute(): Promise<
+    Result<readonly IndicatorDefinitionDto[], AppError>
+  > {
     const result = await this.repository.list();
     return map(result, (rows) => rows.map(toIndicatorDefinitionDto));
   }

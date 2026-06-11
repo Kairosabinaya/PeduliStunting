@@ -274,7 +274,6 @@ export const CHILD_DETAIL_COPY = {
   navMeasurements: "Pengukuran",
   navImmunizations: "Imunisasi",
   navMilestones: "Perkembangan",
-  navNutrition: "Gizi",
   ageLabel: "Usia",
   ageUnitMonth: "bulan",
   birthDateLabel: "Tanggal lahir",
@@ -494,103 +493,6 @@ export const MILESTONE_DOMAIN_LABEL: Record<MilestoneDomain, string> = {
   social: "Sosial & kemandirian",
 };
 
-/* ─────────────────────────── gizi (Phase 5) ─────────────────────────── */
-
-export const NUTRITION_ROUTE_SLUG = "gizi";
-
-export function trackerChildNutritionRoute(childId: string): string {
-  return `/tracker/anak/${childId}/gizi`;
-}
-
-export const NUTRITION_PAGE_COPY = {
-  metaTitleSuffix: "Gizi — Tracker",
-  eyebrow: "Tracker",
-  title: "Catatan gizi anak",
-  description:
-    "Lacak praktik gizi protektif: ASI eksklusif, MPASI, Vitamin A, dan obat cacing.",
-  errorTitle: "Tidak bisa memuat catatan gizi",
-  tabs: {
-    asi: "ASI eksklusif",
-    mpasi: "MPASI",
-    vitA: "Vitamin A",
-    cacing: "Obat cacing",
-  },
-} as const;
-
-export const NUTRITION_ASI_COPY = {
-  title: "ASI eksklusif (0-6 bulan)",
-  description:
-    "ASI saja tanpa makanan atau minuman lain hingga usia 6 bulan, lalu dilanjutkan hingga 2 tahun bersama MPASI.",
-  question: "Apakah anak saat ini mendapat ASI eksklusif?",
-  optionYes: "Ya",
-  optionNo: "Tidak",
-  currentStatusYes: "Tercatat ASI eksklusif sejak",
-  currentStatusNo: "Tercatat TIDAK eksklusif sejak",
-  notRecorded: "Belum dicatat.",
-  saving: "Menyimpan...",
-  educationHeading: "Mengapa ASI eksklusif penting?",
-  educationBody:
-    "ASI eksklusif menyediakan nutrisi lengkap, antibodi pelindung, dan ikatan emosional. Setiap hari ASI mengurangi risiko stunting akibat infeksi berulang.",
-  progressLabelFormat: (days: number, target: number) =>
-    `${days} dari ${target} hari ASI eksklusif`,
-  outOfAgeMessage:
-    "Anak sudah lebih dari 6 bulan. Rekap status ASI eksklusif tetap dapat dicatat untuk referensi.",
-} as const;
-
-export const NUTRITION_MPASI_COPY = {
-  title: "MPASI",
-  description:
-    "MPASI ideal dimulai tepat usia 6 bulan dengan variasi 8 grup makanan dan tekstur yang sesuai usia.",
-  startedAtQuestion: "Tanggal mulai MPASI",
-  startedAtSavedFormat: (date: string) => `MPASI tercatat mulai ${date}.`,
-  startedAtNotYet: "Belum dicatat.",
-  saveCta: "Simpan tanggal MPASI",
-  saving: "Menyimpan...",
-  foodGroupsHeading: "8 grup makanan",
-  foodGroupsSubtitle:
-    "Prioritaskan protein hewani (telur, ikan, ayam, daging, hati).",
-  textureHeading: "Panduan tekstur & porsi",
-  textureSubtitle:
-    "Sesuaikan tekstur agar anak belajar mengunyah dan menelan dengan aman.",
-  emphasisBadge: "Prioritas",
-  outOfAgeMessage:
-    "MPASI ideal mulai usia 6 bulan. Anak Anda masih di bawah usia tersebut — fokus ke ASI eksklusif dulu.",
-} as const;
-
-export const NUTRITION_VITAMIN_A_COPY = {
-  title: "Vitamin A",
-  description:
-    "Vitamin A diberikan kapsul biru sekali (6-11 bulan) lalu kapsul merah Februari & Agustus (12-59 bulan).",
-  alreadyGivenFormat: (date: string) => `Tercatat diberikan pada ${date}.`,
-  notYetGiven: "Belum dicatat.",
-  recordCta: "Catat pemberian hari ini",
-  saving: "Menyimpan...",
-  resetCta: "Reset catatan",
-  ineligibleMessage: "Belum sesuai rentang usia anak.",
-  outOfMonthMessage:
-    "Kapsul ini diberikan pada bulan kampanye nasional (lihat keterangan di atas). Tombol aktif saat bulannya tiba.",
-  educationHeading: "Mengapa Vitamin A penting?",
-  educationBody:
-    "Vitamin A mendukung kekebalan tubuh dan kesehatan mata. Dosis sesuai jadwal Kemenkes mengurangi risiko infeksi yang dapat menghambat pertumbuhan.",
-} as const;
-
-export const NUTRITION_DEWORMING_COPY = {
-  title: "Obat cacing",
-  description:
-    "Anak usia 1-6 tahun perlu obat cacing 2x setahun untuk mengurangi infeksi cacing yang mengganggu penyerapan gizi.",
-  thisYearLabel: "Pemberian tahun ini",
-  historyHeading: "Riwayat pemberian",
-  recordCta: "Catat dosis hari ini",
-  saving: "Menyimpan...",
-  noRecords: "Belum ada catatan.",
-  ineligibleMessage:
-    "Obat cacing direkomendasikan untuk anak usia 1-6 tahun. Anak Anda belum mencapai usia tersebut.",
-  outOfAgeMessage:
-    "Anak sudah di luar rentang 1-6 tahun. Catatan sebelumnya tetap ditampilkan.",
-  progressFormat: (done: number, target: number) =>
-    `${done} dari ${target} dosis tahun ini`,
-} as const;
-
 /* ─────────────────────────── milestone ─────────────────────────── */
 
 /**
@@ -763,43 +665,4 @@ export const GROWTH_DETAIL_COPY = {
   notesLabel: "Catatan",
   noNotes: "Tidak ada catatan.",
   close: "Tutup",
-} as const;
-
-/* ─────────────────────────── module card copy ─────────────────────────── */
-
-/**
- * Copy untuk Module Card dashboard `/tracker/anak/[childId]`. Setiap modul
- * adalah pintu masuk ke sub-route detail; status line di kartu adalah
- * ringkasan satu-baris.
- */
-export const MODULE_CARD_COPY = {
-  growth: {
-    title: "Pertumbuhan",
-    description: "Status terkini menurut standar WHO.",
-    cta: "Lihat detail pengukuran",
-    emptyStatus: "Belum ada pengukuran.",
-  },
-  immunization: {
-    title: "Imunisasi",
-    description: "Jadwal vaksinasi sesuai Buku KIA.",
-    cta: "Buka jadwal imunisasi",
-    emptyStatus: "Belum ada catatan imunisasi.",
-    statusFormat: (done: number, total: number) =>
-      `${done} dari ${total} vaksin tercatat.`,
-  },
-  milestone: {
-    title: "Perkembangan",
-    description: "Tonggak SDIDTK menurut Buku KIA.",
-    cta: "Buka ceklis perkembangan",
-    emptyStatus: "Belum ada ceklis tercatat.",
-    statusFormat: (achieved: number, total: number) =>
-      `${achieved} dari ${total} tonggak tercapai.`,
-  },
-  nutrition: {
-    title: "Gizi",
-    description: "ASI, MPASI, Vitamin A, dan obat cacing.",
-    cta: "Buka catatan gizi",
-    emptyStatus: "Belum ada catatan gizi.",
-    statusFormat: (count: number) => `${count} catatan tercatat`,
-  },
 } as const;

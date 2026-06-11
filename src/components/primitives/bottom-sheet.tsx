@@ -286,6 +286,12 @@ export const BottomSheet = forwardRef<BottomSheetHandle, BottomSheetProps>(
             role="separator"
             aria-orientation="horizontal"
             aria-label={dragHandleAria}
+            // A focusable separator is a widget per WAI-ARIA and requires a
+            // current value (axe `aria-required-attr`); expose the snap
+            // index so assistive tech can announce the sheet position.
+            aria-valuenow={snapIndex}
+            aria-valuemin={0}
+            aria-valuemax={snapPoints.length - 1}
             tabIndex={0}
             onKeyDown={onHandleKeyDown}
             className="flex min-h-10 cursor-grab items-center justify-center rounded-t-2xl px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus active:cursor-grabbing"

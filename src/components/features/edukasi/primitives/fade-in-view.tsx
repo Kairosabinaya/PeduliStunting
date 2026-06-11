@@ -18,7 +18,19 @@ export interface FadeInViewProps {
   readonly className?: string;
   /** Tag for the wrapper. Defaults to `div`. */
   readonly as?: "div" | "section" | "article" | "header" | "footer";
+  /**
+   * `"in-view"` (default) animates via motion when scrolled into view.
+   * `"mount"` renders a CSS-only rise that starts at first paint — use for
+   * above-the-fold blocks: the motion variant holds `opacity: 0` until
+   * hydration, which excludes the block from Largest Contentful Paint.
+   */
+  readonly trigger?: "in-view" | "mount";
 }
+
+/** CSSProperties extended with the reveal offset custom property. */
+type RevealMountStyle = React.CSSProperties & {
+  readonly "--edu-rise-offset": string;
+};
 
 /**
  * Reveal a block when it enters the viewport. Honors `prefers-reduced-motion`
@@ -39,12 +51,31 @@ export function FadeInView({
   delayMs = 0,
   className,
   as = "div",
+  trigger = "in-view",
 }: FadeInViewProps) {
   const reduceMotion = useReducedMotion();
 
   if (reduceMotion) {
     const StaticTag = as;
     return <StaticTag className={className}>{children}</StaticTag>;
+  }
+
+  if (trigger === "mount") {
+    // CSS-only path: the rise starts when stylesheets apply (pre-hydration)
+    // and content stays LCP-eligible (opacity remains 1 throughout).
+    const StaticTag = as;
+    const style: RevealMountStyle = {
+      animationDelay: `${delayMs}ms`,
+      "--edu-rise-offset": `${offsetPx}px`,
+    };
+    return (
+      <StaticTag
+        className={className ? `edu-fade-mount ${className}` : "edu-fade-mount"}
+        style={style}
+      >
+        {children}
+      </StaticTag>
+    );
   }
 
   const MotionTag =

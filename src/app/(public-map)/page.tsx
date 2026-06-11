@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
+import { LANDING_DESCRIPTION } from "@/config/seo";
 import { LandingShell } from "@/components/features/landing/landing-shell";
 import { SignedOutToast } from "@/components/navigation/signed-out-toast";
+
+export const metadata: Metadata = {
+  description: LANDING_DESCRIPTION,
+};
 
 /**
  * Root route `/` — the universal home. Renders the landing scroll story for

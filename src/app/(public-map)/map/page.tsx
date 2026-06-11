@@ -1,20 +1,15 @@
 import type { ModelPredictionDto } from "@/application/model/dtos";
 import type { RegionIndicatorsDto } from "@/application/region/dtos";
-import { MAP_COPY } from "@/config/map";
 import { SUPPORTED_YEARS, type SupportedYear } from "@/config/years";
 
 import { ErrorState } from "@/components/primitives/error-state";
 
 import { AiChatMount } from "@/components/features/ai/ai-chat-mount";
-import {
-  buildMapFeatures,
-  toFeatureCollection,
-} from "@/components/features/map/map-data";
+import { MapPoster } from "@/components/features/map/map-poster";
 import { MapShell } from "@/components/features/map/map-shell";
 import { MapStateProvider } from "@/components/features/map/map-state-context";
 import { parseMapSearchParams } from "@/components/features/map/map-search-params";
 import {
-  getCachedBoundaries,
   getCachedDefaultModel,
   getCachedIndicatorsByYear,
   getCachedPredictionsByYear,
@@ -56,7 +51,6 @@ export default async function MapPage({ searchParams }: MapPageProps) {
   }
 
   let regions: Awaited<ReturnType<typeof getCachedRegions>>;
-  let boundaries: Awaited<ReturnType<typeof getCachedBoundaries>>;
   let defaultModel: Awaited<ReturnType<typeof getCachedDefaultModel>>;
   let bounds: Awaited<ReturnType<typeof getCachedRegionsBounds>>;
   let indicatorsByYear: Record<SupportedYear, readonly RegionIndicatorsDto[]>;
@@ -64,13 +58,11 @@ export default async function MapPage({ searchParams }: MapPageProps) {
   try {
     const [
       regionsValue,
-      boundariesValue,
       defaultModelValue,
       boundsValue,
       ...indicatorPredictionPairs
     ] = await Promise.all([
       getCachedRegions(),
-      getCachedBoundaries(),
       getCachedDefaultModel(),
       getCachedRegionsBounds(),
       ...SUPPORTED_YEARS.flatMap((year) => [
@@ -79,7 +71,6 @@ export default async function MapPage({ searchParams }: MapPageProps) {
       ]),
     ]);
     regions = regionsValue;
-    boundaries = boundariesValue;
     defaultModel = defaultModelValue;
     bounds = boundsValue;
     indicatorsByYear = {} as Record<
@@ -90,10 +81,22 @@ export default async function MapPage({ searchParams }: MapPageProps) {
       SupportedYear,
       readonly ModelPredictionDto[]
     >;
+    // Strip the 20-predictor record from every indicator row before it
+    // crosses to the client: nothing on /map reads `predictors`, and the
+    // full record dominated the RSC flight payload (~514 rows x 4 years x
+    // 20 values). The slim rows still satisfy RegionIndicatorsDto.
+    const slimIndicator = (row: RegionIndicatorsDto): RegionIndicatorsDto => ({
+      kodeBps: row.kodeBps,
+      tahun: row.tahun,
+      yCategory: row.yCategory,
+      y1Prevalence: row.y1Prevalence,
+      predictors: {},
+    });
     SUPPORTED_YEARS.forEach((year, idx) => {
       const indicators = indicatorPredictionPairs[idx * 2];
-      indicatorsByYear[year] =
-        (indicators as readonly RegionIndicatorsDto[] | undefined) ?? [];
+      indicatorsByYear[year] = (
+        (indicators as readonly RegionIndicatorsDto[] | undefined) ?? []
+      ).map(slimIndicator);
       predictionsByYear[year] = [];
     });
 
@@ -120,34 +123,12 @@ export default async function MapPage({ searchParams }: MapPageProps) {
     );
   }
 
-  const featureCollectionsByYear: Record<
-    SupportedYear,
-    ReturnType<typeof toFeatureCollection>
-  > = {} as Record<SupportedYear, ReturnType<typeof toFeatureCollection>>;
-  for (const year of SUPPORTED_YEARS) {
-    const indicators = indicatorsByYear[year] ?? [];
-    const predictions = predictionsByYear[year] ?? [];
-    const features = buildMapFeatures({
-      regions,
-      boundaries,
-      indicators,
-      predictions,
-    });
-    featureCollectionsByYear[year] = toFeatureCollection(features);
-  }
-
-  if (
-    Object.values(featureCollectionsByYear).every(
-      (fc) => fc.features.length === 0,
-    )
-  ) {
-    return (
-      <FullscreenError
-        title={MAP_COPY.noBoundariesTitle}
-        description={MAP_COPY.noBoundariesDescription}
-      />
-    );
-  }
+  // Boundary geometry is NOT fetched here anymore: it used to be joined into
+  // a FeatureCollection once per supported year and serialized into the RSC
+  // payload (~12 MB raw / ~1 MB transferred). The client now pulls it once
+  // from the long-cached /api/map/boundaries endpoint after the deferred map
+  // boot and runs the same `buildMapFeatures` join locally; a missing or
+  // failing payload surfaces as an ErrorState inside `MapShell`.
 
   const predictedAvailable = Object.values(predictionsByYear).some(
     (arr) => arr.length > 0,
@@ -162,7 +143,7 @@ export default async function MapPage({ searchParams }: MapPageProps) {
       >
         <MapShell
           regions={regions}
-          featureCollectionsByYear={featureCollectionsByYear}
+          poster={<MapPoster />}
           indicatorsByYear={indicatorsByYear}
           predictionsByYear={predictionsByYear}
           defaultModel={defaultModel}

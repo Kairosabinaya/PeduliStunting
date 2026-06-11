@@ -6,7 +6,6 @@ import {
   TRACKER_DASHBOARD_SECTIONS,
   trackerChildDashboardSectionRoute,
   trackerChildEditRoute,
-  trackerChildNutritionRoute,
   trackerSelectChildRoute,
 } from "@/config/tracker";
 import { isUuid } from "@/domain/shared/ids";
@@ -58,8 +57,6 @@ export default async function ChildOverviewPage({
           TRACKER_DASHBOARD_SECTIONS.development,
         ),
       );
-    case "gizi":
-      redirect(trackerChildNutritionRoute(childId));
     default:
       redirect(trackerSelectChildRoute(childId));
   }

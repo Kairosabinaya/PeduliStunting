@@ -1,7 +1,4 @@
-import type {
-  IndicatorCode,
-  ModelVersion,
-} from "@/domain/shared/ids";
+import type { IndicatorCode, ModelVersion } from "@/domain/shared/ids";
 import type { KodeBps } from "@/domain/region/value-objects/kode-bps";
 import type { Year } from "@/domain/region/value-objects/year";
 

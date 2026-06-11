@@ -3,10 +3,13 @@
  * being scattered as magic strings/numbers across the codebase.
  */
 
-import { env } from "./env";
+// env.client (NOT env.ts): this module is imported by client components all
+// over the app, and env.ts's Zod schema would drag the Zod runtime into
+// every route bundle. See src/config/env.client.ts.
+import { PUBLIC_ENV } from "./env.client";
 
-export const APP_NAME = env.NEXT_PUBLIC_APP_NAME;
-export const APP_URL = env.NEXT_PUBLIC_APP_URL;
+export const APP_NAME = PUBLIC_ENV.appName;
+export const APP_URL = PUBLIC_ENV.appUrl;
 export const APP_LOCALE = "id-ID";
 
 /** Author/owner of the application, shown in the site-wide copyright notice. */
@@ -38,6 +41,9 @@ export const LANDING_ROUTE = "/";
 export const PUBLIC_ROUTES: readonly string[] = [
   LANDING_ROUTE,
   "/map",
+  // Anon-readable boundary geometry consumed by /map's deferred boot; must
+  // pass the proxy gate or guests would get a 401 instead of the payload.
+  "/api/map/boundaries",
   "/data",
   "/prediksi",
   // Kept public so old links hitting /dashboard pass the proxy gate and reach

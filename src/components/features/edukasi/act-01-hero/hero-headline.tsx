@@ -93,7 +93,11 @@ export function HeroHeadline() {
   // as plain text nodes with intact word spacing.
   return (
     <h1 className="display-headline text-balance text-foreground">
-      <StaggerReveal>{items}</StaggerReveal>
+      {/* `trigger="mount"`: the headline is the page's first-viewport
+          centerpiece; the CSS reveal starts at first paint so LCP never
+          waits for the JS pipeline (in-view mode holds opacity 0 until
+          hydration + IntersectionObserver). */}
+      <StaggerReveal trigger="mount">{items}</StaggerReveal>
     </h1>
   );
 }

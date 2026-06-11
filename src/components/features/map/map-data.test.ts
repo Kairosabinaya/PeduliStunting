@@ -255,10 +255,7 @@ describe("rankRegionByPrevalence", () => {
   });
 
   it("returns null for regions without prevalence", () => {
-    const rows = [
-      makeIndicator("1101", 10),
-      makeIndicator("1102", null),
-    ];
+    const rows = [makeIndicator("1101", 10), makeIndicator("1102", null)];
     expect(rankRegionByPrevalence(rows, "1102")).toBeNull();
   });
 

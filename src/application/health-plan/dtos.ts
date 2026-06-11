@@ -2,11 +2,6 @@ import type { ChildImmunization } from "@/domain/health-plan/entities/child-immu
 import type { ChildMilestone } from "@/domain/health-plan/entities/child-milestone";
 import type { Immunization } from "@/domain/health-plan/entities/immunization";
 import type { Milestone } from "@/domain/health-plan/entities/milestone";
-import type {
-  NutritionEvent,
-  NutritionEventData,
-  NutritionEventKind,
-} from "@/domain/health-plan/entities/nutrition-event";
 
 export interface ImmunizationDto {
   readonly code: string;
@@ -85,28 +80,6 @@ export function toMilestoneDto(item: Milestone): MilestoneDto {
     description: item.description,
     sourceLabel: item.sourceLabel,
     displayOrder: item.displayOrder,
-  };
-}
-
-export interface NutritionEventDto {
-  readonly id: string;
-  readonly userId: string;
-  readonly childId: string;
-  readonly kind: NutritionEventKind;
-  readonly eventDate: string;
-  readonly data: NutritionEventData;
-  readonly note: string | null;
-}
-
-export function toNutritionEventDto(item: NutritionEvent): NutritionEventDto {
-  return {
-    id: item.id,
-    userId: item.userId,
-    childId: item.childId,
-    kind: item.kind,
-    eventDate: item.eventDate,
-    data: item.data,
-    note: item.note,
   };
 }
 

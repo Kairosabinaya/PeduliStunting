@@ -1,3 +1,7 @@
+// Side effect first: switches Zod to jitless mode so no client bundle that
+// contains these schemas ever runs the CSP-violating eval probe.
+import "@/lib/zod-jitless";
+
 /**
  * Zod schemas for the AI chat endpoint. Single source of truth for the request
  * shape and the page-context selection (project guidelines §4). Types are derived via

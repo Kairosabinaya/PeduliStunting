@@ -1,10 +1,6 @@
 import type { AppError } from "@/domain/errors/app-error";
 import type { Result } from "@/domain/shared/result";
-import type {
-  ChildId,
-  MeasurementId,
-  UserId,
-} from "@/domain/shared/ids";
+import type { ChildId, MeasurementId, UserId } from "@/domain/shared/ids";
 import type { DateOnly } from "@/domain/shared/date-only";
 import type {
   GrowthMeasurement,

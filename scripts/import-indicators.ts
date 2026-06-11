@@ -285,7 +285,9 @@ function extractDictionaryRows(rawRows: readonly RawSourceRow[]): {
     const sourceLabel = coerceText(row["Keterangan Sumber"] ?? row.Source);
     const sourceUrl = coerceUrl(row["Tautan Sumber"] ?? row.Source_URL);
     const effectRaw = coerceText(row.Effect_Direction ?? row.Effect);
-    const effectParsed = EffectDirectionEnum.safeParse(effectRaw?.toLowerCase());
+    const effectParsed = EffectDirectionEnum.safeParse(
+      effectRaw?.toLowerCase(),
+    );
     const effect = effectParsed.success
       ? effectParsed.data
       : inferEffectDirection(code);
@@ -353,11 +355,7 @@ async function upsertDictionary(
   rows: readonly DictionaryRow[],
   logger: ScriptLogger,
 ): Promise<void> {
-  for (
-    let offset = 0;
-    offset < rows.length;
-    offset += DICTIONARY_BATCH_SIZE
-  ) {
+  for (let offset = 0; offset < rows.length; offset += DICTIONARY_BATCH_SIZE) {
     const batch = rows.slice(offset, offset + DICTIONARY_BATCH_SIZE);
     const { error } = await client
       .from("indicator_dictionary")
@@ -379,11 +377,7 @@ async function upsertIndicators(
   rows: readonly IndicatorRow[],
   logger: ScriptLogger,
 ): Promise<void> {
-  for (
-    let offset = 0;
-    offset < rows.length;
-    offset += INDICATORS_BATCH_SIZE
-  ) {
+  for (let offset = 0; offset < rows.length; offset += INDICATORS_BATCH_SIZE) {
     const batch = rows.slice(offset, offset + INDICATORS_BATCH_SIZE);
     const { error } = await client
       .from("region_indicators")

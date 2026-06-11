@@ -11,7 +11,6 @@ import type {
   ChildMilestoneDto,
   ImmunizationDto,
   MilestoneDto,
-  NutritionEventDto,
 } from "@/application/health-plan/dtos";
 import type { AppError } from "@/domain/errors/app-error";
 import { ok, type Result } from "@/domain/shared/result";
@@ -26,7 +25,6 @@ import {
   fetchImmunizationSchedule,
   fetchMeasurementsByChild,
   fetchMilestoneCatalog,
-  fetchNutritionEventsByChild,
 } from "@/lib/tracker-cache";
 
 /**
@@ -45,7 +43,6 @@ export interface ChildOverviewData {
   readonly childImmunizations: readonly ChildImmunizationDto[];
   readonly milestoneCatalog: readonly MilestoneDto[];
   readonly childMilestones: readonly ChildMilestoneDto[];
-  readonly nutritionEvents: readonly NutritionEventDto[];
 }
 
 /**
@@ -71,14 +68,12 @@ export const loadChildOverview = cache(
       childImmunizationsResult,
       milestoneCatalogResult,
       childMilestonesResult,
-      nutritionEventsResult,
     ] = await Promise.all([
       fetchMeasurementsByChild(userId, childId),
       fetchImmunizationSchedule(),
       fetchChildImmunizations(userId, childId),
       fetchMilestoneCatalog(),
       fetchChildMilestones(userId, childId),
-      fetchNutritionEventsByChild(userId, childId),
     ]);
 
     if (!measurementsResult.ok) {
@@ -106,9 +101,6 @@ export const loadChildOverview = cache(
         : [],
       childMilestones: childMilestonesResult.ok
         ? childMilestonesResult.value
-        : [],
-      nutritionEvents: nutritionEventsResult.ok
-        ? nutritionEventsResult.value
         : [],
     });
   },
