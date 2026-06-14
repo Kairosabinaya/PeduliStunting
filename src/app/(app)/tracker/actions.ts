@@ -14,13 +14,13 @@ import { requireServerSession } from "@/lib/server-session";
 import {
   DELETE_CHILD_COPY,
   EDIT_CHILD_COPY,
-  TRACKER_ROUTE,
   trackerChildRoute,
 } from "@/config/tracker";
 import { childFormInputSchema } from "@/schemas/tracking";
 
 import type { AddChildFormState } from "./_lib/add-child-state";
 import type { DeleteChildFormState } from "./_lib/delete-child-state";
+import type { RestoreChildResult } from "./_lib/restore-child-state";
 
 function toFormState(
   result: Result<ChildDto, AppError>,
@@ -191,10 +191,12 @@ export async function updateChild(
 /**
  * Soft-delete a child profile owned by the current user. The child id arrives
  * via a hidden form field so the action plugs into `useActionState`. On success
- * the children list and the child's own cache tag are revalidated, then the
- * user is redirected to the tracker home — which re-selects the first remaining
- * child or shows the empty dashboard. Failures surface back through the
- * discriminated {@link DeleteChildFormState}. See project guidelines §14.
+ * the children list and the child's own cache tag are revalidated and the
+ * action returns `{ ok: true }` — it deliberately does NOT redirect. The client
+ * island shows an undo toast ("Pulihkan", Shneiderman rule 6) and navigates to
+ * the tracker home itself, so the undo affordance is reachable after the
+ * navigation. Failures surface back through {@link DeleteChildFormState}.
+ * See project guidelines §14.
  */
 export async function softDeleteChild(
   _previous: DeleteChildFormState | null,
@@ -218,5 +220,36 @@ export async function softDeleteChild(
 
   revalidateTag(childrenTag(session.userId), "max");
   revalidateTag(childTag(rawChildId), "max");
-  redirect(TRACKER_ROUTE);
+  return { ok: true };
+}
+
+/**
+ * Restore a soft-deleted child — the undo path for {@link softDeleteChild},
+ * invoked from the delete toast's "Pulihkan" action button. Revalidates the
+ * children list and the child's own tag so the restored profile reappears.
+ * Returns a tagged result the client maps to a confirmation or error toast.
+ * See project guidelines §14.
+ */
+export async function restoreChild(
+  childId: string,
+): Promise<RestoreChildResult> {
+  const rawChildId = childId.trim();
+  if (!isUuid(rawChildId)) {
+    return { ok: false, message: DELETE_CHILD_COPY.invalidId };
+  }
+
+  const session = await requireServerSession();
+  const supabase = await createSupabaseServerClient();
+  const result = await makeUseCases(supabase).restoreChild.execute(
+    session.userId,
+    asChildId(rawChildId),
+  );
+
+  if (!result.ok) {
+    return { ok: false, message: result.error.message };
+  }
+
+  revalidateTag(childrenTag(session.userId), "max");
+  revalidateTag(childTag(rawChildId), "max");
+  return { ok: true };
 }

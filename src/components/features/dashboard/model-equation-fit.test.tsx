@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { SIMULATOR_EQUATION } from "@/config/dashboard";
@@ -46,6 +46,17 @@ describe("ModelEquationFit", () => {
     expect(text).toContain("X1");
     expect(text).toContain("X20");
     expect(text).toContain("0.00 X2"); // a kept zero-coefficient term
+    await settle();
+  });
+
+  it("collapses the fitted equation by default and expands on click", async () => {
+    render(<ModelEquationFit {...PROPS} />);
+    const toggle = screen.getByRole("button", {
+      name: new RegExp(SIMULATOR_EQUATION.localTitle, "i"),
+    });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
     await settle();
   });
 

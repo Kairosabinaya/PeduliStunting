@@ -3,7 +3,7 @@
 // Client component: recomputes the prediction synchronously on every slider
 // drag and fetches a region-year's local fit on selection (useTransition).
 
-import { RotateCcw } from "lucide-react";
+import { ChevronDown, RotateCcw } from "lucide-react";
 import { useMemo, useState, useTransition, type ReactNode } from "react";
 
 import type { RegionFitDto } from "@/application/model/dtos";
@@ -23,6 +23,7 @@ import {
   SIMULATOR_DIMENSION_GROUPS,
   SIMULATOR_EQUATION,
 } from "@/config/dashboard";
+import { CATEGORY_BADGE_TONE, CATEGORY_BG_CLASS } from "@/config/map";
 import {
   predictOrdinal,
   type PredictorMetaPoint,
@@ -32,11 +33,7 @@ import { cn } from "@/lib/cn";
 import { loadRegionFit } from "@/app/(public)/prediksi/actions";
 import { ModelEquationFit } from "./model-equation-fit";
 import { RegionCombobox } from "./region-combobox";
-import {
-  PredictionResult,
-  PREDICTION_BADGE_TONE,
-  PREDICTION_BAR_CLASS,
-} from "./prediction-result";
+import { PredictionResult } from "./prediction-result";
 import {
   PredictorSliderGroup,
   type SimulatorSlider,
@@ -295,15 +292,24 @@ export function PredictorSimulator({
             {/* Model equations: Scrollable along with sliders */}
             <aside className="mb-5">
               <Card elevation="sm" padding="md" className="space-y-4">
-                <section className="space-y-2">
-                  {/* h2 (visually small): the only heading between the page
-                      h1 and this card, so h3 skipped a level
-                      (axe heading-order). */}
-                  <h2 className="text-sm font-semibold text-foreground">
-                    {SIMULATOR_EQUATION.generalTitle}
-                  </h2>
+                {/* "Bentuk umum" is collapsed by default so the simulator opens
+                    focused on the sliders; the general GTWENOLR form is one tap
+                    away. Native <details> keeps it zero-JS and keyboard-operable.
+                    The h2 stays inside <summary> so heading order is preserved
+                    (parallel to the "Bentuk lokal" h2 below). */}
+                <details className="group/eq space-y-2">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg py-1 marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus">
+                    <h2 className="text-sm font-semibold text-foreground">
+                      {SIMULATOR_EQUATION.generalTitle}
+                    </h2>
+                    <ChevronDown
+                      size={16}
+                      aria-hidden
+                      className="shrink-0 text-muted-foreground transition-transform group-open/eq:rotate-180"
+                    />
+                  </summary>
                   {generalEquation}
-                </section>
+                </details>
                 <ModelEquationFit
                   regionName={fit.kabupatenKota}
                   tahun={fit.tahun}
@@ -364,37 +370,37 @@ export function PredictorSimulator({
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       {DASHBOARD_SIMULATOR.predictedLabel}
                     </p>
-                    <Badge tone={PREDICTION_BADGE_TONE[prediction.category]}>
+                    <Badge tone={CATEGORY_BADGE_TONE[prediction.category]}>
                       {prediction.category}
                     </Badge>
                   </div>
                   <div className="flex h-2.5 flex-1 overflow-hidden rounded-full bg-surface-muted">
                     <span
-                      className={PREDICTION_BAR_CLASS.Rendah}
+                      className={CATEGORY_BG_CLASS.Rendah}
                       style={{
                         width: `${prediction.probabilities.rendah * 100}%`,
                       }}
                     />
                     <span
-                      className={PREDICTION_BAR_CLASS.Sedang}
+                      className={CATEGORY_BG_CLASS.Sedang}
                       style={{
                         width: `${prediction.probabilities.sedang * 100}%`,
                       }}
                     />
                     <span
-                      className={PREDICTION_BAR_CLASS.Tinggi}
+                      className={CATEGORY_BG_CLASS.Tinggi}
                       style={{
                         width: `${prediction.probabilities.tinggi * 100}%`,
                       }}
                     />
                   </div>
-                  <div className="shrink-0 text-right">
+                  <div className="flex shrink-0 flex-col items-end gap-1">
                     <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                       {DASHBOARD_SIMULATOR.actualLabel}
                     </p>
-                    <span className="text-sm font-semibold text-foreground">
+                    <Badge tone={CATEGORY_BADGE_TONE[fit.actualCategory]}>
                       {fit.actualCategory}
-                    </span>
+                    </Badge>
                   </div>
                 </div>
               </div>

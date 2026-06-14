@@ -140,4 +140,33 @@ export class SupabaseChildRepository implements ChildRepository {
       return err(mapUnknownInfrastructureError(cause, "children.softDelete"));
     }
   }
+
+  async restore(
+    userId: UserId,
+    childId: ChildId,
+  ): Promise<Result<void, AppError>> {
+    try {
+      // `not("deleted_at", "is", null)` scopes the clear to a row that is
+      // actually soft-deleted; `select().maybeSingle()` returns null when no
+      // such row exists (wrong owner, unknown id, or already active) so the
+      // zero-row case maps to a precise not_found rather than a silent
+      // success. `findById` filters out deleted children, so restore cannot
+      // pre-check via the use case — the conditional update IS the check.
+      const { data, error } = await this.client
+        .from("children")
+        .update({ deleted_at: null })
+        .eq("user_id", userId)
+        .eq("id", childId)
+        .not("deleted_at", "is", null)
+        .select("id")
+        .maybeSingle();
+      if (error) return err(mapPostgrestError(error, "children"));
+      if (data === null) {
+        return err(AppErrors.notFound("Anak tidak ditemukan.", "child"));
+      }
+      return ok(undefined);
+    } catch (cause) {
+      return err(mapUnknownInfrastructureError(cause, "children.restore"));
+    }
+  }
 }

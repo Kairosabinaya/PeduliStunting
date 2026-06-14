@@ -7,10 +7,22 @@ import { DeleteChildButton } from "./delete-child-button";
 
 const softDeleteChildMock =
   vi.fn<(previous: unknown, formData: FormData) => Promise<unknown>>();
+const restoreChildMock = vi.fn();
 
 vi.mock("@/app/(app)/tracker/actions", () => ({
   softDeleteChild: (previous: unknown, formData: FormData) =>
     softDeleteChildMock(previous, formData),
+  restoreChild: (childId: string) => restoreChildMock(childId),
+}));
+
+// The island now navigates on success and fires an undo toast; both are
+// stubbed since these tests only cover the open/confirm/cancel surface.
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
+}));
+
+vi.mock("sonner", () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
 }));
 
 beforeEach(() => {

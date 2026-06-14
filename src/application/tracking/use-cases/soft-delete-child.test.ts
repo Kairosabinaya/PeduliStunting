@@ -66,6 +66,10 @@ class InMemoryChildRepository implements ChildRepository {
     this.child = null;
     return ok(undefined);
   }
+
+  async restore(): Promise<Result<void, AppError>> {
+    return ok(undefined);
+  }
 }
 
 describe("SoftDeleteChildUseCase", () => {

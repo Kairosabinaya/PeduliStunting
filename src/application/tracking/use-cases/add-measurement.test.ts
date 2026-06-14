@@ -66,6 +66,10 @@ class InMemoryChildRepository implements ChildRepository {
   async softDelete(): Promise<Result<void, AppError>> {
     return ok(undefined);
   }
+
+  async restore(): Promise<Result<void, AppError>> {
+    return ok(undefined);
+  }
 }
 
 class InMemoryMeasurementRepository implements GrowthMeasurementRepository {

@@ -52,6 +52,7 @@ import { GetChildByIdUseCase } from "@/application/tracking/use-cases/get-child-
 import { CreateChildUseCase } from "@/application/tracking/use-cases/create-child";
 import { UpdateChildUseCase } from "@/application/tracking/use-cases/update-child";
 import { SoftDeleteChildUseCase } from "@/application/tracking/use-cases/soft-delete-child";
+import { RestoreChildUseCase } from "@/application/tracking/use-cases/restore-child";
 import { ListMeasurementsByChildUseCase } from "@/application/tracking/use-cases/list-measurements-by-child";
 import { AddMeasurementUseCase } from "@/application/tracking/use-cases/add-measurement";
 import { ComputeQuickScreeningUseCase } from "@/application/tracking/use-cases/compute-quick-screening";
@@ -109,6 +110,7 @@ export interface UseCases {
   readonly createChild: CreateChildUseCase;
   readonly updateChild: UpdateChildUseCase;
   readonly softDeleteChild: SoftDeleteChildUseCase;
+  readonly restoreChild: RestoreChildUseCase;
   readonly listMeasurementsByChild: ListMeasurementsByChildUseCase;
   readonly addMeasurement: AddMeasurementUseCase;
   readonly computeQuickScreening: ComputeQuickScreeningUseCase;
@@ -212,6 +214,7 @@ export function makeUseCases(client: TypedSupabaseClient): UseCases {
     createChild: new CreateChildUseCase(childRepo),
     updateChild: new UpdateChildUseCase(childRepo),
     softDeleteChild: new SoftDeleteChildUseCase(childRepo),
+    restoreChild: new RestoreChildUseCase(childRepo),
     listMeasurementsByChild: new ListMeasurementsByChildUseCase(
       measurementRepo,
     ),

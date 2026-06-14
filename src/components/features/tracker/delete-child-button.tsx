@@ -1,12 +1,16 @@
 "use client";
 
 // Client island: holds the open/closed dialog state and drives the
-// destructive `softDeleteChild` Server Action via `useActionState`.
+// destructive `softDeleteChild` Server Action via `useActionState`. On success
+// it fires an undo toast (Shneiderman rule 6 — easy reversal) and navigates to
+// the tracker home; the toast's "Pulihkan" button calls `restoreChild`.
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
-import { softDeleteChild } from "@/app/(app)/tracker/actions";
+import { restoreChild, softDeleteChild } from "@/app/(app)/tracker/actions";
 import {
   INITIAL_DELETE_CHILD_STATE,
   type DeleteChildFormState,
@@ -14,7 +18,7 @@ import {
 import { Button } from "@/components/primitives/button";
 import { FeedbackBanner } from "@/components/primitives/feedback-banner";
 import { Modal } from "@/components/primitives/modal";
-import { DELETE_CHILD_COPY } from "@/config/tracker";
+import { DELETE_CHILD_COPY, TRACKER_ROUTE } from "@/config/tracker";
 
 export interface DeleteChildButtonProps {
   readonly childId: string;
@@ -51,6 +55,7 @@ export function DeleteChildButton({
   childId,
   childName,
 }: DeleteChildButtonProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [state, action] = useActionState<DeleteChildFormState | null, FormData>(
     softDeleteChild,
@@ -61,6 +66,35 @@ export function DeleteChildButton({
     state && !state.ok
       ? (state.message ?? DELETE_CHILD_COPY.genericError)
       : null;
+
+  // `useActionState` returns a fresh object per completed call, so this effect
+  // re-runs on every successful delete. A ref guards against the toast firing
+  // twice for one state (e.g. a re-render that keeps the same state object).
+  const handledStateRef = useRef<DeleteChildFormState | null>(null);
+  useEffect(() => {
+    if (!state || !state.ok || handledStateRef.current === state) return;
+    handledStateRef.current = state;
+    setOpen(false);
+    // Navigate first; the Sonner toaster lives in the root layout and survives
+    // the route change, so the "Pulihkan" button stays clickable on /tracker.
+    router.push(TRACKER_ROUTE);
+    toast.success(DELETE_CHILD_COPY.deletedToast(childName), {
+      description: DELETE_CHILD_COPY.deletedToastDescription,
+      action: {
+        label: DELETE_CHILD_COPY.undoLabel,
+        onClick: () => {
+          void restoreChild(childId).then((result) => {
+            if (result.ok) {
+              toast.success(DELETE_CHILD_COPY.restoredToast(childName));
+              router.refresh();
+            } else {
+              toast.error(result.message || DELETE_CHILD_COPY.restoreError);
+            }
+          });
+        },
+      },
+    });
+  }, [state, childId, childName, router]);
 
   function close() {
     setOpen(false);

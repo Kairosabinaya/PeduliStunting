@@ -28,4 +28,11 @@ export interface ChildRepository {
   create(input: NewChildInput): Promise<Result<Child, AppError>>;
   update(input: UpdateChildInput): Promise<Result<Child, AppError>>;
   softDelete(userId: UserId, childId: ChildId): Promise<Result<void, AppError>>;
+  /**
+   * Reverse a soft-delete by clearing `deleted_at`. Only matches a row that is
+   * currently soft-deleted and owned by the user; a non-existent or
+   * already-active child resolves to a `not_found` error so the caller can
+   * surface a precise message instead of a silent no-op.
+   */
+  restore(userId: UserId, childId: ChildId): Promise<Result<void, AppError>>;
 }

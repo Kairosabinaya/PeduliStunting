@@ -311,13 +311,21 @@ export const DELETE_CHILD_COPY = {
   description:
     "Profil anak beserta seluruh riwayatnya akan dihapus dari akun Anda.",
   confirmBody: (name: string) =>
-    `Data ${name}, termasuk pengukuran, imunisasi, dan perkembangan, tidak akan tampil lagi di akun ini. Tindakan ini tidak dapat dibatalkan dari aplikasi.`,
+    `Data ${name}, termasuk pengukuran, imunisasi, dan perkembangan, tidak akan tampil lagi di akun ini. Anda dapat memulihkannya lewat tombol "Pulihkan" pada notifikasi setelah menghapus.`,
   cancel: "Batal",
   confirm: "Ya, hapus",
   pending: "Menghapus...",
   invalidId: "ID anak tidak valid.",
   genericError:
     "Data anak belum bisa dihapus. Coba lagi atau muat ulang halaman.",
+  // Undo affordance (Shneiderman rule 6). The toast is fired client-side
+  // after a successful soft-delete; the action button calls `restoreChild`.
+  deletedToast: (name: string) => `Data ${name} dihapus.`,
+  deletedToastDescription: "Ketuk Pulihkan untuk membatalkan penghapusan.",
+  undoLabel: "Pulihkan",
+  restoredToast: (name: string) => `Data ${name} dipulihkan.`,
+  restoreError:
+    "Data anak belum bisa dipulihkan. Coba lagi atau muat ulang halaman.",
 } as const;
 
 export const MEASUREMENTS_COPY = {
@@ -430,17 +438,24 @@ export interface SdClassDisplay {
   readonly tone: "primary" | "neutral" | "success" | "warning" | "danger";
 }
 
+/**
+ * Display label + semantic tone per SD class. Labels are kept short (single
+ * disease term, e.g. "Stunting" / "Wasting") so the badge never wraps to a
+ * second line in narrow cards; severity (mild vs severe) is carried by the
+ * `tone` colour (warning vs danger) and the z-score shown beside the badge,
+ * not by a longer label. Mirrors the disease terms used in cek-cepat config.
+ */
 export const SD_CLASS_DISPLAY: Record<SdClass, SdClassDisplay> = {
   buruk: { label: "Sangat kurang", tone: "danger" },
   kurang: { label: "Kurang", tone: "warning" },
   normal: { label: "Normal", tone: "success" },
   lebih: { label: "Lebih", tone: "warning" },
   obesitas: { label: "Obesitas", tone: "danger" },
-  pendek: { label: "Pendek (stunting)", tone: "warning" },
-  sangat_pendek: { label: "Sangat pendek (stunting)", tone: "danger" },
+  pendek: { label: "Stunting", tone: "warning" },
+  sangat_pendek: { label: "Stunting berat", tone: "danger" },
   tinggi: { label: "Tinggi", tone: "primary" },
-  kurus: { label: "Kurus (wasting)", tone: "warning" },
-  sangat_kurus: { label: "Sangat kurus (wasting)", tone: "danger" },
+  kurus: { label: "Wasting", tone: "warning" },
+  sangat_kurus: { label: "Wasting berat", tone: "danger" },
   gemuk: { label: "Gemuk", tone: "warning" },
   mikrosefali: { label: "Mikrosefali", tone: "danger" },
   makrosefali: { label: "Makrosefali", tone: "warning" },

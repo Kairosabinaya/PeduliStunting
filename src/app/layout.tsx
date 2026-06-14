@@ -9,6 +9,7 @@ import { CSP_NONCE_HEADER } from "@/config/security";
 import { APP_DESCRIPTION, FAVICONS, OG_IMAGE } from "@/config/seo";
 import { BROWSER_THEME_COLOR } from "@/config/theme";
 import { Toaster } from "@/components/primitives/toaster";
+import { GlobalShortcuts } from "@/components/navigation/global-shortcuts";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ThemeScript } from "@/components/theme/theme-script";
 
@@ -106,6 +107,7 @@ export default async function RootLayout({
         <ThemeProvider>
           {children}
           <Toaster />
+          <GlobalShortcuts />
         </ThemeProvider>
       </body>
     </html>

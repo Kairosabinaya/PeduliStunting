@@ -3,8 +3,13 @@
 import { motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 
+import { Badge } from "@/components/primitives/badge";
 import { DASHBOARD_SIMULATOR } from "@/config/dashboard";
-import { CATEGORY_ORDER } from "@/config/map";
+import {
+  CATEGORY_BADGE_TONE,
+  CATEGORY_BG_CLASS,
+  CATEGORY_ORDER,
+} from "@/config/map";
 import type { OrdinalProbabilities } from "@/domain/model/services/ordinal-predictor";
 import type { StuntingCategory } from "@/domain/region/value-objects/stunting-category";
 import { cn } from "@/lib/cn";
@@ -34,39 +39,13 @@ const PROB_KEY: Record<StuntingCategory, keyof OrdinalProbabilities> = {
 };
 
 /**
- * Brand-palette ramp for the predicted class (blue/green only — the ordinal
- * red/yellow/green is reserved for the map). Sequential low→high: Rendah sage
- * green, Sedang sky blue, Tinggi primary blue. Exported so the mobile bar in
- * the simulator stays in sync.
+ * Faint per-category wash behind the hero, drawn from the map's ordinal ramp so
+ * the card reads the same colour family as the predicted-class badge and /peta.
  */
-export const PREDICTION_BAR_CLASS: Record<StuntingCategory, string> = {
-  Rendah: "bg-accent",
-  Sedang: "bg-primary-soft",
-  Tinggi: "bg-primary",
-};
-
-/** Badge tone for the predicted class (brand only). */
-export const PREDICTION_BADGE_TONE: Record<
-  StuntingCategory,
-  "success" | "primary"
-> = {
-  Rendah: "success",
-  Sedang: "primary",
-  Tinggi: "primary",
-};
-
-/** Category-tinted hero background (low alpha so the big label stays readable). */
 const HERO_TINT: Record<StuntingCategory, string> = {
-  Rendah: "bg-accent/10",
-  Sedang: "bg-primary-soft/15",
-  Tinggi: "bg-primary/10",
-};
-
-/** Category text colour, AA-safe on the tinted hero (brand). */
-const HERO_TEXT: Record<StuntingCategory, string> = {
-  Rendah: "text-accent-ink",
-  Sedang: "text-primary",
-  Tinggi: "text-primary",
+  Rendah: "bg-ordinal-rendah/10",
+  Sedang: "bg-ordinal-sedang/10",
+  Tinggi: "bg-ordinal-tinggi/10",
 };
 
 function formatPercent(value: number): string {
@@ -100,16 +79,14 @@ export function PredictionResult({
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {DASHBOARD_SIMULATOR.predictedLabel}
         </p>
-        {/* testid: the category text also appears in the probability-bar labels
-            and the actual-class chip, so there is no unambiguous semantic query
-            for the predicted class. */}
-        <motion.p
+        {/* testid: the category also appears in the probability-bar labels and
+            the actual-class chip, so there is no unambiguous semantic query for
+            the predicted class. It renders as the map's ordinal badge (saturated
+            fill + label-shadow) so colour and contrast match /peta. */}
+        <motion.div
           key={category}
           data-testid="predicted-class"
-          className={cn(
-            "stat-number mt-1 text-4xl font-bold leading-none tracking-tight",
-            HERO_TEXT[category],
-          )}
+          className="mt-2 flex justify-center"
           initial={reduceMotion === true ? false : { scale: 0.92, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{
@@ -117,13 +94,18 @@ export function PredictionResult({
             ease: "easeOut",
           }}
         >
-          {category}
-        </motion.p>
-        <p className="mt-3 text-xs text-muted-foreground">
-          {DASHBOARD_SIMULATOR.actualLabel}:{" "}
-          <span className="font-semibold text-foreground">
+          <Badge
+            tone={CATEGORY_BADGE_TONE[category]}
+            className="rounded-2xl px-5 py-2 text-3xl leading-none tracking-tight"
+          >
+            {category}
+          </Badge>
+        </motion.div>
+        <p className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <span>{DASHBOARD_SIMULATOR.actualLabel}:</span>
+          <Badge tone={CATEGORY_BADGE_TONE[actualCategory]}>
             {actualCategory}
-          </span>
+          </Badge>
         </p>
       </div>
 
@@ -174,9 +156,12 @@ export function PredictionResult({
                   aria-valuemax={100}
                 >
                   <motion.div
+                    // Per-class bars share the map's red/yellow/green ordinal
+                    // palette (Rendah green, Sedang yellow, Tinggi red) so the
+                    // "keyakinan model" readout reads the same as /peta.
                     className={cn(
                       "h-full rounded-full",
-                      PREDICTION_BAR_CLASS[cat],
+                      CATEGORY_BG_CLASS[cat],
                       !isPredicted && "opacity-70",
                     )}
                     initial={reduceMotion === true ? false : { width: 0 }}

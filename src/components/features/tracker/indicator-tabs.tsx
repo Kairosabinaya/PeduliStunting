@@ -5,16 +5,31 @@ import {
   SegmentedControl,
   type SegmentedControlItem,
 } from "@/components/primitives/segmented-control";
-import { cn } from "@/lib/cn";
 import {
   GROWTH_INDICATOR_PARENT_LABEL,
   SD_CLASS_DISPLAY,
+  type SdClassDisplay,
 } from "@/config/tracker";
 import {
   GROWTH_INDICATORS,
   type GrowthIndicator,
 } from "@/domain/tracking/value-objects/growth-indicator";
 import type { SdClass } from "@/domain/tracking/value-objects/sd-classification";
+
+/**
+ * On an active (selected) pill the background is `bg-primary` (dark blue), where
+ * the muted semantic badge tones (e.g. faint-red `danger`) lose contrast. Swap
+ * to the solid ordinal tones — same hue, white text + label-shadow — so the
+ * status stays legible. Hue still encodes severity: danger→red (tinggi),
+ * warning→yellow (sedang), success→green (rendah).
+ */
+const ACTIVE_BADGE_TONE = {
+  danger: "tinggi",
+  warning: "sedang",
+  success: "rendah",
+  primary: "primary",
+  neutral: "neutral",
+} as const satisfies Record<SdClassDisplay["tone"], string>;
 
 export interface IndicatorTabsProps {
   readonly value: GrowthIndicator;
@@ -43,11 +58,8 @@ export function IndicatorTabs({
         trailing: display
           ? (active: boolean) => (
               <Badge
-                tone={display.tone}
-                className={cn(
-                  "px-1.5 py-0 text-xs",
-                  active && "ring-1 ring-white/40",
-                )}
+                tone={active ? ACTIVE_BADGE_TONE[display.tone] : display.tone}
+                className="px-1.5 py-0 text-xs"
               >
                 {display.label}
               </Badge>

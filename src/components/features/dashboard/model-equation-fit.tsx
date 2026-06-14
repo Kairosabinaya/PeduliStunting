@@ -7,11 +7,13 @@
 
 import "katex/dist/katex.min.css";
 
-import { useEffect, useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { useEffect, useId, useState } from "react";
 
 import { InfoHint } from "@/components/primitives/info-hint";
 import { KATEX_IDLE_DELAY_MS, SIMULATOR_EQUATION } from "@/config/dashboard";
 import { STUNTING_CATEGORIES } from "@/domain/region/value-objects/stunting-category";
+import { cn } from "@/lib/cn";
 
 interface KatexRenderer {
   readonly renderToString: (
@@ -84,6 +86,10 @@ export function ModelEquationFit({
   nActive,
 }: ModelEquationFitProps) {
   const [katex, setKatex] = useState<KatexRenderer | null>(null);
+  // Collapsed by default (parallel to "Bentuk umum"); the button below toggles
+  // the fitted equation. `contentId` wires the toggle to its panel for AT.
+  const [open, setOpen] = useState(false);
+  const contentId = useId();
   // KaTeX (~150 KB across two chunks) loads on the FIRST user interaction,
   // or after an idle delay for readers who never touch the page — loading it
   // on mount put the chunks inside the critical window and inflated LCP/TBT
@@ -119,11 +125,27 @@ export function ModelEquationFit({
   return (
     <section className="space-y-2">
       <div className="flex items-center gap-1.5">
-        {/* h2 to mirror the sibling "bentuk umum" heading — both are parallel
-            sections directly under the page h1 (axe heading-order). */}
-        <h2 className="text-sm font-semibold text-foreground">
-          {SIMULATOR_EQUATION.localTitle} — {regionName}, {tahun}
-        </h2>
+        <button
+          type="button"
+          onClick={() => setOpen((prev) => !prev)}
+          aria-expanded={open}
+          aria-controls={contentId}
+          className="flex flex-1 items-center justify-between gap-2 rounded-lg py-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus"
+        >
+          {/* h2 mirrors the sibling "Bentuk umum" heading — both parallel
+              sections directly under the page h1 (axe heading-order). */}
+          <h2 className="text-sm font-semibold text-foreground">
+            {SIMULATOR_EQUATION.localTitle} — {regionName}, {tahun}
+          </h2>
+          <ChevronDown
+            size={16}
+            aria-hidden
+            className={cn(
+              "shrink-0 text-muted-foreground transition-transform",
+              open && "rotate-180",
+            )}
+          />
+        </button>
         <InfoHint label={SIMULATOR_EQUATION.localInfoLabel}>
           <p>{SIMULATOR_EQUATION.proportionalOddsNote}</p>
           <p className="mt-2">
@@ -134,8 +156,15 @@ export function ModelEquationFit({
       </div>
       {/* `overflow-y-hidden` stops the horizontal scrollbar (the 20 terms never
           fit) from coercing a spurious vertical scrollbar; `p-4` leaves room for
-          it. */}
-      <div className="space-y-1.5 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-surface-muted/40 p-4">
+          it. Always rendered (the `aria-controls` target); `hidden` collapses
+          it without unmounting the typeset equation. */}
+      <div
+        id={contentId}
+        className={cn(
+          "space-y-1.5 overflow-x-auto overflow-y-hidden rounded-lg border border-border bg-surface-muted/40 p-4",
+          !open && "hidden",
+        )}
+      >
         {lines.map(({ category, intercept }) => {
           const text = buildText(category, intercept, beta);
           // The plain-text equation is always in the DOM: it is the accessible
