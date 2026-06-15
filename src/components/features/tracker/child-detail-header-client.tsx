@@ -1,12 +1,17 @@
 "use client";
 
+import Link from "next/link";
+
 import type { ChildDto } from "@/application/tracking/dtos";
 import { Badge } from "@/components/primitives/badge";
 import { buttonVariants } from "@/components/primitives/button";
-import { CHILD_DETAIL_COPY, SEX_LABEL, TRACKER_MODAL } from "@/config/tracker";
+import {
+  CHILD_DETAIL_COPY,
+  SEX_LABEL,
+  trackerChildEditRoute,
+} from "@/config/tracker";
 import { asDateOnly, dateOnlyFromDate } from "@/domain/shared/date-only";
 import { monthsBetween } from "@/domain/shared/age-months";
-import { ModalTrigger } from "./modal-trigger";
 import { DeleteChildButton } from "./delete-child-button";
 
 export interface ChildDetailHeaderClientProps {
@@ -74,18 +79,20 @@ export function ChildDetailHeaderClient({
           </div>
         </dl>
         <div className="flex shrink-0 items-center gap-2">
-          <ModalTrigger modalKey={TRACKER_MODAL.editChild}>
-            {({ onClick }) => (
-              <button
-                type="button"
-                onClick={onClick}
-                aria-label={CHILD_DETAIL_COPY.editAriaLabel(child.name)}
-                className={buttonVariants({ variant: "outline", size: "sm" })}
-              >
-                {CHILD_DETAIL_COPY.editLabel}
-              </button>
-            )}
-          </ModalTrigger>
+          {/* Link (not a bare ModalTrigger): the edit modal mutates a specific
+              child, so the URL must carry `?anak=<id>` alongside `?modal=edit`.
+              `trackerChildEditRoute` builds both params; a plain modal trigger
+              set only `?modal=edit`, so on the single-child dashboard (no
+              `?anak` in the URL) `resolveEditTarget` returned null and the modal
+              never opened. `scroll={false}` keeps the dashboard position. */}
+          <Link
+            href={trackerChildEditRoute(child.id)}
+            scroll={false}
+            aria-label={CHILD_DETAIL_COPY.editAriaLabel(child.name)}
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            {CHILD_DETAIL_COPY.editLabel}
+          </Link>
           <DeleteChildButton childId={child.id} childName={child.name} />
         </div>
       </div>
