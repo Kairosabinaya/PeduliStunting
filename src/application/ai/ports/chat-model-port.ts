@@ -32,6 +32,10 @@ export interface ChatStreamParams {
   readonly maxOutputTokens: number;
   /** Max generation/tool-call steps per turn (cost guard). */
   readonly maxSteps: number;
+  /** Sampling temperature; lower = more focused, consistent answers. */
+  readonly temperature: number;
+  /** Reasoning-token budget for Gemini 2.5 thinking models (0 disables). */
+  readonly thinkingBudgetTokens: number;
   /** Aborts the upstream call when the client stops or disconnects. */
   readonly abortSignal?: AbortSignal;
   /** Invoked on a mid-stream error for logging/observability. */

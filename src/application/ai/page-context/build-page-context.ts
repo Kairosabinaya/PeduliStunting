@@ -129,7 +129,12 @@ async function buildPublicSummary(
   }
   if (selection.kodeBps) {
     const line = await buildSelectedRegionLine(deps, selection.kodeBps);
-    if (line) lines.push(line);
+    // Surface a not-found note instead of silently dropping the line, so the
+    // model can tell the user the region isn't in the data rather than
+    // answering generically ("ga nyambung").
+    lines.push(
+      line ?? "Catatan: wilayah yang dipilih tidak ditemukan di data aplikasi.",
+    );
   }
   const indicatorsLine = await buildTopIndicatorsLine(deps);
   if (indicatorsLine) lines.push(indicatorsLine);
@@ -158,7 +163,12 @@ async function buildPrediksiSummary(
   }
   if (selection.kodeBps) {
     const line = await buildSelectedRegionLine(deps, selection.kodeBps);
-    if (line) lines.push(line);
+    // Surface a not-found note instead of silently dropping the line, so the
+    // model can tell the user the region isn't in the data rather than
+    // answering generically ("ga nyambung").
+    lines.push(
+      line ?? "Catatan: wilayah yang dipilih tidak ditemukan di data aplikasi.",
+    );
   }
   const indicatorsLine = await buildTopIndicatorsLine(deps);
   if (indicatorsLine) lines.push(indicatorsLine);

@@ -24,6 +24,7 @@ import type {
   ChatStreamResult,
   ChatUiMessage,
 } from "@/application/ai/ports/chat-model-port";
+import { AI_SAFETY_SETTINGS } from "@/config/ai";
 import { AI_COPY } from "@/config/ai-copy";
 import { env } from "@/config/env";
 
@@ -45,15 +46,23 @@ export class GoogleChatModel implements ChatModelPort {
       model: this.provider(env.GEMINI_MODEL),
       system: params.system,
       messages: modelMessages,
-      tools: {
-        ...toSdkTools(params.tools),
-        // Web-search grounding so the model can find facts not in the app
-        // instead of answering "tidak tahu" (gemini-2.5 supports combining this
-        // with function tools). Provider-defined tool; key must be "google_search".
-        google_search: this.provider.tools.googleSearch({}),
-      },
+      // Function tools ONLY — no `google_search` grounding. Google documents the
+      // built-in-grounding + function-calling combination as a Gemini 3 feature;
+      // on Gemini 2.5 it made the model over-search, pull off-topic web results,
+      // and burn the step budget (slow, "ga nyambung"). The model answers general
+      // questions from its own knowledge and uses these tools for app numbers.
+      tools: toSdkTools(params.tools),
       stopWhen: stepCountIs(params.maxSteps),
+      temperature: params.temperature,
       maxOutputTokens: params.maxOutputTokens,
+      providerOptions: {
+        google: {
+          // Small reasoning budget (gemini-2.5-flash) for coherent multi-part
+          // answers; relaxed safety so health/nutrition education is not blocked.
+          thinkingConfig: { thinkingBudget: params.thinkingBudgetTokens },
+          safetySettings: [...AI_SAFETY_SETTINGS],
+        },
+      },
       ...(params.abortSignal ? { abortSignal: params.abortSignal } : {}),
       onError: ({ error }) => params.onError?.(error),
     });

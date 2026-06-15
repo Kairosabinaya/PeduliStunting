@@ -9,6 +9,12 @@ describe("referencesScreen", () => {
     expect(referencesScreen("maksud tabel yang tampil itu apa")).toBe(true);
   });
 
+  it("detects deictic references without an explicit element noun", () => {
+    expect(referencesScreen("jelaskan ini")).toBe(true);
+    expect(referencesScreen("apa maksudnya?")).toBe(true);
+    expect(referencesScreen("kenapa begini?")).toBe(true);
+  });
+
   it("returns false for self-contained questions (skip screen text)", () => {
     expect(referencesScreen("apa itu stunting")).toBe(false);
     expect(referencesScreen("bandingkan Surabaya dan Malang 2024")).toBe(false);

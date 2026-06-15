@@ -35,13 +35,18 @@ const EnvSchema = z.object({
   // Handler is the only caller. Swapping the dev free-tier key for a paid
   // (no-training) key is a single env change here, no code change. See ADR-0020.
   GEMINI_API_KEY: z.string().min(1).optional(),
-  GEMINI_MODEL: z.string().min(1).default("gemini-2.5-flash-lite"),
+  // `gemini-2.5-flash` (not `-lite`): stronger reasoning so the assistant stops
+  // giving off-topic answers and refusing in-scope questions. It also supports a
+  // thinking budget (see AI_GENERATION). Overridable per environment.
+  GEMINI_MODEL: z.string().min(1).default("gemini-2.5-flash"),
   GEMINI_MAX_OUTPUT_TOKENS: z.coerce
     .number()
     .int()
     .positive()
     .max(8192)
-    .default(1024),
+    // 2048 (was 1024): 1024 truncated longer explanations mid-answer, which
+    // read as incoherent. 2048 leaves room while still capping cost.
+    .default(2048),
   // ADR-0021: explicit acknowledgement that on the free tier Google may train on
   // the tracker payload. Flip to "false" when moving to a paid no-training key.
   GEMINI_TRACKER_DATA_TRAINING_RISK_ACCEPTED: z

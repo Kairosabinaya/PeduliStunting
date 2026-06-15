@@ -110,6 +110,13 @@ describe("BuildPageContextUseCase", () => {
     expect(ctx.summary).toContain("Kota Surabaya");
   });
 
+  it("notes when the selected region is not found in the data", async () => {
+    const ctx = await new BuildPageContextUseCase(
+      deps({ getRegionByKodeBps: { execute: async () => ok(null) } }),
+    ).execute({ pageId: "map", kodeBps: "9999" }, null);
+    expect(ctx.summary).toContain("tidak ditemukan di data aplikasi");
+  });
+
   it("summarises the model on the prediksi page", async () => {
     const ctx = await new BuildPageContextUseCase(deps()).execute(
       { pageId: "prediksi" },

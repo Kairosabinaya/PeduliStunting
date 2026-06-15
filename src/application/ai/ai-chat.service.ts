@@ -14,7 +14,7 @@ import type {
   ChatUiMessage,
 } from "@/application/ai/ports/chat-model-port";
 import type { AiToolSet } from "@/application/ai/tools/ai-tool";
-import { AI_LIMITS, type AiPageId } from "@/config/ai";
+import { AI_GENERATION, AI_LIMITS, type AiPageId } from "@/config/ai";
 import {
   AI_PAGE_CONTEXT_FENCE,
   AI_PAGE_FRAGMENTS,
@@ -56,6 +56,8 @@ export class AiChatService {
         tools: input.tools,
         maxOutputTokens: env.GEMINI_MAX_OUTPUT_TOKENS,
         maxSteps: AI_LIMITS.maxSteps,
+        temperature: AI_GENERATION.temperature,
+        thinkingBudgetTokens: AI_GENERATION.thinkingBudgetTokens,
         ...(input.abortSignal ? { abortSignal: input.abortSignal } : {}),
         onError: (error) =>
           this.logger.error("AI stream error", {
