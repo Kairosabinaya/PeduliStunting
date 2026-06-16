@@ -5,8 +5,8 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
 
+import { notify } from "@/lib/notify";
 import { SIGN_OUT_NOTICE_COPY } from "@/config/auth";
 import {
   SIGNED_OUT_NOTICE_PARAM,
@@ -34,9 +34,10 @@ export function SignedOutToast() {
     if (!signedOut || firedRef.current) return;
     firedRef.current = true;
 
-    toast.success(SIGN_OUT_NOTICE_COPY.toastTitle, {
-      description: SIGN_OUT_NOTICE_COPY.toastDescription,
-    });
+    notify.success(
+      SIGN_OUT_NOTICE_COPY.toastTitle,
+      SIGN_OUT_NOTICE_COPY.toastDescription,
+    );
 
     const next = new URLSearchParams(params);
     next.delete(SIGNED_OUT_NOTICE_PARAM);

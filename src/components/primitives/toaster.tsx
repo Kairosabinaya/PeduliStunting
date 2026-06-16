@@ -9,14 +9,16 @@ import { useTheme } from "@/components/theme/theme-provider";
 import { TOAST_DURATION_MS } from "@/config/toast";
 
 /**
- * App-wide toast surface. Mounted once in the root layout so any client
- * component can fire notifications via `toast()` from `sonner`. Colours follow
- * the active theme so success/error toasts stay legible in light and dark.
+ * App-wide toast surface. Mounted once in the root layout. Notifications are
+ * fired through `notify` ({@link file://../../lib/notify.tsx}), which renders the
+ * branded `ToastCard` via `toast.custom` — so this only positions the portal.
+ * `richColors`/`closeButton` are off because the card supplies its own design
+ * tokens and dismiss control; keeping them would double up the chrome.
  *
  * @example
  * ```tsx
- * import { toast } from "sonner";
- * toast.success("Tersimpan", { description: "Perubahan profil disimpan." });
+ * import { notify } from "@/lib/notify";
+ * notify.success("Tersimpan.", "Perubahan profil disimpan.");
  * ```
  */
 export function Toaster() {
@@ -25,8 +27,6 @@ export function Toaster() {
     <SonnerToaster
       theme={resolvedTheme}
       position="top-right"
-      richColors
-      closeButton
       duration={TOAST_DURATION_MS}
     />
   );

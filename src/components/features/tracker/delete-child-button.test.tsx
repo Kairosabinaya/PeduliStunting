@@ -15,14 +15,14 @@ vi.mock("@/app/(app)/tracker/actions", () => ({
   restoreChild: (childId: string) => restoreChildMock(childId),
 }));
 
-// The island now navigates on success and fires an undo toast; both are
-// stubbed since these tests only cover the open/confirm/cancel surface.
+// The island now navigates on success and fires a branded undo snackbar via
+// `notify`; both are stubbed since these tests only cover open/confirm/cancel.
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
 
-vi.mock("sonner", () => ({
-  toast: { success: vi.fn(), error: vi.fn() },
+vi.mock("@/lib/notify", () => ({
+  notify: { success: vi.fn(), error: vi.fn(), info: vi.fn(), action: vi.fn() },
 }));
 
 beforeEach(() => {

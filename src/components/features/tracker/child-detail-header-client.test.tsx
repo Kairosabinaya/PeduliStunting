@@ -11,8 +11,8 @@ import { ChildDetailHeaderClient } from "./child-detail-header-client";
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
-vi.mock("sonner", () => ({
-  toast: { success: vi.fn(), error: vi.fn() },
+vi.mock("@/lib/notify", () => ({
+  notify: { success: vi.fn(), error: vi.fn(), info: vi.fn(), action: vi.fn() },
 }));
 
 const CHILD_ID = "00000000-0000-0000-0000-000000000002";

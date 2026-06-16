@@ -2,13 +2,13 @@
 
 // Client island: holds the open/closed dialog state and drives the
 // destructive `softDeleteChild` Server Action via `useActionState`. On success
-// it fires an undo toast (Shneiderman rule 6 — easy reversal) and navigates to
-// the tracker home; the toast's "Pulihkan" button calls `restoreChild`.
+// it fires a branded undo snackbar (Shneiderman rule 6 — easy reversal) via
+// `notify` and navigates to the tracker home; the snackbar's "Pulihkan" button
+// calls `restoreChild`.
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 import { restoreChild, softDeleteChild } from "@/app/(app)/tracker/actions";
 import {
@@ -19,6 +19,8 @@ import { Button } from "@/components/primitives/button";
 import { FeedbackBanner } from "@/components/primitives/feedback-banner";
 import { Modal } from "@/components/primitives/modal";
 import { DELETE_CHILD_COPY, TRACKER_ROUTE } from "@/config/tracker";
+import { TOAST_DURATION_MS } from "@/config/toast";
+import { notify } from "@/lib/notify";
 
 export interface DeleteChildButtonProps {
   readonly childId: string;
@@ -43,8 +45,8 @@ function ConfirmButton() {
 /**
  * Destructive "Hapus anak" trigger plus its confirmation modal. The confirm
  * step guards against accidental deletion (the trigger sits in the child
- * header, close to navigation). On success the Server Action redirects away, so
- * this island only renders the error path inline.
+ * header, close to navigation). On success it navigates to the tracker home and
+ * shows a branded undo snackbar; failures render inline in the modal.
  *
  * @example
  * ```tsx
@@ -75,23 +77,25 @@ export function DeleteChildButton({
     if (!state || !state.ok || handledStateRef.current === state) return;
     handledStateRef.current = state;
     setOpen(false);
-    // Navigate first; the Sonner toaster lives in the root layout and survives
-    // the route change, so the "Pulihkan" button stays clickable on /tracker.
+    // Navigate first; the toaster lives in the root layout and survives the
+    // route change, so the "Pulihkan" button stays clickable on /tracker.
     router.push(TRACKER_ROUTE);
-    toast.success(DELETE_CHILD_COPY.deletedToast(childName), {
+    notify.action({
+      tone: "success",
+      title: DELETE_CHILD_COPY.deletedToast(childName),
       description: DELETE_CHILD_COPY.deletedToastDescription,
-      action: {
-        label: DELETE_CHILD_COPY.undoLabel,
-        onClick: () => {
-          void restoreChild(childId).then((result) => {
-            if (result.ok) {
-              toast.success(DELETE_CHILD_COPY.restoredToast(childName));
-              router.refresh();
-            } else {
-              toast.error(result.message || DELETE_CHILD_COPY.restoreError);
-            }
-          });
-        },
+      actionLabel: DELETE_CHILD_COPY.undoLabel,
+      // A little longer than a plain toast so there is time to undo.
+      duration: TOAST_DURATION_MS * 2,
+      onAction: () => {
+        void restoreChild(childId).then((result) => {
+          if (result.ok) {
+            notify.success(DELETE_CHILD_COPY.restoredToast(childName));
+            router.refresh();
+          } else {
+            notify.error(result.message || DELETE_CHILD_COPY.restoreError);
+          }
+        });
       },
     });
   }, [state, childId, childName, router]);
