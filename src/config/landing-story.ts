@@ -1,7 +1,7 @@
 /**
  * Copy + constants for the landing-only signature moments and connective
  * beats. Kept here (not in components) so the landing narrative stays a single
- * source of truth and no string/threshold is hardcoded in JSX (project guidelines §2).
+ * source of truth and no string/threshold is hardcoded in JSX.
  *
  * Every statistic references a footnote id from {@link EDUKASI_FOOTNOTES} so the
  * inline citations and the closing "Sumber & catatan" list can never drift.

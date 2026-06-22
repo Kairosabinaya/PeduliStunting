@@ -6,10 +6,9 @@ import "server-only";
  * `scripts/generate-choropleth-svg.ts`).
  *
  * The JSON is a trusted build artifact, but it crosses a module boundary into
- * the app, so it is validated once with Zod at import time (project guidelines §2.1 —
- * the single `as unknown` is immediately narrowed by a runtime check). Parsing
- * happens once per server process (module-level), so the per-render cost is
- * zero.
+ * the app, so it is validated once with Zod at import time (the single
+ * `as unknown` is immediately narrowed by a runtime check). Parsing happens
+ * once per server process (module-level), so the per-render cost is zero.
  */
 
 import { z } from "zod";

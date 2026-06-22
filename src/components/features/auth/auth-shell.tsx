@@ -27,7 +27,7 @@ interface AuthShellProps {
  *
  * The previous auth shell rendered a full MapLibre WebGL choropleth behind a
  * glass card; this redesign drops it entirely, so auth routes no longer carry
- * the map bundle (a meaningful win on mid-range Android per project guidelines Section 7).
+ * the map bundle (a meaningful win on mid-range Android).
  *
  * Server Component: the only interactive island is {@link ThemeToggle}.
  */

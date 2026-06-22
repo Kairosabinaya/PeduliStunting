@@ -4,7 +4,7 @@
  * Pure, framework-free domain service: no IO, no React/Next/Supabase imports,
  * so it can be imported by both the Vitest verification test and the client
  * what-if simulator bundle. This is the single canonical home of the model's
- * prediction formula (project guidelines §3 — domain logic, zero framework deps).
+ * prediction formula (domain logic, zero framework deps).
  *
  * The model is *local*: every region-year carries its own intercepts
  * (`alfa1`, `alfa2`) and slope vector (`beta`). A prediction therefore answers

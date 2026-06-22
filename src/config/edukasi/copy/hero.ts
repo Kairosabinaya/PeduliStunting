@@ -55,8 +55,7 @@ export const HERO_COPY = {
  * Hero illustration raster asset. Square (1000x1000) PNG with a transparent
  * background, so the consuming component sits it on a light backing panel that
  * stays light in dark mode (the dark line-art would otherwise vanish). Path
- * lives here so the component stays free of hardcoded asset strings
- * (project guidelines §2).
+ * lives here so the component stays free of hardcoded asset strings.
  */
 export const HERO_ILLUSTRATION = {
   src: "/edukasi/hero-ibu-pangku-anak.webp",

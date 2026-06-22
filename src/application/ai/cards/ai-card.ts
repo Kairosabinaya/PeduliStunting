@@ -3,7 +3,7 @@
  *
  * This discriminated union is the single contract shared between tool `execute`
  * outputs (server) and the card renderers (client). Field types reuse existing
- * DTO/value-object types so there is no schema drift (project guidelines §4).
+ * DTO/value-object types so there is no schema drift.
  */
 
 import { AI_CARD_TYPES, type AiChildAspect } from "@/config/ai";

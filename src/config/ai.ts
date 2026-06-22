@@ -3,7 +3,7 @@
  *
  * Every AI-related identifier (page ids, tool names, card types) and every
  * numeric limit (cost/latency guards) lives here so no magic strings or numbers
- * leak into the feature code (project guidelines §2.2, §10). System-prompt text lives in
+ * leak into the feature code. System-prompt text lives in
  * {@link file://./ai-prompts.ts} and user-facing copy in
  * {@link file://./ai-copy.ts}.
  */

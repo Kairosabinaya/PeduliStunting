@@ -23,7 +23,7 @@ export interface UpdateChildCommand {
  * by the caller first (so a missing or foreign id yields a clean `not_found`
  * instead of a silent no-op), then persists the new values. The owner scope is
  * also enforced by RLS and by the repository's `eq(user_id)` filter — this is
- * defence in depth (project guidelines §6).
+ * defence in depth.
  */
 export class UpdateChildUseCase {
   constructor(private readonly repository: ChildRepository) {}

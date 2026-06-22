@@ -71,7 +71,7 @@ export function createSupabasePublicClient(): TypedSupabaseClient {
 /**
  * Server-only admin client backed by the service role key. NEVER import this
  * from a route, page, or component. Reserve for `scripts/` and clearly
- * isolated admin use cases that justify bypassing RLS (see project guidelines §2.12).
+ * isolated admin use cases that justify bypassing RLS.
  */
 export function createSupabaseAdminClient(): TypedSupabaseClient {
   if (!env.SUPABASE_SERVICE_ROLE_KEY) {

@@ -1,6 +1,6 @@
 /**
  * Copy for the admin management surface. Centralised so component code
- * stays free of hardcoded strings (project guidelines §2.2).
+ * stays free of hardcoded strings.
  */
 
 export const ADMIN_USERS_COPY = {

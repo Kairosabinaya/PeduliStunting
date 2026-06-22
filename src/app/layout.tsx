@@ -18,7 +18,7 @@ import { ThemeScript } from "@/components/theme/theme-script";
 // `tailwind.config.ts#fontFamily` picks it up everywhere without per-file
 // edits.
 //
-// display "optional" (deliberate deviation from project guidelines Section 7's
+// display "optional" (deliberate deviation from the usual
 // "swap"): with swap, the late-arriving webfont repainted the largest text
 // on every route under mobile throttling, re-issuing the LCP entry 3-5 s
 // after first paint and capping Lighthouse mobile Performance in the 60s.
@@ -92,7 +92,7 @@ export default async function RootLayout({
   readonly children: React.ReactNode;
 }) {
   // CSP nonce minted by the proxy; the inline theme script must carry it or
-  // the nonce-based script-src would block it (project guidelines Section 6).
+  // the nonce-based script-src would block it.
   const nonce = (await headers()).get(CSP_NONCE_HEADER) ?? undefined;
   return (
     <html

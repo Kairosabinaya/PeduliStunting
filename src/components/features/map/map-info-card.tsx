@@ -95,7 +95,7 @@ export function MapInfoCard({
 
       {/* `/map` is a full-bleed surface with no room for a footer, so the
           site-wide copyright rides at the bottom of this always-visible info
-          card instead (project guidelines attribution requirement). */}
+          card instead. */}
       <p className="mt-3 border-t border-border pt-2 text-center text-xs text-muted-foreground">
         {COPYRIGHT_NOTICE}
       </p>

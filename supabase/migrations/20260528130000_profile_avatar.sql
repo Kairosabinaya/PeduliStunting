@@ -5,7 +5,7 @@
 -- upload folder (`_signup/`) from the authenticated per-user folder
 -- (`users/{auth.uid}/`).
 --
--- Down (manual, single PR per project guidelines §8): drop policies on storage.objects,
+-- Down (manual, single PR): drop policies on storage.objects,
 -- delete bucket avatars, drop column profiles.avatar_url, restore previous
 -- handle_new_user. This migration is intentionally reversible piece by piece.
 

@@ -1,7 +1,7 @@
 /**
  * UI copy and structural constants for the `/dashboard` route. Centralised so
  * the page itself contains zero hardcoded customer-facing strings — every
- * label is editable from this file alone, per project guidelines §2.2.
+ * label is editable from this file alone.
  *
  * The dashboard renders ONLY data sourced from `model_metadata`,
  * `model_predictions`, `model_coefficients`, and `indicator_dictionary`. This
@@ -101,7 +101,7 @@ export const DASHBOARD_TREND = {
   /**
    * Rendered chart height. Shared by the Recharts container AND the
    * loading skeleton shown while the code-split chart chunk loads, so the
-   * swap is layout-shift free (CLS budget, project guidelines Section 7).
+   * swap is layout-shift free (CLS budget).
    */
   chartHeightPx: 340,
   /** Minimum chart height on narrow viewports. */

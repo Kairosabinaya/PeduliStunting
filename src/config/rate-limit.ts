@@ -1,8 +1,8 @@
 /**
  * Rate-limit configuration for the AI chat endpoint. Numbers live here (not in
- * the gate) so limits are tuned in one place with no magic numbers in code
- * (project guidelines §2.2). Anonymous visitors get a much smaller budget than
- * authenticated users; once anon is exhausted the UI prompts a sign-in.
+ * the gate) so limits are tuned in one place with no magic numbers in code.
+ * Anonymous visitors get a much smaller budget than authenticated users; once
+ * anon is exhausted the UI prompts a sign-in.
  */
 
 /**

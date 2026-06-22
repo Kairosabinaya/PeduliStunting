@@ -17,7 +17,7 @@ export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
 
 /**
  * Required wrapper for any list/section that may be empty. Always explains
- * *why* it is empty AND offers a next step. See project guidelines §11.
+ * *why* it is empty AND offers a next step.
  *
  * @example
  * ```tsx

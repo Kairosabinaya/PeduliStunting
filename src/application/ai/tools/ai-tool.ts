@@ -1,7 +1,7 @@
 /**
  * Framework-agnostic AI tool definition. Tools are defined here (application
  * layer) and translated into the AI SDK `tool()` shape by the infrastructure
- * adapter, so the `ai` package never leaks inward (DIP, project guidelines §3).
+ * adapter, so the `ai` package never leaks inward (DIP).
  */
 
 import type { z } from "zod";

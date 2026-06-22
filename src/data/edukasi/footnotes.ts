@@ -1,8 +1,8 @@
 /**
  * Footnotes registry. Every superscript reference rendered on /edukasi
- * points to an id from this array. The id format is contracted (project guidelines
- * "Constants live in exactly one file per category") so external tools and
- * STATE.md can refer to them stably.
+ * points to an id from this array. The id format is contracted (constants
+ * live in exactly one file per category) so external tools and STATE.md can
+ * refer to them stably.
  *
  * The order in the array determines the rendered order in the
  * `<FootnoteList>` at the bottom of the page; it is also the numbering

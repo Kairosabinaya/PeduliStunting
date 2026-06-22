@@ -29,9 +29,9 @@ import { createSupabaseAdminClient } from "@/infrastructure/supabase/server-clie
  *      client that the RLS policies would reject — leading to silently
  *      empty results (the "Batas wilayah belum tersedia" bug that motivated
  *      this comment).
- *   2. project guidelines §2.12 reserves the admin client for "clearly isolated
- *      server-only admin paths". This module is exactly that: a narrow,
- *      audited surface that returns read-only public data, never user data.
+ *   2. The admin client is reserved for clearly isolated server-only admin
+ *      paths. This module is exactly that: a narrow, audited surface that
+ *      returns read-only public data, never user data.
  *   3. The data is shared across all users by design — there is nothing
  *      privileged to leak.
  *

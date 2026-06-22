@@ -8,7 +8,7 @@
  * the map moment, and the interactive MapLibre map lives one click away at
  * `/map`. Dropping the always-on canvas removes ~210 KB of map JS and the
  * ~3 MB district GeoJSON from the landing's critical path, which is what keeps
- * the page within the Slow-3G LCP + initial-JS budgets (project guidelines §7).
+ * the page within the Slow-3G LCP + initial-JS budgets.
  */
 
 import { cn } from "@/lib/cn";

@@ -3,8 +3,7 @@ import { DASHBOARD_ERROR } from "@/config/dashboard";
 
 /**
  * Route-segment skeleton matching the `/prediksi` header + simulator + model
- * block so navigation has a shaped placeholder rather than a blank frame
- * (project guidelines §11).
+ * block so navigation has a shaped placeholder rather than a blank frame.
  */
 export default function PrediksiLoading() {
   return (

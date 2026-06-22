@@ -1,8 +1,7 @@
 /**
  * Client-safe public environment values — the browser-bundle counterpart of
- * `env.ts` (project guidelines Section 2.9 keeps ALL `process.env` access inside
- * `/src/config/env*.ts`; this file is that boundary for client-reachable
- * code).
+ * `env.ts` (ALL `process.env` access stays inside `/src/config/env*.ts`; this
+ * file is that boundary for client-reachable code).
  *
  * Why not just import `env.ts`? Its Zod schema dragged the whole Zod
  * runtime (~64 KB transferred, ~250 ms of mobile main-thread execution)

@@ -1,7 +1,7 @@
 /**
- * Single source for mapping a domain {@link AppError} to a UI treatment
- * (project guidelines §12). Components render errors through this switch instead of
- * inventing ad-hoc error UI. Copy is Bahasa Indonesia.
+ * Single source for mapping a domain {@link AppError} to a UI treatment.
+ * Components render errors through this switch instead of inventing ad-hoc
+ * error UI. Copy is Bahasa Indonesia.
  */
 
 import type { AppError } from "@/domain/errors/app-error";

@@ -5,8 +5,8 @@ import { z } from "zod";
 /**
  * Wire shape of GET /api/map/boundaries (an array of `RegionBoundaryDto`).
  * Validated client-side before the rows enter the map feature join, so the
- * fetch boundary never leaks an unchecked cast (project guidelines Section 2.1).
- * `geometry` stays opaque here — `buildMapFeatures` narrows it to a
+ * fetch boundary never leaks an unchecked cast. `geometry` stays opaque
+ * here — `buildMapFeatures` narrows it to a
  * polygonal GeoJSON geometry and skips rows that fail.
  *
  * Kept in its own module (NOT schemas/region.ts, which pulls the whole

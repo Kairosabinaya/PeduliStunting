@@ -1,7 +1,7 @@
 /**
  * Build a PII-safe log context from the chat request selection. Child and region
  * identifiers are reduced to booleans so per-user identifiers never reach the
- * logs (project guidelines §19; ADR-0021). The data sent to Gemini is unaffected.
+ * logs (ADR-0021). The data sent to Gemini is unaffected.
  */
 
 import type { LogContext } from "@/domain/shared/logger";

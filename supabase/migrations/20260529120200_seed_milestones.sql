@@ -8,9 +8,8 @@
 --   * 48-60 bulan (14 items)
 --   * 60-72 bulan (13 items)
 --
--- Ranges deliberately omitted (0-3, 6-9, 9-12, 24-48 bulan) await the user
--- supplying canonical Buku KIA text. Per project guidelines §2 we do not invent
--- developmental indicators.
+-- Ranges deliberately omitted (0-3, 6-9, 9-12, 24-48 bulan) await
+-- canonical Buku KIA text. We do not invent developmental indicators.
 --
 -- Domain assignment follows SDIDTK convention: gross_motor (motorik kasar),
 -- fine_motor (motorik halus), language (bahasa), social (sosial-kemandirian).

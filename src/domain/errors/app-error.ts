@@ -1,5 +1,5 @@
 /**
- * Error taxonomy used across every layer. See project guidelines §12.
+ * Error taxonomy used across every layer.
  *
  * All errors that cross a layer boundary (use case -> Server Action,
  * use case -> Route Handler) MUST be one of the union members defined here.
@@ -120,7 +120,7 @@ export const AppErrors = {
 
 /**
  * Map a domain {@link AppError} to the HTTP status code Route Handlers should
- * return. Keep in sync with project guidelines §12.
+ * return.
  */
 export function appErrorToHttpStatus(error: AppError): number {
   switch (error.kind) {

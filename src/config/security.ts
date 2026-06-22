@@ -1,5 +1,5 @@
 /**
- * Content-Security-Policy configuration (project guidelines Section 6).
+ * Content-Security-Policy configuration.
  *
  * The policy is nonce-based: `src/proxy.ts` generates a fresh nonce per
  * request, forwards it to the RSC render via the {@link CSP_NONCE_HEADER}

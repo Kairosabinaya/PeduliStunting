@@ -48,8 +48,8 @@ export interface ButtonProps
 }
 
 /**
- * Primary action element. Touch target is at least 44px tall on `size="md"`
- * per project guidelines §9. For link-styled actions, wrap a Next `Link` with the
+ * Primary action element. Touch target is at least 44px tall on `size="md"`.
+ * For link-styled actions, wrap a Next `Link` with the
  * `buttonVariants` helper rather than nesting interactive elements.
  *
  * @example Primary (default)

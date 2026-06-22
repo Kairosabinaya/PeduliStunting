@@ -1,7 +1,7 @@
 /**
  * Fixed national reference values for the stunting dashboard. These are
  * published policy targets and survey headline figures (not model output), so
- * they live in config per project guidelines §2.2 rather than in a model table.
+ * they live in config rather than in a model table.
  *
  * The population-weighted `nationalPrevalence` (SSGI/SKI) is deliberately
  * distinct from the dashboard's cross-region mean of `region_indicators`: the

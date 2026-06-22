@@ -2,8 +2,8 @@
  * SEO constants: canonical descriptions, Open Graph card, and favicon paths.
  *
  * Single source for everything `generateMetadata`/`metadata` exports consume,
- * so copy never drifts between routes (project guidelines Section 2.2). The OG image
- * and favicons are emitted by `scripts/optimize-images.ts`.
+ * so copy never drifts between routes. The OG image and favicons are emitted
+ * by `scripts/optimize-images.ts`.
  */
 
 import { APP_NAME } from "./app";

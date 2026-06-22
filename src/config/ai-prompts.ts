@@ -4,7 +4,7 @@
  *
  * All text is Bahasa Indonesia because the assistant answers in Bahasa
  * Indonesia. Keeping the fragments here (not inline in code) keeps prompt copy
- * reviewable and free of magic strings (project guidelines §2.2).
+ * reviewable and free of magic strings.
  */
 
 import type { AiPageId } from "./ai";

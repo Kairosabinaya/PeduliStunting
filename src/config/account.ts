@@ -1,7 +1,7 @@
 /**
  * Copy, option lists, and routing constants for the `/account` route. Keeps
  * the Server Component, Server Action, and client form free of magic strings
- * (project guidelines §2.2) and lets us audit every label in one place.
+ * and lets us audit every label in one place.
  *
  * The underlying domain values (`THEME_PREFERENCES`, `USER_ROLES`) live in the
  * account entity; this module only attaches presentation labels and hints.

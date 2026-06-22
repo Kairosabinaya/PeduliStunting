@@ -19,8 +19,7 @@ export const metadata: Metadata = {
  * No data fetch happens here: the signature map moment is the build-time
  * inline-SVG choropleth, and the interactive MapLibre map lives one click away
  * at `/map`. Keeping the landing free of the always-on canvas plus its ~3 MB
- * boundary fetch is what holds the Slow-3G LCP and initial-JS budgets
- * (project guidelines §7).
+ * boundary fetch is what holds the Slow-3G LCP and initial-JS budgets.
  */
 export default function HomePage() {
   return (

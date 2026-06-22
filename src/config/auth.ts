@@ -1,7 +1,7 @@
 /**
  * Marketing and UX copy for the public auth flows. Centralising it here keeps
  * Server Components free of hardcoded strings and lets us audit every label a
- * visitor reads in one place (project guidelines §2.2). Updating copy never requires
+ * visitor reads in one place. Updating copy never requires
  * touching component code.
  *
  * The actual auth backend is Supabase Auth; this file is the only source of

@@ -54,8 +54,8 @@ export interface SliderProps extends Omit<
 /**
  * Range input wrapper with a live numeric readout, optional discrete ticks,
  * and full keyboard support (arrow keys, Home/End, PageUp/PageDown via the
- * browser). Touch target meets project guidelines section 9 (44px minimum) on coarse
- * pointers via an h-11 native control.
+ * browser). Touch target meets the 44px minimum on coarse pointers via an
+ * h-11 native control.
  *
  * @example Numeric what-if delta
  * ```tsx

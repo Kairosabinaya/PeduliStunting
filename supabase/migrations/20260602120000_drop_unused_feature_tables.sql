@@ -1,5 +1,5 @@
 -- Drop tables for removed/deactivated features so the schema only carries
--- what the active app uses (project guidelines §8, §22).
+-- what the active app uses.
 --
 -- Removed features:
 --   * pregnancies            -> "Kehamilan" (Tracker Phase 6) feature code was

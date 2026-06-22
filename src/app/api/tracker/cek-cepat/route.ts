@@ -27,7 +27,7 @@ const RequestSchema = z
  * authenticated session (it reads RLS-protected WHO standards) but does not
  * require any stored child profile — it is the backend of the floating "Cek
  * Cepat" banner mounted at `/tracker/**`. Authentication is verified here, not
- * only at the proxy (project guidelines Section 6).
+ * only at the proxy.
  *
  * The handler returns a Result-shape JSON `{ ok, value?, error? }` so client
  * code can branch with the same convention used by Server Actions.

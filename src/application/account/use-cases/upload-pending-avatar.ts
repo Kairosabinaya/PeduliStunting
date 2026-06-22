@@ -21,7 +21,7 @@ export interface UploadPendingAvatarOutput {
  * user-owned avatar through trigger-driven metadata.
  *
  * The use case never throws — invalid bytes or storage failures are
- * surfaced as `Result<_, AppError>` per project guidelines §12.
+ * surfaced as `Result<_, AppError>`.
  */
 export class UploadPendingAvatarUseCase {
   constructor(private readonly storage: AvatarStoragePort) {}

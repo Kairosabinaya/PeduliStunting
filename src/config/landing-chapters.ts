@@ -1,7 +1,7 @@
 /**
  * Copy strings + structured content for the landing-before-login experience
  * rendered at `/map` for unauthenticated users. Kept in one config module
- * (project guidelines §0) so PRs that tweak wording can be reviewed without touching
+ * so PRs that tweak wording can be reviewed without touching
  * component code. All copy is in Bahasa Indonesia per project locale rules.
  */
 

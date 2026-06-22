@@ -50,7 +50,7 @@ export interface GrowthChartCardProps {
  *   - Bottom sheet detail saat user mengetuk dot
  *
  * Recharts tetap dynamic-imported (ssr:false) untuk menjaga bundle initial
- * tetap di bawah budget (project guidelines §7).
+ * tetap di bawah budget.
  */
 export function GrowthChartCard({ child, measurements }: GrowthChartCardProps) {
   const [indicator, setIndicator] = useState<GrowthIndicator>("TB_U");

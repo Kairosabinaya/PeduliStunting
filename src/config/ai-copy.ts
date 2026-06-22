@@ -1,7 +1,7 @@
 /**
  * User-facing copy for the AI panel and the deterministic recommended-question
  * templates per page. Kept out of components so all strings are reviewable in
- * one place (project guidelines §2.2). All copy is Bahasa Indonesia.
+ * one place. All copy is Bahasa Indonesia.
  */
 
 import type { AiPageId } from "./ai";

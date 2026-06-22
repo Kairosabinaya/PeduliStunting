@@ -8,7 +8,7 @@ import type { UserId } from "@/domain/shared/ids";
  * composition root. The port intentionally exposes only the three
  * operations the use cases need — uploading to the pre-signup pending
  * folder, uploading under an authenticated user's folder, and deleting
- * a specific object — keeping it ISP-compliant (project guidelines §3).
+ * a specific object — keeping it ISP-compliant.
  */
 export interface AvatarStoragePort {
   /**

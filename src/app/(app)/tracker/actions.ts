@@ -54,7 +54,7 @@ function validationFromFlatten(
  * client form shows a "Data berhasil disimpan." toast and navigates to the new
  * child — deliberately NOT a server redirect, so the branded toast can fire
  * after the navigation (same pattern as `softDeleteChild`'s undo). Field-level
- * validation surfaces back via {@link AddChildFormState}. See project guidelines §14.
+ * validation surfaces back via {@link AddChildFormState}.
  */
 export async function createChild(
   _previous: AddChildFormState | null,
@@ -120,7 +120,7 @@ export async function createChild(
  * On success the child's own tag and the children list tag are revalidated (the
  * name is shown in the switcher and list) and the updated child is returned in
  * the success state; the client form then shows a "Data berhasil disimpan."
- * toast and navigates to the child (no server redirect). See project guidelines §14.
+ * toast and navigates to the child (no server redirect).
  */
 export async function updateChild(
   _previous: AddChildFormState | null,
@@ -194,7 +194,6 @@ export async function updateChild(
  * island shows an undo toast ("Pulihkan", Shneiderman rule 6) and navigates to
  * the tracker home itself, so the undo affordance is reachable after the
  * navigation. Failures surface back through {@link DeleteChildFormState}.
- * See project guidelines §14.
  */
 export async function softDeleteChild(
   _previous: DeleteChildFormState | null,
@@ -226,7 +225,6 @@ export async function softDeleteChild(
  * invoked from the delete toast's "Pulihkan" action button. Revalidates the
  * children list and the child's own tag so the restored profile reappears.
  * Returns a tagged result the client maps to a confirmation or error toast.
- * See project guidelines §14.
  */
 export async function restoreChild(
   childId: string,

@@ -2,7 +2,7 @@
  * Discriminated-union return type for operations that can fail.
  *
  * Use cases and domain services return `Result<T, E>` instead of throwing.
- * Exceptions never cross layer boundaries (see project guidelines §2.15 and §12).
+ * Exceptions never cross layer boundaries.
  *
  * @example
  * ```ts

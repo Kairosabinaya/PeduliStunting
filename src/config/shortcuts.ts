@@ -9,7 +9,7 @@
  *   dialog.
  *
  * Destinations come from {@link PRIMARY_NAV} so the shortcut targets cannot
- * drift from the visible navigation (single source of truth, project guidelines §2/§4).
+ * drift from the visible navigation (single source of truth).
  */
 
 import { PRIMARY_NAV } from "./navigation";

@@ -43,7 +43,7 @@ function validationFromFlatten(
 /**
  * Persist the editable preferences from `/account`. Returns a structured
  * result so the client form can show field-level errors and a global banner
- * without throwing across the action boundary (project guidelines §14).
+ * without throwing across the action boundary.
  *
  * On success the cache tag `user:{userId}:profile` is revalidated so any
  * downstream Server Component (notably the floating header) sees the new

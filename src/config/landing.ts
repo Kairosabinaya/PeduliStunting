@@ -1,8 +1,8 @@
 /**
  * Marketing copy and brand assets shown on the public landing page. Centralised
  * so the page itself contains zero hardcoded strings or paths — every piece of
- * customer-facing content is editable from this file alone, satisfying
- * project guidelines §2.2 (configuration lives in `/src/config/`).
+ * customer-facing content is editable from this file alone (configuration
+ * lives in `/src/config/`).
  *
  * Per STATE.md §5.1 the landing page is `static` with no DB fetch; the source
  * of truth for what the visitor sees is therefore this file plus the brand

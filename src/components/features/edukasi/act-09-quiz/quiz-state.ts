@@ -1,7 +1,7 @@
 /**
  * State machine for ACT 9 quiz. Lives in its own file so it can be unit
- * tested without a DOM, and so the React component is reduced to wiring
- * (project guidelines §22 file-length anti-pattern).
+ * tested without a DOM, and so the React component is reduced to wiring,
+ * keeping each file within the file-length limit.
  *
  * Stages:
  *  - `intro`    — landing screen with the prominent "Mulai Kuis" CTA.

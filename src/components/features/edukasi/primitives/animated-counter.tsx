@@ -2,7 +2,7 @@
 
 // Client component: animates a numeric value when scrolled into view. Reads
 // the user's reduced-motion preference and snaps to the final value when set,
-// matching project guidelines §20 accessibility expectations.
+// matching accessibility expectations.
 
 import { useEffect, useRef, useState } from "react";
 import {

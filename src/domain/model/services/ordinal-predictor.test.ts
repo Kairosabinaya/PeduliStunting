@@ -11,7 +11,7 @@ import {
 } from "@/domain/model/services/ordinal-predictor";
 
 /**
- * Correctness gate (project guidelines §15, and the research brief's "verify first").
+ * Correctness gate aligned with the research brief's "verify first".
  *
  * `predictOrdinal` must reproduce the model's own exported truth: the
  * `pred_class_local` class and `prob_*` probabilities in `observations.csv`.

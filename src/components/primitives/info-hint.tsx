@@ -19,7 +19,7 @@ export interface InfoHintProps {
 /**
  * Compact "i" affordance that keeps explanatory copy out of the way until a
  * reader wants it. The panel appears on hover and keyboard focus, and tapping
- * the icon toggles it — so the hint is never hover-only (project guidelines Section 9).
+ * the icon toggles it — so the hint is never hover-only.
  * The panel content stays mounted (visually hidden, not removed) so screen
  * readers reach it via `aria-describedby` and assistive queries still find it.
  *

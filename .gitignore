@@ -52,21 +52,6 @@ sentry.properties
 supabase/.branches/
 supabase/.temp/
 
-# --- Claude / AI agents internal artefacts ---
-# Do NOT commit Claude-generated session artefacts, plans, scratch, or hooks state
-.claude/
-.claude-cache/
-.claude-session/
-.claude-plans/
-.claude-thoughts/
-project guidelines
-project guidelines
-.aider*
-.cursor/
-.windsurf/
-.continue/
-.github/copilot-*
-
 # --- /docs is local-only ---
 # All documentation, ADRs, STATE/GLOSSARY, raw research artefacts (PDF, GPKG,
 # model exports, WHO standards) live under /docs and stay out of git. Only
@@ -95,3 +80,4 @@ scratch/
 *.seed
 *.pid.lock
 .cache/
+_cleanup-backup/

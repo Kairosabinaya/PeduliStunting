@@ -22,7 +22,7 @@ export const COPYRIGHT_YEAR = 2026;
  * Single source of truth for the copyright line rendered on every page
  * (footer on standard layouts, info card on `/map`, closing block on the
  * landing). Referencing this constant everywhere keeps the string from
- * drifting across surfaces (project guidelines Section 2/4).
+ * drifting across surfaces.
  *
  * @example
  * ```ts

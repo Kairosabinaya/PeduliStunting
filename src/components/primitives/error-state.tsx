@@ -18,7 +18,7 @@ export interface ErrorStateProps extends React.HTMLAttributes<HTMLDivElement> {
 /**
  * Required wrapper for any data-fetch failure. Internal details (stacks,
  * payloads) go to Sentry — the user sees only the friendly message plus the
- * correlation ID. See project guidelines §11 and §12.
+ * correlation ID.
  *
  * @example
  * ```tsx

@@ -27,7 +27,7 @@ export interface MythCardProps {
  *
  * Implemented as a `<button>` (not a `<div>` with `role="button"`) so it
  * comes with native Enter/Space handling and focus management out of the
- * box, satisfying project guidelines §20 "Semantic HTML before ARIA".
+ * box, following the "Semantic HTML before ARIA" principle.
  *
  * Reduced-motion users get the legacy click-only behaviour with an instant
  * swap instead of the scroll-driven 3D flip.

@@ -6,7 +6,7 @@
  *
  *   - {@link createScriptAdminClient}: a typed Supabase client bound to the
  *     service-role key. Used for bulk upserts that bypass RLS during local
- *     ingestion. NEVER import from app code (project guidelines §2.12).
+ *     ingestion. NEVER import from app code.
  *   - {@link createScriptLogger}: a minimal structured logger writing JSON
  *     lines to stdout/stderr so script output is machine-parseable in CI.
  *   - {@link resolveSourcePath}: canonical resolver for `docs/source/*`.

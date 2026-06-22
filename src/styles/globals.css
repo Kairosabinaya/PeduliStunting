@@ -208,7 +208,7 @@
      token-driven section (ActSection tints, HighlightWord, Button, Card,
      charts, the choropleth ordinal ramp) re-colours automatically WITHOUT
      touching `/edukasi` or the rest of the app, and WITHOUT introducing magic
-     values in components (project guidelines §2, §10).
+     values in components.
 
      Palette (warm refined): terracotta (primary), pine/teal (secondary,
      "night" bands), warm paper (background), ochre (warning/accent fills),
@@ -366,8 +366,8 @@
      scrollytelling visual language calls for display-size numerals and
      refined eyebrow labels that the rest of the app does not use, so they
      live here as named utilities instead of being inlined as Tailwind
-     arbitrary values (project guidelines §10). Values use clamp() so they breathe
-     between mobile and desktop without media queries. */
+     arbitrary values. Values use clamp() so they breathe between mobile and
+     desktop without media queries. */
 
   .display-stat {
     font-weight: 800;
@@ -431,7 +431,7 @@
      min-height made the pinned column "bounce" while scrubbing. Content longer
      than the box scrolls inside it (the consumer pairs this with an
      `overflow-y-auto` inner region). Kept as a named utility instead of an
-     arbitrary Tailwind value per project guidelines §10. */
+     arbitrary Tailwind value. */
   .edu-frame-box {
     height: 26rem;
   }
@@ -458,7 +458,7 @@
   /* Card width for the ACT 4 determinant horizontal carousel. A fraction of
      the viewport on small screens (so the next card peeks, signalling
      swipe-ability), a fixed comfortable width from `sm` up. Named utility
-     keeps the responsive width out of arbitrary Tailwind values (§10). */
+     keeps the responsive width out of arbitrary Tailwind values. */
   .edu-determinant-card {
     width: 80vw;
     max-width: 22rem;
@@ -473,7 +473,7 @@
   /* ACT 1 hero illustration max width. Kept small on phones so the dense hero
      (headline + lead + fact line + art + scroll prompt) still fits one screen,
      then unconstrained at lg where the two-column layout has room. Named
-     utility instead of an arbitrary `max-w-[…]` value (§10). */
+     utility instead of an arbitrary `max-w-[…]` value. */
   .edu-hero-art {
     max-width: 16rem;
   }
@@ -492,7 +492,7 @@
      bands top and bottom with the node/line band (`auto`) centred between
      them — so the horizontal line stays straight across all four columns
      regardless of label length, and labels alternate above/below. Named
-     utility instead of an arbitrary `grid-rows-[…]` value (§10). */
+     utility instead of an arbitrary `grid-rows-[…]` value. */
   .edu-timeline-grid {
     grid-template-rows: 1fr auto 1fr;
   }
@@ -751,8 +751,8 @@
 
   /* Desktop: cap the /prediksi slider list so the prediction hero above it
      stays in view and the whole simulator fits roughly one screen; the list
-     scrolls within. Named utility (not an arbitrary `max-h-[…]`) per §10 — the
-     value is viewport-relative and has no spacing-scale token. Mobile keeps
+     scrolls within. Named utility (not an arbitrary `max-h-[…]`) — the value
+     is viewport-relative and has no spacing-scale token. Mobile keeps
      normal flow (the fixed bottom bar carries the prediction there). */
   @media (min-width: 1024px) {
     .slider-scroll {

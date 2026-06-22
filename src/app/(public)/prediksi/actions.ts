@@ -11,7 +11,7 @@ import { createSupabaseServerClient } from "@/infrastructure/supabase/server-cli
 /**
  * Serializable result of {@link loadRegionFit}. The client only needs the fit
  * (or a user-facing message), so domain entities/AppError never cross the
- * action boundary (project guidelines §14). `fit === null` means the model did not fit
+ * action boundary. `fit === null` means the model did not fit
  * the requested region-year — the UI shows a "not modelled" empty state.
  */
 export type LoadRegionFitState =

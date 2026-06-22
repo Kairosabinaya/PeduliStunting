@@ -1,8 +1,8 @@
 /**
  * Motion + layout tokens for the /edukasi scrollytelling page.
  *
- * Phase 1 uses these constants from JSX/motion props so project guidelines §10
- * (no magic Tailwind values, no inline numeric literals for design
+ * Phase 1 uses these constants from JSX/motion props so the no-magic-values
+ * rule (no magic Tailwind values, no inline numeric literals for design
  * decisions) is honoured. Durations align with the new
  * `transitionDuration.emphatic` / `.cinematic` Tailwind tokens added in
  * tailwind.config.ts.

@@ -3,7 +3,7 @@ import { DASHBOARD_ERROR } from "@/config/dashboard";
 
 /**
  * Route-segment skeleton matching the `/data` header + KPI row + chart rows so
- * navigation has a shaped placeholder rather than a blank frame (project guidelines §11).
+ * navigation has a shaped placeholder rather than a blank frame.
  */
 export default function DataLoading() {
   return (
