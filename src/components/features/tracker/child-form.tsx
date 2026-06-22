@@ -2,7 +2,16 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useActionState, useId, useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import {
+  useActionState,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
@@ -18,9 +27,12 @@ import {
 import { Textarea } from "@/components/primitives/textarea";
 import {
   ADD_CHILD_COPY,
+  DATA_SAVED_MESSAGE,
   TRACKER_FIELD_LIMITS,
   TRACKER_VALIDATION_COPY,
+  trackerChildRoute,
 } from "@/config/tracker";
+import { notify } from "@/lib/notify";
 import { todayIso } from "@/lib/today";
 import { childFormInputSchema } from "@/schemas/tracking";
 
@@ -124,11 +136,24 @@ export function ChildForm({
   childId,
   defaults = EMPTY_DEFAULTS,
 }: ChildFormProps) {
+  const router = useRouter();
   const [state, formAction] = useActionState<
     AddChildFormState | null,
     FormData
   >(action, INITIAL_ADD_CHILD_STATE);
   const [pending, startTransition] = useTransition();
+
+  // On a successful save the action returns `{ ok: true, child }` (it no longer
+  // redirects). Show the branded "Data berhasil disimpan." toast and navigate to
+  // the child — the toaster lives in the root layout so it survives the
+  // navigation. A ref guards against firing twice for the same state object.
+  const handledStateRef = useRef<AddChildFormState | null>(null);
+  useEffect(() => {
+    if (!state?.ok || !state.child || handledStateRef.current === state) return;
+    handledStateRef.current = state;
+    notify.success(DATA_SAVED_MESSAGE);
+    router.push(trackerChildRoute(state.child.id));
+  }, [state, router]);
 
   const [birthStatus, setBirthStatus] = useState<BirthStatus>(
     defaults.isPremature ? "preterm" : "term",

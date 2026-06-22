@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { MEASUREMENTS_COPY } from "@/config/tracker";
+import { DATA_SAVED_MESSAGE, MEASUREMENTS_COPY } from "@/config/tracker";
 
 import type { AddMeasurementFormState } from "@/app/(app)/tracker/anak/[childId]/pengukuran/_lib/add-measurement-state";
 
@@ -22,6 +22,18 @@ vi.mock("@/app/(app)/tracker/anak/[childId]/pengukuran/actions", () => ({
   ) => addMeasurementMock(childId, previous, formData),
 }));
 
+// Success is now confirmed by a branded top-right toast instead of an inline
+// banner, so the notifier is stubbed.
+const notifySuccessMock = vi.fn();
+vi.mock("@/lib/notify", () => ({
+  notify: {
+    success: notifySuccessMock,
+    error: vi.fn(),
+    info: vi.fn(),
+    action: vi.fn(),
+  },
+}));
+
 const { MeasurementForm } = await import("./measurement-form");
 
 const childId = "11111111-1111-1111-1111-111111111111";
@@ -30,6 +42,7 @@ const childBirthDate = "2024-01-01";
 describe("MeasurementForm", () => {
   beforeEach(() => {
     addMeasurementMock.mockReset();
+    notifySuccessMock.mockReset();
   });
 
   afterEach(() => {
@@ -84,7 +97,7 @@ describe("MeasurementForm", () => {
     expect(formData?.get("weightKg")).toBe("8.5");
   });
 
-  it("renders the success banner when the action resolves ok", async () => {
+  it("fires the success toast when the action resolves ok", async () => {
     addMeasurementMock.mockResolvedValueOnce({ ok: true });
 
     render(
@@ -99,9 +112,7 @@ describe("MeasurementForm", () => {
     );
 
     await waitFor(() => {
-      expect(
-        screen.getByText(MEASUREMENTS_COPY.successMessage),
-      ).toBeInTheDocument();
+      expect(notifySuccessMock).toHaveBeenCalledWith(DATA_SAVED_MESSAGE);
     });
   });
 

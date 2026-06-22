@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ADD_CHILD_COPY } from "@/config/tracker";
+import { ADD_CHILD_COPY, DATA_SAVED_MESSAGE } from "@/config/tracker";
 
 import type { AddChildFormState } from "@/app/(app)/tracker/_lib/add-child-state";
 
@@ -16,6 +16,22 @@ const createChildMock =
 vi.mock("@/app/(app)/tracker/actions", () => ({
   createChild: (previous: AddChildFormState | null, formData: FormData) =>
     createChildMock(previous, formData),
+}));
+
+// The form now navigates + fires a branded toast on success (no server
+// redirect), so the router and notifier are stubbed.
+const pushMock = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: pushMock }),
+}));
+const notifySuccessMock = vi.fn();
+vi.mock("@/lib/notify", () => ({
+  notify: {
+    success: notifySuccessMock,
+    error: vi.fn(),
+    info: vi.fn(),
+    action: vi.fn(),
+  },
 }));
 
 const { AddChildForm } = await import("./add-child-form");
@@ -38,6 +54,8 @@ function fillIdentity() {
 describe("AddChildForm", () => {
   beforeEach(() => {
     createChildMock.mockReset();
+    pushMock.mockReset();
+    notifySuccessMock.mockReset();
   });
 
   afterEach(() => {
@@ -129,6 +147,36 @@ describe("AddChildForm", () => {
     const formData = createChildMock.mock.calls[0]?.[1];
     expect(formData?.get("birthStatus")).toBe("preterm");
     expect(formData?.get("gestationalAgeWeeks")).toBe("34");
+  });
+
+  it("fires the success toast and navigates to the new child on success", async () => {
+    createChildMock.mockResolvedValueOnce({
+      ok: true,
+      child: {
+        id: "00000000-0000-0000-0000-000000000009",
+        userId: "00000000-0000-0000-0000-000000000001",
+        name: "Aira",
+        sex: "P",
+        birthDate: "2024-01-15",
+        birthWeightKg: null,
+        birthLengthCm: null,
+        gestationalAgeWeeks: null,
+        notes: null,
+      },
+    });
+
+    render(<AddChildForm />);
+    fillIdentity();
+    fireEvent.click(
+      screen.getByRole("button", { name: ADD_CHILD_COPY.submit }),
+    );
+
+    await waitFor(() => {
+      expect(notifySuccessMock).toHaveBeenCalledWith(DATA_SAVED_MESSAGE);
+    });
+    expect(pushMock).toHaveBeenCalledWith(
+      expect.stringContaining("anak=00000000-0000-0000-0000-000000000009"),
+    );
   });
 
   it("renders field-level errors when the action returns them", async () => {

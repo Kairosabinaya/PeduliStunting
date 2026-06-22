@@ -304,6 +304,13 @@ export const CHILD_DETAIL_COPY = {
     `Pengukuran ${date}. Aktifkan untuk melihat detail.`,
 } as const;
 
+/**
+ * Shared success message shown as a top-right toast after a save completes
+ * (add child, edit child, add measurement). Centralised so the confirmation
+ * copy stays identical across every save surface.
+ */
+export const DATA_SAVED_MESSAGE = "Data berhasil disimpan.";
+
 export const DELETE_CHILD_COPY = {
   trigger: "Hapus data",
   triggerAriaLabel: (name: string) => `Hapus data anak ${name}`,

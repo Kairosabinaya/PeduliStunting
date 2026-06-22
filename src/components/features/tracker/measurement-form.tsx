@@ -6,6 +6,7 @@ import {
   useEffect,
   useId,
   useMemo,
+  useRef,
   useTransition,
 } from "react";
 import { useForm } from "react-hook-form";
@@ -17,10 +18,12 @@ import { Input } from "@/components/primitives/input";
 import { Label } from "@/components/primitives/label";
 import { Textarea } from "@/components/primitives/textarea";
 import {
+  DATA_SAVED_MESSAGE,
   MEASUREMENTS_COPY,
   TRACKER_FIELD_LIMITS,
   TRACKER_VALIDATION_COPY,
 } from "@/config/tracker";
+import { notify } from "@/lib/notify";
 import { todayIso } from "@/lib/today";
 import { recordMeasurementFormInputSchema } from "@/schemas/tracking";
 
@@ -107,11 +110,16 @@ export function MeasurementForm({
   const muacId = useId();
   const noteId = useId();
 
+  // Fire the branded "Data berhasil disimpan." toast once per successful save,
+  // then reset the form and let the modal wrapper close. The ref guard prevents
+  // a re-render (e.g. from `form.reset`) from re-firing it.
+  const handledStateRef = useRef<AddMeasurementFormState | null>(null);
   useEffect(() => {
-    if (state?.ok) {
-      form.reset(defaultValues);
-      onSaved?.();
-    }
+    if (!state?.ok || handledStateRef.current === state) return;
+    handledStateRef.current = state;
+    notify.success(DATA_SAVED_MESSAGE);
+    form.reset(defaultValues);
+    onSaved?.();
   }, [defaultValues, form, state, onSaved]);
 
   const generalError =
@@ -249,6 +257,8 @@ export function MeasurementForm({
         </div>
       </div>
 
+      {/* Success is confirmed by the top-right toast (notify.success); only
+          error states render inline so the user can correct the form. */}
       {hasClientErrors ? (
         <FeedbackBanner tone="error">
           <strong>{TRACKER_VALIDATION_COPY.summaryTitle}</strong>
@@ -258,10 +268,6 @@ export function MeasurementForm({
         </FeedbackBanner>
       ) : generalError ? (
         <FeedbackBanner tone="error">{generalError}</FeedbackBanner>
-      ) : state?.ok ? (
-        <FeedbackBanner tone="success">
-          {MEASUREMENTS_COPY.successMessage}
-        </FeedbackBanner>
       ) : null}
 
       <div className="flex flex-wrap items-center justify-end gap-2">

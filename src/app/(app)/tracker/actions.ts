@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidateTag } from "next/cache";
-import { redirect } from "next/navigation";
 
 import type { ChildDto } from "@/application/tracking/dtos";
 import { makeUseCases } from "@/composition";
@@ -11,11 +10,7 @@ import { err, type Result } from "@/domain/shared/result";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server-client";
 import { childTag, childrenTag } from "@/lib/tracker-cache";
 import { requireServerSession } from "@/lib/server-session";
-import {
-  DELETE_CHILD_COPY,
-  EDIT_CHILD_COPY,
-  trackerChildRoute,
-} from "@/config/tracker";
+import { DELETE_CHILD_COPY, EDIT_CHILD_COPY } from "@/config/tracker";
 import { childFormInputSchema } from "@/schemas/tracking";
 
 import type { AddChildFormState } from "./_lib/add-child-state";
@@ -55,9 +50,11 @@ function validationFromFlatten(
 
 /**
  * Create a new child profile owned by the current user. Revalidates the
- * children list tag, then redirects to the freshly created child's detail
- * page. Field-level validation surfaces back to the form via the discriminated
- * {@link AddChildFormState}. See project guidelines §14.
+ * children list tag and returns the created child in the success state. The
+ * client form shows a "Data berhasil disimpan." toast and navigates to the new
+ * child — deliberately NOT a server redirect, so the branded toast can fire
+ * after the navigation (same pattern as `softDeleteChild`'s undo). Field-level
+ * validation surfaces back via {@link AddChildFormState}. See project guidelines §14.
  */
 export async function createChild(
   _previous: AddChildFormState | null,
@@ -113,7 +110,7 @@ export async function createChild(
   }
 
   revalidateTag(childrenTag(session.userId), "max");
-  redirect(trackerChildRoute(result.value.id));
+  return toFormState(result);
 }
 
 /**
@@ -121,8 +118,9 @@ export async function createChild(
  * arrives via a hidden `childId` form field (so the action plugs into
  * `useActionState`); the remaining fields reuse {@link createChildInputSchema}.
  * On success the child's own tag and the children list tag are revalidated (the
- * name is shown in the switcher and list), then the user is redirected to the
- * child's detail page. See project guidelines §14.
+ * name is shown in the switcher and list) and the updated child is returned in
+ * the success state; the client form then shows a "Data berhasil disimpan."
+ * toast and navigates to the child (no server redirect). See project guidelines §14.
  */
 export async function updateChild(
   _previous: AddChildFormState | null,
@@ -185,7 +183,7 @@ export async function updateChild(
 
   revalidateTag(childrenTag(session.userId), "max");
   revalidateTag(childTag(rawChildId), "max");
-  redirect(trackerChildRoute(rawChildId));
+  return toFormState(result);
 }
 
 /**
